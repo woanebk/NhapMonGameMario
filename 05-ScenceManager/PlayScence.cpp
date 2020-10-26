@@ -180,6 +180,11 @@ void CPlayScene::_ParseSection_OBJECTS(string line)
 
 void CPlayScene::Load()
 {
+	//Load background
+	mapbackground = new MapBackground(176, 27, 16, 16, 12, 11);
+	mapbackground->SetTileSet(L"map1-1_bank.png", D3DCOLOR_XRGB(255, 255, 255));
+	mapbackground->LoadMatrix(L"map1-1.txt");
+	//
 	DebugOut(L"[INFO] Start loading scene resources from : %s \n", sceneFilePath);
 
 	ifstream f;
@@ -253,11 +258,14 @@ void CPlayScene::Update(DWORD dt)
 	cx -= game->GetScreenWidth() / 2;
 	cy -= game->GetScreenHeight() / 2;
 
-	CGame::GetInstance()->SetCamPos(cx, 0.0f /*cy*/);
+	CGame::GetInstance()->SetCamPos(cx, cy);
 }
 
 void CPlayScene::Render()
 {
+	//render background
+	mapbackground->Render(mapbackground->GetTileSet());
+	//
 	for (int i = 0; i < objects.size(); i++)
 		objects[i]->Render();
 }
@@ -303,6 +311,8 @@ void CPlayScenceKeyHandler::KeyState(BYTE *states)
 		mario->SetState(MARIO_STATE_WALKING_RIGHT);
 	else if (game->IsKeyDown(DIK_LEFT))
 		mario->SetState(MARIO_STATE_WALKING_LEFT);
+	else if (game->IsKeyDown(DIK_SPACE))
+		mario->SetState(MARIO_STATE_JUMP);
 	else
 		mario->SetState(MARIO_STATE_IDLE);
 }

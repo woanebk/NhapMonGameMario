@@ -7,12 +7,15 @@
 #include "Mario.h"
 #include "Goomba.h"
 #include "Koopas.h"
+#include "MapBackground.h"
 
 
 class CPlayScene: public CScene
 {
 protected: 
 	CMario *player;					// A play scene has to have player, right? 
+
+	LPMAPBACKGROUND mapbackground;	//Add a map background
 
 	vector<LPGAMEOBJECT> objects;
 
