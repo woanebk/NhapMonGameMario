@@ -144,6 +144,7 @@
   <ItemGroup>
     <ClInclude Include="Animations.h" />
     <ClInclude Include="Brick.h" />
+    <ClInclude Include="define.h" />
     <ClInclude Include="Koopas.h" />
     <ClInclude Include="MapBackground.h" />
     <ClInclude Include="Portal.h" />
@@ -159,7 +160,17 @@
     <ClInclude Include="Textures.h" />
   </ItemGroup>
   <ItemGroup>
+    <Text Include="scence-world-1-1.txt" />
     <Text Include="scene-test.txt" />
+  </ItemGroup>
+  <ItemGroup>
+    <Image Include="textures\bbox.png" />
+    <Image Include="textures\enemies-2.png" />
+    <Image Include="textures\enemies.png" />
+    <Image Include="textures\gameover.png" />
+    <Image Include="textures\mario.png" />
+    <Image Include="textures\misc.png" />
+    <Image Include="textures\title.png" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

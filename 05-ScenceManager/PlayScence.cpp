@@ -274,7 +274,11 @@ void CPlayScene::Render()
 	mapbackground->Render(mapbackground->GetTileSet());
 	//
 	for (int i = 0; i < objects.size(); i++)
+	{
+		if (objects[i]->isVisabled())
 		objects[i]->Render();
+	}
+		
 }
 
 /*
@@ -314,6 +318,8 @@ void CPlayScenceKeyHandler::KeyState(BYTE *states)
 
 	// disable control key when Mario die 
 	if (mario->GetState() == MARIO_STATE_DIE) return;
+	if (game->IsKeyDown(DIK_DOWN))
+		mario->SetState(MARIO_STATE_SIT);
 	if (game->IsKeyDown(DIK_RIGHT))
 		mario->SetState(MARIO_STATE_WALKING_RIGHT);
 	else if (game->IsKeyDown(DIK_LEFT))
