@@ -105,6 +105,16 @@ void MapBackground::SetTileSet(LPCWSTR filePath, D3DCOLOR transparentColor)
 	DebugOut(L"[INFO] Texture(TileSet) loaded Ok: %s\n", filePath);
 }
 
+float MapBackground::GetMapHeight()
+{
+	return MapRows * TileHeight;
+}
+
+float MapBackground::GetMapWidth()
+{
+	return MapColumns * TileWidth;
+}
+
 LPDIRECT3DTEXTURE9 MapBackground::GetTileSet()
 {
 	return tileset;

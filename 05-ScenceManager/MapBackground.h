@@ -16,8 +16,8 @@ class MapBackground
 {
 	int MapColumns; 
 	int MapRows;
-	int TileHeight;
-	int TileWidth;
+	float TileHeight;
+	float TileWidth;
 	int TileSetColumns; //number of column in a tileset image
 	int TileSetRows;	//number of row in a tileset image
 	int map[500][500];	//map as matrix
@@ -31,6 +31,8 @@ public:
 	void DrawTile(int tileID, LPDIRECT3DTEXTURE9 tileset, int i, int j);
 	void Render(LPDIRECT3DTEXTURE9 tileset );
 	void SetTileSet(LPCWSTR filePath, D3DCOLOR transparentColor);
+	float GetMapHeight();
+	float GetMapWidth();
 	LPDIRECT3DTEXTURE9 GetTileSet();
 };
 

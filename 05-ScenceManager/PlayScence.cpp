@@ -257,7 +257,14 @@ void CPlayScene::Update(DWORD dt)
 	CGame *game = CGame::GetInstance();
 	cx -= game->GetScreenWidth() / 2;
 	cy -= game->GetScreenHeight() / 2;
-
+	if (cx < 0)
+		cx = 0;
+	if (cx > mapbackground->GetMapWidth() - game->GetScreenWidth())
+	cx = mapbackground->GetMapWidth() - game->GetScreenWidth();
+	if (cy < 0)
+		cy = 0;
+	if (cy > mapbackground->GetMapHeight() - game->GetScreenHeight())
+		cy = mapbackground->GetMapHeight() - game->GetScreenHeight();
 	CGame::GetInstance()->SetCamPos(cx, cy);
 }
 
