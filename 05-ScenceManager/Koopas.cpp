@@ -43,9 +43,9 @@ void CKoopas::Render()
 	if (state == KOOPAS_STATE_DIE) {
 		ani = KOOPAS_ANI_DIE;
 	}
-	else
-		if (state == KOOPAS_STATE_SHELL)
-			ani = KOOPAS_ANI_SHELL;
+	else if (state == KOOPAS_STATE_SHELL) {
+		ani = KOOPAS_ANI_SHELL;
+	}
 	else if (vx > 0) ani = KOOPAS_ANI_WALKING_RIGHT;
 	else if (vx <= 0) ani = KOOPAS_ANI_WALKING_LEFT;
 

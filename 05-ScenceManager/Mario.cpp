@@ -134,8 +134,15 @@ void CMario::Update(DWORD dt, vector<LPGAMEOBJECT> *coObjects)
 						}
 					}
 				}
-				else if(e->ny <0)
-					if(koopas->state !=)
+				 if (e->ny < 0)
+				{
+					if (koopas->GetState() != KOOPAS_STATE_DIE || koopas->GetState() != KOOPAS_STATE_SHELL)
+					{
+						koopas->SetState(KOOPAS_STATE_SHELL);
+						vy = -MARIO_JUMP_DEFLECT_SPEED;
+					}
+					
+				}
 			} //if Koopas
 		}
 	}
@@ -205,6 +212,7 @@ void CMario::SetState(int state)
 		break;
 	case MARIO_STATE_JUMP:
 		// TODO: need to check if Mario is *current* on a platform before allowing to jump again
+
 		vy = -MARIO_JUMP_SPEED_Y;
 		break; 
 	case MARIO_STATE_IDLE: 

@@ -275,7 +275,7 @@ void CPlayScene::Render()
 	//
 	for (int i = 0; i < objects.size(); i++)
 	{
-		if (objects[i]->isVisabled())
+		/*if(i<8 || i>104)*/ // disable render the brick ground
 		objects[i]->Render();
 	}
 		
