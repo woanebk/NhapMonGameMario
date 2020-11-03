@@ -272,11 +272,13 @@ void CPlayScene::Render()
 {
 	//render background
 	mapbackground->Render(mapbackground->GetTileSet());
-	//
+	
 	for (int i = 0; i < objects.size(); i++)
 	{
-		/*if(i<8 || i>104)*/ // disable render the brick ground
-		objects[i]->Render();
+		if (i >= 9 && i <= 141)
+			objects[i]->setVisable(false);	// disable render the brick ground
+		if (objects[i]->isVisabled())
+			objects[i]->Render();
 	}
 		
 }
