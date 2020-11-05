@@ -223,6 +223,23 @@ void CMario::Render()
 			ani = MARIO_ANI_SMALL_WALKING_RIGHT;
 		else ani = MARIO_ANI_SMALL_WALKING_LEFT;
 	}
+	if (level == MARIO_LEVEL_LEAF)
+	{
+		if (vy < 0)
+		{
+			if (nx < 0) ani = MARIO_ANI_LEAF_JUMP_LEFT_LOW;
+			else ani = MARIO_ANI_LEAF_JUMP_RIGHT_LOW;
+		}
+		else
+			if (vx == 0)
+			{
+				if (nx > 0) ani = MARIO_ANI_LEAF_IDLE_RIGHT;
+				else ani = MARIO_ANI_LEAF_IDLE_LEFT;
+			}
+			else if (vx > 0)
+				ani = MARIO_ANI_LEAF_WALK_RIGHT;
+			else ani = MARIO_ANI_LEAF_WALK_LEFT;
+	}
 	
 
 	int alpha = 255;
@@ -276,6 +293,11 @@ void CMario::GetBoundingBox(float &left, float &top, float &right, float &bottom
 		bottom = y + MARIO_BIG_BBOX_HEIGHT;
 	}
 	else
+		if (level == MARIO_LEVEL_LEAF){
+			right = x + MARIO_LEAF_BBOX_WIDTH;
+			bottom = y + MARIO_LEAF_BBOX_HEIGHT;
+		}
+		else
 	{
 		right = x + MARIO_SMALL_BBOX_WIDTH;
 		bottom = y + MARIO_SMALL_BBOX_HEIGHT;

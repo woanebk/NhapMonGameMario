@@ -73,12 +73,6 @@ void CKoopas::Update(DWORD dt, vector<LPGAMEOBJECT> *coObjects)
 			LPCOLLISIONEVENT e = coEventsResult[i];
 			if (dynamic_cast<CBrick*>(e->obj))
 			{
-				if (e->nx != 0)
-				{
-					x += min_tx * dx + e->nx * 0.4f;
-					vx = -vx;
-					DebugOut(L"koopas meet brick x");
-				}
 				if (e->ny != 0)
 				{
 					vy = 0;
@@ -86,6 +80,13 @@ void CKoopas::Update(DWORD dt, vector<LPGAMEOBJECT> *coObjects)
 
 					DebugOut(L"koopas meet brick y");
 				}
+				if (e->nx != 0)
+				{
+					x += min_tx * dx + e->nx * 0.4f;
+					/*vx = -vx;*/
+					DebugOut(L"koopas meet brick x");
+				}
+				
 
 			}
 		}
