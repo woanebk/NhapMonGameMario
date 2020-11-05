@@ -275,8 +275,8 @@ void CPlayScene::Render()
 	
 	for (int i = 0; i < objects.size(); i++)
 	{
-		if (i >= 9 && i <= 141)
-			objects[i]->setVisable(false);	// disable render the brick ground
+		/*if (i >= 9 && i <= 141)
+			objects[i]->setVisable(false);*/	// disable render the brick ground
 		if (objects[i]->isVisabled())
 			objects[i]->Render();
 	}
@@ -305,7 +305,12 @@ void CPlayScenceKeyHandler::OnKeyDown(int KeyCode)
 	switch (KeyCode)
 	{
 	case DIK_SPACE:
+		if(mario->canJump())
 		mario->SetState(MARIO_STATE_JUMP);
+		mario->setJumpable(false);
+		break;
+	case DIK_S:
+		mario->SetLevel(MARIO_LEVEL_TALE);
 		break;
 	case DIK_A: 
 		mario->Reset();
@@ -326,8 +331,11 @@ void CPlayScenceKeyHandler::KeyState(BYTE *states)
 		mario->SetState(MARIO_STATE_WALKING_RIGHT);
 	else if (game->IsKeyDown(DIK_LEFT))
 		mario->SetState(MARIO_STATE_WALKING_LEFT);
-	else if (game->IsKeyDown(DIK_SPACE))
+	else if (game->IsKeyDown(DIK_SPACE) && mario->canJump())
+	{
 		mario->SetState(MARIO_STATE_JUMP);
+		mario->setJumpable(false);
+	}
 	else
 		mario->SetState(MARIO_STATE_IDLE);
 }

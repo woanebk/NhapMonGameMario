@@ -51,6 +51,10 @@ void CMario::Update(DWORD dt, vector<LPGAMEOBJECT> *coObjects)
 	{
 		x += dx; 
 		y += dy;
+		if (x < 0)
+			x = 0;
+		if (x > WORLD_1_1_WIDTH)
+			x = WORLD_1_1_WIDTH; //relocate mario inside map
 	}
 	else
 	{
@@ -70,7 +74,10 @@ void CMario::Update(DWORD dt, vector<LPGAMEOBJECT> *coObjects)
 		y += min_ty*dy + ny*0.4f;
 
 		if (nx!=0) vx = 0;
-		if (ny!=0) vy = 0;
+		if (ny != 0) {
+			vy = 0;
+			if (ny < 0) jumpable = true;
+		} 
 
 
 		//
@@ -120,7 +127,16 @@ void CMario::Update(DWORD dt, vector<LPGAMEOBJECT> *coObjects)
 				CKoopas *koopas = dynamic_cast<CKoopas *>(e->obj);
 				if (e->nx != 0)
 				{
-					if (untouchable == 0)
+					if (koopas->GetState() == KOOPAS_STATE_SHELL)
+					{
+						if (e->nx < 0)
+							koopas->SetState(KOOPAS_STATE_SPIN_RIGHT);
+						else
+							koopas->SetState(KOOPAS_STATE_SPIN_LEFT);
+							
+					} //kick the shell
+					else
+					if (untouchable == 0) 
 					{
 						if (koopas->GetState() != KOOPAS_STATE_DIE)
 						{
@@ -133,15 +149,22 @@ void CMario::Update(DWORD dt, vector<LPGAMEOBJECT> *coObjects)
 								SetState(MARIO_STATE_DIE);
 						}
 					}
+					DebugOut(L"x");
 				}
-				 if (e->ny < 0)
-				{
-					if (koopas->GetState() != KOOPAS_STATE_DIE || koopas->GetState() != KOOPAS_STATE_SHELL)
+				
+				 if (e->ny != 0)
+				 {
+					 
+					if (koopas->GetState() != KOOPAS_STATE_DIE )
 					{
-						koopas->SetState(KOOPAS_STATE_SHELL);
-						vy = -MARIO_JUMP_DEFLECT_SPEED;
+						if (koopas->GetState() != KOOPAS_STATE_SHELL ) 
+						{
+							koopas->SetState(KOOPAS_STATE_SHELL);
+							
+						}
+						vy = -MARIO_JUMP_DEFLECT_SPEED;	
 					}
-					
+					DebugOut(L"y");
 				}
 			} //if Koopas
 		}
@@ -167,6 +190,12 @@ void CMario::Render()
 	else
 	if (level == MARIO_LEVEL_BIG)
 	{
+		if (vy < 0)
+		{
+			if (nx < 0) ani = MARIO_ANI_BIG_JUMP_LEFT;
+			else ani = MARIO_ANI_BIG_JUMP_RIGHT;
+		}
+		else
 		if (vx == 0)
 		{
 			if (nx>0) ani = MARIO_ANI_BIG_IDLE_RIGHT;
@@ -178,6 +207,13 @@ void CMario::Render()
 	}
 	else if (level == MARIO_LEVEL_SMALL)
 	{
+		if (vy < 0)
+		{
+			if (nx > 0) ani = MARIO_ANI_SMALL_JUMP_RIGHT;
+			else
+				ani = MARIO_ANI_SMALL_JUMP_LEFT;
+		} //jump animation
+		else
 		if (vx == 0)
 		{
 			if (nx>0) ani = MARIO_ANI_SMALL_IDLE_RIGHT;
@@ -187,6 +223,7 @@ void CMario::Render()
 			ani = MARIO_ANI_SMALL_WALKING_RIGHT;
 		else ani = MARIO_ANI_SMALL_WALKING_LEFT;
 	}
+	
 
 	int alpha = 255;
 	if (untouchable) alpha = 128;
