@@ -97,8 +97,6 @@ void CMario::Update(DWORD dt, vector<LPGAMEOBJECT> *coObjects)
 					if (goomba->GetState()!= GOOMBA_STATE_DIE)
 					{
 						goomba->SetState(GOOMBA_STATE_DIE);
-						goomba->setEnable(false);
-						goomba->setVisable(false);
 						vy = -MARIO_JUMP_DEFLECT_SPEED;
 					}
 				}

@@ -16,7 +16,10 @@ void CKoopas::GetBoundingBox(float &left, float &top, float &right, float &botto
 		bottom = y + KOOPAS_BBOX_HEIGHT_DIE;
 	else
 		if (state == KOOPAS_STATE_SHELL)
-			bottom = y + KOOPAS_BBOX_HEIGHT_SHELL ;
+			bottom = y + KOOPAS_BBOX_HEIGHT_SHELL -1;
+		else
+			if (state == KOOPAS_STATE_SPIN_LEFT || state == KOOPAS_STATE_SPIN_RIGHT)
+				bottom = y + KOOPAS_BBOX_HEIGHT_SHELL -1;
 		else
 		bottom = y + KOOPAS_BBOX_HEIGHT;
 }
@@ -63,7 +66,8 @@ void CKoopas::Update(DWORD dt, vector<LPGAMEOBJECT> *coObjects)
 		FilterCollision(coEvents, coEventsResult, min_tx, min_ty, nx, ny, rdx, rdy);
 
 		// block every object first!
-		
+		x += min_tx * dx + nx * 0.4f;
+		y += min_ty * dy + ny * 0.4f;
 		
 
 		if (nx != 0) vx = 0;
@@ -72,9 +76,11 @@ void CKoopas::Update(DWORD dt, vector<LPGAMEOBJECT> *coObjects)
 		for (UINT i = 0; i < coEventsResult.size(); i++)
 		{
 			LPCOLLISIONEVENT e = coEventsResult[i];
-			/*if (dynamic_cast<CBrick*>(e->obj))
+			if (dynamic_cast<CBrick*>(e->obj))
 			{
-				if (e->ny != 0)
+				
+				
+				/*if (e->ny != 0)
 				{
 					vy = 0;
 					y += min_ty * dy + e->ny * 0.4f;
@@ -83,10 +89,10 @@ void CKoopas::Update(DWORD dt, vector<LPGAMEOBJECT> *coObjects)
 				{
 					x += min_tx * dx + e->nx * 0.4f;
 					vx = -vx;
-				}
+				}*/
 				
 
-			}*/
+			}
 		}
 
 		//
