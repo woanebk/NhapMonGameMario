@@ -265,7 +265,7 @@ void CPlayScene::Update(DWORD dt)
 		cy = 0;
 	if (cy > mapbackground->GetMapHeight() - game->GetScreenHeight())
 		cy = mapbackground->GetMapHeight() - game->GetScreenHeight();
-	CGame::GetInstance()->SetCamPos(cx, cy);
+	CGame::GetInstance()->SetCamPos((int)cx, (int)cy);
 }
 
 void CPlayScene::Render()
@@ -275,8 +275,8 @@ void CPlayScene::Render()
 	
 	for (int i = 0; i < objects.size(); i++)
 	{
-		/*if (i >= 9 && i <= 141)
-			objects[i]->setVisable(false);*/	// disable render the brick ground
+		if (i >= 9 && i <= 140)
+			objects[i]->setVisable(false);	// disable render the brick ground
 		if (objects[i]->isVisabled())
 			objects[i]->Render();
 	}
@@ -304,11 +304,6 @@ void CPlayScenceKeyHandler::OnKeyDown(int KeyCode)
 	CMario *mario = ((CPlayScene*)scence)->GetPlayer();
 	switch (KeyCode)
 	{
-	/*case DIK_SPACE:
-		if(mario->canJump())
-		mario->SetState(MARIO_STATE_JUMP);
-		mario->setJumpable(false);
-		break;*/
 	case DIK_Z:
 		if (mario->canJump())
 			mario->SetState(MARIO_STATE_JUMP);
@@ -332,11 +327,12 @@ void CPlayScenceKeyHandler::KeyState(BYTE *states)
 	if (mario->GetState() == MARIO_STATE_DIE) return;
 	if (game->IsKeyDown(DIK_DOWN))
 		mario->SetState(MARIO_STATE_SIT);
-	if (game->IsKeyDown(DIK_SPACE) && mario->canJump())
+	if (game->IsKeyDown(DIK_SPACE))
 	{
-		mario->SetState(MARIO_STATE_JUMP);
 		
-		mario->setJumpable(false);
+			mario->SetState(MARIO_STATE_JUMP);
+			mario->setJumpable(false);
+		
 	}
 	else
 	if (game->IsKeyDown(DIK_RIGHT))

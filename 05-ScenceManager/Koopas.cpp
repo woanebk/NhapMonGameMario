@@ -16,7 +16,7 @@ void CKoopas::GetBoundingBox(float &left, float &top, float &right, float &botto
 		bottom = y + KOOPAS_BBOX_HEIGHT_DIE;
 	else
 		if (state == KOOPAS_STATE_SHELL)
-			bottom = y + KOOPAS_BBOX_HEIGHT_SHELL;
+			bottom = y + KOOPAS_BBOX_HEIGHT_SHELL ;
 		else
 		bottom = y + KOOPAS_BBOX_HEIGHT;
 }
@@ -30,7 +30,7 @@ void CKoopas::Update(DWORD dt, vector<LPGAMEOBJECT> *coObjects)
 	// 
 
 	// Simple fall down
-	vy += MARIO_GRAVITY * dt;
+	/*vy += MARIO_GRAVITY * dt;*/
 
 	vector<LPCOLLISIONEVENT> coEvents;
 	vector<LPCOLLISIONEVENT> coEventsResult;
@@ -66,29 +66,27 @@ void CKoopas::Update(DWORD dt, vector<LPGAMEOBJECT> *coObjects)
 		
 		
 
-		/*if (nx != 0) vx = 0;
-		if (ny != 0) vy = 0;*/
+		if (nx != 0) vx = 0;
+		if (ny != 0) vy = 0;
+
 		for (UINT i = 0; i < coEventsResult.size(); i++)
 		{
 			LPCOLLISIONEVENT e = coEventsResult[i];
-			if (dynamic_cast<CBrick*>(e->obj))
+			/*if (dynamic_cast<CBrick*>(e->obj))
 			{
 				if (e->ny != 0)
 				{
 					vy = 0;
 					y += min_ty * dy + e->ny * 0.4f;
-
-					DebugOut(L"koopas meet brick y");
 				}
 				if (e->nx != 0)
 				{
 					x += min_tx * dx + e->nx * 0.4f;
-					/*vx = -vx;*/
-					DebugOut(L"koopas meet brick x");
+					vx = -vx;
 				}
 				
 
-			}
+			}*/
 		}
 
 		//

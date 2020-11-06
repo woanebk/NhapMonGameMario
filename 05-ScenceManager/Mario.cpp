@@ -77,8 +77,8 @@ void CMario::Update(DWORD dt, vector<LPGAMEOBJECT> *coObjects)
 		if (ny != 0) {
 			vy = 0;
 			if (ny < 0) jumpable = true;
-		} 
-
+		} //jump condition
+		if (vy <= 0 && jumpable == false) isjumping = true;
 
 		//
 		// Collision logic with other objects
@@ -97,6 +97,8 @@ void CMario::Update(DWORD dt, vector<LPGAMEOBJECT> *coObjects)
 					if (goomba->GetState()!= GOOMBA_STATE_DIE)
 					{
 						goomba->SetState(GOOMBA_STATE_DIE);
+						goomba->setEnable(false);
+						goomba->setVisable(false);
 						vy = -MARIO_JUMP_DEFLECT_SPEED;
 					}
 				}
@@ -266,8 +268,14 @@ void CMario::SetState(int state)
 		break;
 	case MARIO_STATE_JUMP:
 		// TODO: need to check if Mario is *current* on a platform before allowing to jump again
-
-		vy = -MARIO_JUMP_SPEED_Y;
+		if (jumpable)
+		{
+			vy = -MARIO_JUMP_SPEED_Y;
+			jumpable = false;
+		}
+		else
+		if (isjumping == true)
+				vy -= 0.005f;
 		break; 
 	case MARIO_STATE_IDLE: 
 		vx = 0;

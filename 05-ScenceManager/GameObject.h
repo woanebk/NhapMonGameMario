@@ -58,6 +58,7 @@ public:
 
 	int state;
 	bool visable = true;
+	bool enable = true;
 
 	DWORD dt; 
 
@@ -70,6 +71,9 @@ public:
 	void GetSpeed(float &vx, float &vy) { vx = this->vx; vy = this->vy; }
 	bool isVisabled() { return visable; }
 	void setVisable(bool Visable) { visable = Visable; }
+
+	bool isEnabled() { return enable; }
+	void setEnable(bool e) { enable = e; }
 
 	int GetState() { return this->state; }
 

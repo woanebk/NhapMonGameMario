@@ -10,6 +10,7 @@ class CMario : public CGameObject
 	int untouchable;
 	DWORD untouchable_start;
 	bool jumpable = true;
+	bool isjumping = false;
 
 	float start_x;			// initial position of Mario at scene
 	float start_y; 
@@ -24,6 +25,10 @@ public:
 
 	void setJumpable(bool jump) { jumpable = jump; }
 	bool canJump() { return jumpable; }
+
+	void setIsJumping(bool j) { isjumping = j; }
+	bool isJumping() { return isjumping; }
+
 
 	void Reset();
 
