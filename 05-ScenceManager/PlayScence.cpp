@@ -5,6 +5,7 @@
 #include "Utils.h"
 #include "Textures.h"
 #include "Sprites.h"
+#include "Block.h"
 #include "Portal.h"
 
 using namespace std;
@@ -143,13 +144,13 @@ void CPlayScene::_ParseSection_OBJECTS(string line)
 	switch (object_type)
 	{
 	case OBJECT_TYPE_MARIO:
-		if (player!=NULL) 
+		if (player != NULL)
 		{
 			DebugOut(L"[ERROR] MARIO object was created before!\n");
 			return;
 		}
-		obj = new CMario(x,y); 
-		player = (CMario*)obj;  
+		obj = new CMario(x, y);
+		player = (CMario*)obj;
 
 		DebugOut(L"[INFO] Player object created!\n");
 		break;
@@ -157,13 +158,20 @@ void CPlayScene::_ParseSection_OBJECTS(string line)
 	case OBJECT_TYPE_BRICK: obj = new CBrick(); break;
 	case OBJECT_TYPE_KOOPAS: obj = new CKoopas(); break;
 	case OBJECT_TYPE_PORTAL:
-		{	
-			float r = atof(tokens[4].c_str());
-			float b = atof(tokens[5].c_str());
-			int scene_id = atoi(tokens[6].c_str());
-			obj = new CPortal(x, y, r, b, scene_id);
-		}
-		break;
+	{
+		float r = atof(tokens[4].c_str());
+		float b = atof(tokens[5].c_str());
+		int scene_id = atoi(tokens[6].c_str());
+		obj = new CPortal(x, y, r, b, scene_id);
+	}
+	break;
+	case OBJECT_TYPE_BLOCK:
+	{
+		float r = atof(tokens[4].c_str());
+		float b = atof(tokens[5].c_str());
+		obj = new CBlock(x, y, r, b);
+	}
+		  break;
 	default:
 		DebugOut(L"[ERR] Invalid object type: %d\n", object_type);
 		return;
@@ -275,8 +283,6 @@ void CPlayScene::Render()
 	
 	for (int i = 0; i < objects.size(); i++)
 	{
-		if (i >= 9 && i <= 140)
-			objects[i]->setVisable(false);	// disable render the brick ground
 		if (objects[i]->isVisabled())
 			objects[i]->Render();
 	}
@@ -311,6 +317,7 @@ void CPlayScenceKeyHandler::OnKeyDown(int KeyCode)
 		break;
 	case DIK_S:
 		mario->SetLevel(MARIO_LEVEL_LEAF);
+		mario->SetPosition(mario->x, mario->y - (MARIO_LEAF_BBOX_HEIGHT - MARIO_SMALL_BBOX_HEIGHT)); //push mario up a bit
 		break;
 	case DIK_A: 
 		mario->Reset();
@@ -331,7 +338,6 @@ void CPlayScenceKeyHandler::KeyState(BYTE *states)
 	{
 		
 			mario->SetState(MARIO_STATE_JUMP);
-			mario->setJumpable(false);
 		
 	}
 	else

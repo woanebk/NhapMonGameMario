@@ -9,7 +9,7 @@
 #include "Portal.h"
 #include "Brick.h"
 #include "Koopas.h"
-
+#include "Block.h"
 CMario::CMario(float x, float y) : CGameObject()
 {
 	level = MARIO_LEVEL_BIG;
@@ -167,11 +167,16 @@ void CMario::Update(DWORD dt, vector<LPGAMEOBJECT> *coObjects)
 					DebugOut(L"y");
 				}
 			} //if Koopas
+			if (dynamic_cast<CBlock*> (e->obj))
+			{
+				CBlock *block = dynamic_cast<CBlock*>(e->obj);
+			}
 		}
 	}
 
 	// clean up collision events
 	for (UINT i = 0; i < coEvents.size(); i++) delete coEvents[i];
+	
 }
 
 void CMario::Render()
@@ -269,7 +274,7 @@ void CMario::SetState(int state)
 		if (jumpable)
 		{
 			vy = -MARIO_JUMP_SPEED_Y;
-			jumpable = false;
+			/*jumpable = false;*/
 		}
 		else
 		if (isjumping == true)

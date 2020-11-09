@@ -1,6 +1,8 @@
 #include "Koopas.h"
 #include "Brick.h"
 #include "Utils.h"
+#include "Mario.h"
+
 CKoopas::CKoopas()
 {
 	SetState(KOOPAS_STATE_WALKING);
@@ -16,11 +18,12 @@ void CKoopas::GetBoundingBox(float &left, float &top, float &right, float &botto
 		bottom = y + KOOPAS_BBOX_HEIGHT_DIE;
 	else
 		if (state == KOOPAS_STATE_SHELL)
-			bottom = y + KOOPAS_BBOX_HEIGHT_SHELL -1;
+			bottom = y + KOOPAS_BBOX_HEIGHT_SHELL ;
 		else
 			if (state == KOOPAS_STATE_SPIN_LEFT || state == KOOPAS_STATE_SPIN_RIGHT)
-				bottom = y + KOOPAS_BBOX_HEIGHT_SHELL -1;
-		else
+				bottom = y + KOOPAS_BBOX_HEIGHT_SHELL ;
+			else
+		
 		bottom = y + KOOPAS_BBOX_HEIGHT;
 }
 
@@ -33,7 +36,7 @@ void CKoopas::Update(DWORD dt, vector<LPGAMEOBJECT> *coObjects)
 	// 
 
 	// Simple fall down
-	/*vy += MARIO_GRAVITY * dt;*/
+	vy += MARIO_GRAVITY * dt;
 
 	vector<LPCOLLISIONEVENT> coEvents;
 	vector<LPCOLLISIONEVENT> coEventsResult;
@@ -70,7 +73,7 @@ void CKoopas::Update(DWORD dt, vector<LPGAMEOBJECT> *coObjects)
 		y += min_ty * dy + ny * 0.4f;
 		
 
-		if (nx != 0) vx = 0;
+		/*if (nx != 0) vx = 0;*/
 		if (ny != 0) vy = 0;
 
 		for (UINT i = 0; i < coEventsResult.size(); i++)
@@ -78,20 +81,17 @@ void CKoopas::Update(DWORD dt, vector<LPGAMEOBJECT> *coObjects)
 			LPCOLLISIONEVENT e = coEventsResult[i];
 			if (dynamic_cast<CBrick*>(e->obj))
 			{
-				
-				
-				/*if (e->ny != 0)
-				{
-					vy = 0;
-					y += min_ty * dy + e->ny * 0.4f;
-				}
 				if (e->nx != 0)
 				{
-					x += min_tx * dx + e->nx * 0.4f;
+					
 					vx = -vx;
-				}*/
+				}
 				
 
+			}
+			if (dynamic_cast<CMario*>(e->obj))
+			{
+				if (e->ny != 0) {}
 			}
 		}
 
@@ -113,6 +113,7 @@ void CKoopas::Update(DWORD dt, vector<LPGAMEOBJECT> *coObjects)
 		x = 290; vx = -vx;
 	}*/
 	for (UINT i = 0; i < coEvents.size(); i++) delete coEvents[i];
+	DebugOut(L"koopas %d ", y);
 }
 
 void CKoopas::Render()
@@ -141,12 +142,10 @@ void CKoopas::SetState(int state)
 	switch (state)
 	{
 	case KOOPAS_STATE_DIE:
-		y += KOOPAS_BBOX_HEIGHT - KOOPAS_BBOX_HEIGHT_DIE + 1;
 		vx = 0;
 		vy = 0;
 		break;
 	case KOOPAS_STATE_SHELL:
-		y+= KOOPAS_BBOX_HEIGHT - KOOPAS_BBOX_HEIGHT_SHELL - 1;
 		vx = 0;
 		vy = 0;
 		break;
