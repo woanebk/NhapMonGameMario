@@ -2,6 +2,8 @@
 #include "Brick.h"
 #include "Utils.h"
 #include "Mario.h"
+#include "Pine.h"
+#include "Block.h"
 
 CKoopas::CKoopas()
 {
@@ -50,9 +52,6 @@ void CKoopas::Update(DWORD dt, vector<LPGAMEOBJECT> *coObjects)
 	{
 		x += dx;
 		y += dy;
-		if (vx < 0 && x < 0) {
-			x = 0; vx = -vx;
-		}
 
 		if (vx > 0 && x > WORLD_1_1_WIDTH ) {
 			 vx = -vx;
@@ -69,8 +68,8 @@ void CKoopas::Update(DWORD dt, vector<LPGAMEOBJECT> *coObjects)
 		FilterCollision(coEvents, coEventsResult, min_tx, min_ty, nx, ny, rdx, rdy);
 
 		// block every object first!
-		x += min_tx * dx + nx * 0.4f;
-		y += min_ty * dy + ny * 0.4f;
+		/*x += min_tx * dx + nx * 0.4f;
+		y += min_ty * dy + ny * 0.4f;*/
 		
 
 		/*if (nx != 0) vx = 0;*/
@@ -81,18 +80,50 @@ void CKoopas::Update(DWORD dt, vector<LPGAMEOBJECT> *coObjects)
 			LPCOLLISIONEVENT e = coEventsResult[i];
 			if (dynamic_cast<CBrick*>(e->obj))
 			{
+				CBrick *brick = dynamic_cast<CBrick*>(e->obj);
 				if (e->nx != 0)
 				{
+					x += min_tx * dx + nx * 0.4f;
 					
-					vx = -vx;
+					if(brick->canBounce() == 1 )
+						vx = -vx;
+				}
+				if (e->ny != 0)
+				{
+					y += min_ty * dy + ny * 0.4f;
+					/*x += dx;*/
 				}
 				
 
 			}
-			if (dynamic_cast<CMario*>(e->obj))
+			else
+			if (dynamic_cast<CBlock*> (e->obj))
 			{
-				if (e->ny != 0) {}
-			}
+				CBlock *block = dynamic_cast<CBlock*>(e->obj);
+				if (e->ny < 0) {
+					vy = 0;
+					x += dx;
+					y += min_ty * rdy + ny * 0.4f;
+				}
+				if (e->nx != 0)
+				{
+					vy = 0;
+					x += dx;
+				}
+			}//if block
+			else
+			if (dynamic_cast<CPine*>(e->obj))
+			{
+				CPine *pine = dynamic_cast<CPine*>(e->obj);
+				if (e->nx != 0) {
+					x += min_tx * rdx + nx * 0.4f;
+					vx = -vx;
+				}
+				if (e->ny != 0) {
+					vy = 0;
+					y += min_ty * rdy + ny * 0.4f;
+				}
+			}// if Pine
 		}
 
 		//
@@ -113,7 +144,6 @@ void CKoopas::Update(DWORD dt, vector<LPGAMEOBJECT> *coObjects)
 		x = 290; vx = -vx;
 	}*/
 	for (UINT i = 0; i < coEvents.size(); i++) delete coEvents[i];
-	DebugOut(L"koopas %d ", y);
 }
 
 void CKoopas::Render()

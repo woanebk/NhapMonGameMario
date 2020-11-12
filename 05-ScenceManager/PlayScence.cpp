@@ -5,8 +5,10 @@
 #include "Utils.h"
 #include "Textures.h"
 #include "Sprites.h"
+#include "Pine.h"
 #include "Block.h"
 #include "Portal.h"
+#include "Coin.h"
 
 using namespace std;
 
@@ -155,7 +157,11 @@ void CPlayScene::_ParseSection_OBJECTS(string line)
 		DebugOut(L"[INFO] Player object created!\n");
 		break;
 	case OBJECT_TYPE_GOOMBA: obj = new CGoomba(); break;
-	case OBJECT_TYPE_BRICK: obj = new CBrick(); break;
+	case OBJECT_TYPE_BRICK: { 
+		int b = atof(tokens[4].c_str());
+		obj = new CBrick(b);
+	}
+		break;
 	case OBJECT_TYPE_KOOPAS: obj = new CKoopas(); break;
 	case OBJECT_TYPE_PORTAL:
 	{
@@ -172,6 +178,15 @@ void CPlayScene::_ParseSection_OBJECTS(string line)
 		obj = new CBlock(x, y, r, b);
 	}
 		  break;
+	case OBJECT_TYPE_COIN: obj = new CCoin();
+		break;
+	case OBJECT_TYPE_PINE: 
+	{
+		float r = atof(tokens[4].c_str());
+		float b = atof(tokens[5].c_str());
+		obj = new CPine(x, y, r, b);
+	}
+	break;
 	default:
 		DebugOut(L"[ERR] Invalid object type: %d\n", object_type);
 		return;

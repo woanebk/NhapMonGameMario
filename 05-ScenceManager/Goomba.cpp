@@ -1,5 +1,8 @@
 #include "Goomba.h"
 #include "Koopas.h"
+#include "Brick.h"
+#include "Pine.h"
+#include "Block.h"
 CGoomba::CGoomba()
 {
 	SetState(GOOMBA_STATE_WALKING);
@@ -39,8 +42,6 @@ void CGoomba::Update(DWORD dt, vector<LPGAMEOBJECT> *coObjects)
 
 	coEvents.clear();
 
-	// turn off collision when die 
-	if (state != MARIO_STATE_DIE)
 		CalcPotentialCollisions(coObjects, coEvents);
 
 	if (coEvents.size() == 0)
@@ -48,12 +49,8 @@ void CGoomba::Update(DWORD dt, vector<LPGAMEOBJECT> *coObjects)
 		x += dx;
 		y += dy;
 
-		if (vx < 0 && x < 0) {
-			x = 0; vx = -vx;
-		}
-
-		if (vx > 0 && x > 290) {
-			x = 290; vx = -vx;
+		if (vx > 0 && x > WORLD_1_1_WIDTH) {
+			x = WORLD_1_1_WIDTH; vx = -vx;
 		}
 		
 	}
@@ -71,11 +68,11 @@ void CGoomba::Update(DWORD dt, vector<LPGAMEOBJECT> *coObjects)
 		//	x += nx*abs(rdx); 
 
 		// block every object first!
-		x += min_tx * dx + nx * 0.4f;
+		/*x += min_tx * dx + nx * 0.4f;
 		y += min_ty * dy + ny * 0.4f;
 
 		if (nx != 0) vx = 0;
-		if (ny != 0) vy = 0;
+		if (ny != 0) vy = 0;*/
 
 		for (UINT i = 0; i < coEventsResult.size(); i++)
 		{
@@ -89,9 +86,65 @@ void CGoomba::Update(DWORD dt, vector<LPGAMEOBJECT> *coObjects)
 						SetState(GOOMBA_STATE_DIE);
 				}
 
-			}
+			} //if koopas
+			else if (dynamic_cast<CBlock*>(e->obj)) 
+			{
+				CBlock *block = dynamic_cast<CBlock*>(e->obj);
+				if (e->ny < 0) {
+					vy = 0;
+					y += min_ty * rdy + ny * 0.4f;
+					x += dx;
+				}
+				if (e->nx != 0)
+				{
+					vy = 0;
+					x += dx;
+				}
+			}// if Block
+			else
+				if (dynamic_cast<CPine*>(e->obj))
+				{
+					CPine *pine = dynamic_cast<CPine*>(e->obj);
+					if (e->nx != 0) {
+						x += min_tx * rdx + nx * 0.4f;
+						vx = -vx;
+					}
+					if (e->ny != 0) {
+						vy = 0;
+						y += min_ty * rdy + ny * 0.4f;
+					}
+				}// if Pine
+			else
+				if (dynamic_cast<CGoomba*>(e->obj))
+				{
+					CGoomba *goomba = dynamic_cast<CGoomba*>(e->obj);
+					if (e->nx != 0) {
+						x += min_tx * rdx + nx * 0.4f;
+						vx = -vx;
+					}
+					
+				}// if Goomba
+				else
+					if (dynamic_cast<CBrick*>(e->obj))
+					{
+						CBrick *brick = dynamic_cast<CBrick*>(e->obj);
+						if (e->ny != 0)
+						{
+							vy = 0;
+							y += min_ty * rdy + ny * 0.4f;
+						}
+						if (e->nx != 0)
+						{
+							x += min_tx * dx + nx * 0.4f;
+							if (brick->canBounce() == 1)
+								vx = -vx;
+						}
+					}// if brick
 		}
+
 	}
+	// clean up collision events
+	for (UINT i = 0; i < coEvents.size(); i++) delete coEvents[i];
 }
 
 void CGoomba::Render()

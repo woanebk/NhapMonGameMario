@@ -5,10 +5,12 @@
 #include "Mario.h"
 #include "Game.h"
 
+#include "Pine.h"
 #include "Goomba.h"
 #include "Portal.h"
 #include "Brick.h"
 #include "Koopas.h"
+#include "Coin.h"
 #include "Block.h"
 CMario::CMario(float x, float y) : CGameObject()
 {
@@ -70,15 +72,13 @@ void CMario::Update(DWORD dt, vector<LPGAMEOBJECT> *coObjects)
 		//	x += nx*abs(rdx); 
 		
 		// block every object first!
-		x += min_tx*dx + nx*0.4f;
-		y += min_ty*dy + ny*0.4f;
+		/*x += min_tx*dx + nx*0.4f;
+		y += min_ty*dy + ny*0.4f;*/
 
-		if (nx!=0) vx = 0;
-		if (ny != 0) {
-			vy = 0;
-			if (ny < 0) jumpable = true;
-		} //jump condition
-		if (vy <= 0 && jumpable == false) isjumping = true;
+		/*if (nx !=0) vx = 0;*/
+		/*if (ny < 0) vy = 0;*/
+		if (ny < 0) jumpable = true;//jump condition
+		if (vy < 0 && jumpable == false) isjumping = true;
 
 		//
 		// Collision logic with other objects
@@ -167,9 +167,63 @@ void CMario::Update(DWORD dt, vector<LPGAMEOBJECT> *coObjects)
 					DebugOut(L"y");
 				}
 			} //if Koopas
+			else
+				if (dynamic_cast<CBrick*>(e->obj))
+				{
+					CBrick *brick = dynamic_cast<CBrick*>(e->obj);
+					if (e->nx != 0)
+					{
+						vx = 0;
+						x += min_tx * rdx + nx * 0.4f;
+					}
+					else
+					if (e->ny != 0)
+					{
+						vy = 0;
+						y += min_ty * rdy + ny * 0.4f;
+							/*x += dx;*/
+					}
+					
+					
+				} //if brick
+				else
 			if (dynamic_cast<CBlock*> (e->obj))
 			{
 				CBlock *block = dynamic_cast<CBlock*>(e->obj);
+				if (e->ny < 0) {
+					vy = 0;
+					x += dx;
+					y += min_ty * rdy + ny * 0.4f;
+				}
+				if (e->nx != 0)
+				{
+					x += dx;
+				}
+			}//if block
+			else
+			if (dynamic_cast<CCoin*>(e->obj))
+			{
+				CCoin *coin = dynamic_cast<CCoin*>(e->obj);
+				if (e->nx != 0 ) { 
+					coin->setEnable(false);
+					coin->setVisable(false);
+				}
+				if (e->ny != 0) {
+					coin->setEnable(false);
+					coin->setVisable(false);
+				} //==== earn money =====
+			}
+			if (dynamic_cast<CPine*>(e->obj))
+			{
+				CPine *pine = dynamic_cast<CPine*>(e->obj);
+				if (e->nx != 0) {
+					vx = 0;
+					x += min_tx * rdx + nx * 0.4f;
+				}
+				if (e->ny != 0) {
+					vy = 0;
+					y += min_ty * rdy + ny * 0.4f;
+				}
 			}
 		}
 	}
@@ -228,6 +282,7 @@ void CMario::Render()
 			ani = MARIO_ANI_SMALL_WALKING_RIGHT;
 		else ani = MARIO_ANI_SMALL_WALKING_LEFT;
 	}
+	else
 	if (level == MARIO_LEVEL_LEAF)
 	{
 		if (vy < 0)
@@ -285,7 +340,6 @@ void CMario::SetState(int state)
 		break;
 	case MARIO_STATE_SIT:
 		vx = 0;
-		y = 10;
 		break;
 	case MARIO_STATE_DIE:
 		vy = -MARIO_DIE_DEFLECT_SPEED;
@@ -300,6 +354,11 @@ void CMario::GetBoundingBox(float &left, float &top, float &right, float &bottom
 
 	if (level==MARIO_LEVEL_BIG)
 	{
+		if (state == MARIO_STATE_SIT)
+		{
+			right = x + MARIO_BBOX_SIT_WIDTH;
+			bottom = y + MARIO_BBOX_SIT_HEIGHT;
+		}
 		right = x + MARIO_BIG_BBOX_WIDTH;
 		bottom = y + MARIO_BIG_BBOX_HEIGHT;
 	}
