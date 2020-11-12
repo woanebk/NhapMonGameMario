@@ -211,7 +211,7 @@ void CMario::Update(DWORD dt, vector<LPGAMEOBJECT> *coObjects)
 				if (e->ny != 0) {
 					coin->setEnable(false);
 					coin->setVisable(false);
-				} //==== earn money =====
+				} //if Coin : ==== earn money =====
 			}
 			if (dynamic_cast<CPine*>(e->obj))
 			{
@@ -224,7 +224,7 @@ void CMario::Update(DWORD dt, vector<LPGAMEOBJECT> *coObjects)
 					vy = 0;
 					y += min_ty * rdy + ny * 0.4f;
 				}
-			}
+			} //if Pine
 		}
 	}
 
@@ -357,10 +357,13 @@ void CMario::GetBoundingBox(float &left, float &top, float &right, float &bottom
 		if (state == MARIO_STATE_SIT)
 		{
 			right = x + MARIO_BBOX_SIT_WIDTH;
-			bottom = y + MARIO_BBOX_SIT_HEIGHT;
+			bottom = y + MARIO_BBOX_SIT_HEIGHT -1;
 		}
-		right = x + MARIO_BIG_BBOX_WIDTH;
-		bottom = y + MARIO_BIG_BBOX_HEIGHT;
+		else
+		{
+			right = x + MARIO_BIG_BBOX_WIDTH;
+			bottom = y + MARIO_BIG_BBOX_HEIGHT;
+		}
 	}
 	else
 		if (level == MARIO_LEVEL_LEAF){

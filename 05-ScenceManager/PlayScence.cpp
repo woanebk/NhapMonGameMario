@@ -340,6 +340,17 @@ void CPlayScenceKeyHandler::OnKeyDown(int KeyCode)
 	}
 }
 
+void CPlayScenceKeyHandler::OnKeyUp(int KeyCode)
+{
+	CMario *mario = ((CPlayScene*)scence)->GetPlayer();
+	switch (KeyCode)
+	{
+	case DIK_DOWN:
+		mario->SetPosition(mario->x, mario->y - (MARIO_BIG_BBOX_HEIGHT - MARIO_BBOX_SIT_HEIGHT) -1 ); //push mario up a bit after stand up
+	}
+}
+
+
 void CPlayScenceKeyHandler::KeyState(BYTE *states)
 {
 	CGame *game = CGame::GetInstance();
@@ -349,6 +360,7 @@ void CPlayScenceKeyHandler::KeyState(BYTE *states)
 	if (mario->GetState() == MARIO_STATE_DIE) return;
 	if (game->IsKeyDown(DIK_DOWN))
 		mario->SetState(MARIO_STATE_SIT);
+	else
 	if (game->IsKeyDown(DIK_SPACE))
 	{
 		

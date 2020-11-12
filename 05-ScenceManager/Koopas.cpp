@@ -3,6 +3,7 @@
 #include "Utils.h"
 #include "Mario.h"
 #include "Pine.h"
+#include "Goomba.h"
 #include "Block.h"
 
 CKoopas::CKoopas()
@@ -93,9 +94,7 @@ void CKoopas::Update(DWORD dt, vector<LPGAMEOBJECT> *coObjects)
 					y += min_ty * dy + ny * 0.4f;
 					/*x += dx;*/
 				}
-				
-
-			}
+			} // if Brick
 			else
 			if (dynamic_cast<CBlock*> (e->obj))
 			{
@@ -124,6 +123,16 @@ void CKoopas::Update(DWORD dt, vector<LPGAMEOBJECT> *coObjects)
 					y += min_ty * rdy + ny * 0.4f;
 				}
 			}// if Pine
+			else
+			if (dynamic_cast<CGoomba*> (e->obj))
+			{
+				CGoomba *goomba = dynamic_cast<CGoomba*>(e->obj);
+				if (e->nx != 0)
+				{
+					if(state != KOOPAS_STATE_SPIN_LEFT && state !=KOOPAS_STATE_SPIN_RIGHT)
+					vx = -vx;
+				}
+			}//if Goomba
 		}
 
 		//
