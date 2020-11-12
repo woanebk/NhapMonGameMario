@@ -181,7 +181,7 @@ void CMario::Update(DWORD dt, vector<LPGAMEOBJECT> *coObjects)
 					{
 						vy = 0;
 						y += min_ty * rdy + ny * 0.4f;
-							/*x += dx;*/
+							/*x += dx;*/ //loi di xuyen gach
 					}
 					
 					

@@ -33,7 +33,7 @@ void CGoomba::Update(DWORD dt, vector<LPGAMEOBJECT> *coObjects)
 	CGameObject::Update(dt, coObjects);
 
 	// Simple fall down
-	/*vy += MARIO_GRAVITY * dt;*/
+	vy += MARIO_GRAVITY * dt;
 	//
 	// TO-DO: make sure Goomba can interact with the world and to each of them too!
 	// 

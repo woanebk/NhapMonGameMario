@@ -84,14 +84,14 @@ void CKoopas::Update(DWORD dt, vector<LPGAMEOBJECT> *coObjects)
 				CBrick *brick = dynamic_cast<CBrick*>(e->obj);
 				if (e->nx != 0)
 				{
-					x += min_tx * dx + nx * 0.4f;
+					x += min_tx * rdx + nx * 0.4f;
 					
 					if(brick->canBounce() == 1 )
 						vx = -vx;
 				}
 				if (e->ny != 0)
 				{
-					y += min_ty * dy + ny * 0.4f;
+					y += min_ty * rdy + ny * 0.4f;
 					/*x += dx;*/
 				}
 			} // if Brick
