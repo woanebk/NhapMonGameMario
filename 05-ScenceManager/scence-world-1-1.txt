@@ -28,6 +28,11 @@
 10016	35	275	51	301	0
 #jump right
 10017	395	275	411	301	0
+#hold shell left
+10018	96	234	110	261	0
+#hold shell right
+10019	336	234	350	261	0
+
 # SMALL MARIO
 # idle small right
 10021	247	0	259	15	0
@@ -43,6 +48,10 @@
 10041	95	120	110	136	0
 #jump right
 10042	336	120	351	136	0
+#hold shell left
+10043	186	120	200	136	0
+#hold shell right
+10044	246	120	260	136	0
 
 #LEAF MARIO
 #idle left
@@ -63,6 +72,15 @@
 11017	2	719	24	737	0
 #sit right
 11018	422	719	444	737	0
+#spin 
+11019	331	634	355	662	0
+11020	215	633	231	662	0
+11021	91	634	115	662	0
+11022	215	674	231	702	0
+#hold shell left
+11023	182	794	204	822	0
+#hold shell right
+11024	242	794	264	822	0
 
 #FIRE MARIO
 #idle left
@@ -83,6 +101,10 @@ idle right
 12009	6	479	20	497	0
 #sit right
 12010	426	479	440	497	0
+#hold shell left
+12011	185	594	201	621	0
+#hold shell right
+12012	245	594	261	621	0
 
 #COIN
 60001	303	99	313	115	20
@@ -130,7 +152,7 @@ idle right
 70001	582	119	589	128	20
 # ani_id	sprite1_id	time1	sprite2_id	time2	...
 [ANIMATIONS]
-# ==== MARIO =========
+# ==== MARIO ========= 500++
 #idle BIG right
 400	10001	100
 #idle BIG left
@@ -139,6 +161,10 @@ idle right
 508	10016	100
 #jump BIG right
 509	10017	100
+#sit left big
+504	10014	100
+#sit left right
+505	10015	100
 
 #idle small right
 402	10021	100
@@ -154,14 +180,18 @@ idle right
 503	10031	100	10032	100	10033	100
 #die
 599	10099	100
-#sit left big
-504	10014	100
-#sit left right
-505	10015	100
 #jump small left
 506	10041	100
 #jump small right
 507	10042	100
+#small hold shell left
+510	10043	100
+#small hold shell right
+511	10044	100
+#big hold shell left
+512	10018	100
+#big hold shell right
+513	10019	100
 
 #LEAF MARIO 530++
 #idle left
@@ -180,6 +210,14 @@ idle right
 536	11017	100
 #sit right
 537	11018	100
+#spin face right
+538	11019	100	11020	100	11021	100	11022	100
+#spin face left
+539	11021	100	11020	100	11019	100	11022	100
+#hold shell left
+540	11023	100
+#hold shell right 
+541	11024	100
 
 #FIRE MARIO 560++
 #ide left
@@ -198,6 +236,10 @@ idle right
 566	12009	100
 #sit right
 567	12010	100
+# hold shell left
+568	12011	100
+#hold shell right
+569	12012	100
 
 # ==== BRICK =========
 601	20001	100
@@ -239,7 +281,7 @@ idle right
 #
 [ANIMATION_SETS]
 # MARIO
-1	400	401	402	403	500	501	502	503	599	504	505	506	507	508	509	530	531	532	533	534	535	536	537	560	561	562	563	564	565	566	567
+1	400	401	402	403	500	501	502	503	599	504	505	506	507	508	509	530	531	532	533	534	535	536	537	560	561	562	563	564	565	566	567	538	539	510	511	512	513	540	541	568	569
 # BRICK (wood, question, ground1, ground 2, cloud)
 2	601	602	603	604	605
 # GOOMBA
@@ -258,6 +300,8 @@ idle right
 0	17	115	1
 # KOOPAS
 3	560	383	4
+3	650	370	4
+3	750	370	4
 3	1440	416	4
 # BRICK 
 #type	l	t	aniset_id	bounce

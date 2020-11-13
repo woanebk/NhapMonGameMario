@@ -5,6 +5,7 @@
 #include "Pine.h"
 #include "Goomba.h"
 #include "Block.h"
+#include "Playscence.h"
 
 CKoopas::CKoopas()
 {
@@ -37,7 +38,6 @@ void CKoopas::Update(DWORD dt, vector<LPGAMEOBJECT> *coObjects)
 	//
 	// TO-DO: make sure Koopas can interact with the world and to each of them too!
 	// 
-
 	// Simple fall down
 	vy += MARIO_GRAVITY * dt;
 
@@ -49,6 +49,9 @@ void CKoopas::Update(DWORD dt, vector<LPGAMEOBJECT> *coObjects)
 	if (state != KOOPAS_STATE_DIE)
 		CalcPotentialCollisions(coObjects, coEvents);
 
+	//holded by mario///////////////////
+	getHoldedbyMario();
+	////////////////////////////////////
 	if (coEvents.size() == 0)
 	{
 		x += dx;
@@ -133,6 +136,12 @@ void CKoopas::Update(DWORD dt, vector<LPGAMEOBJECT> *coObjects)
 					vx = -vx;
 				}
 			}//if Goomba
+			if (dynamic_cast<CKoopas*> (e->obj))
+			{
+				CKoopas *koopas = dynamic_cast<CKoopas*>(e->obj);
+				if(state==KOOPAS_STATE_SPIN_LEFT || state == KOOPAS_STATE_SPIN_RIGHT)
+				koopas->SetState(KOOPAS_STATE_DIE);
+			}//if Koopas
 		}
 
 		//
@@ -181,8 +190,7 @@ void CKoopas::SetState(int state)
 	switch (state)
 	{
 	case KOOPAS_STATE_DIE:
-		vx = 0;
-		vy = 0;
+		vy = -MARIO_DIE_DEFLECT_SPEED;
 		break;
 	case KOOPAS_STATE_SHELL:
 		vx = 0;
@@ -197,5 +205,24 @@ void CKoopas::SetState(int state)
 	case KOOPAS_STATE_WALKING:
 		vx = KOOPAS_WALKING_SPEED;
 	}
-
 }
+
+void CKoopas::getHoldedbyMario()
+{
+		CMario* mario = ((CPlayScene*)CGame::GetInstance()->GetCurrentScene())->GetPlayer();
+		float left, top, right, bottom;
+		mario->GetBoundingBox(left, top, right, bottom); 
+		if (!mario->isHolding()) holded = false;	//if mario stop Holding every koopas then holded == false
+		if (holded) //stick koopas with mario depend on bounding box(more accurate)
+		{
+			vy = 0;
+			vx = 0;
+			if (mario->nx > 0)
+				SetPosition(right - 1, top + (bottom - top) / 3);
+			else
+				SetPosition(left - KOOPAS_BBOX_WIDTH + 1, top + (bottom - top) / 3);
+		}
+			
+		
+}
+

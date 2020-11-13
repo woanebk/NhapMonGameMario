@@ -72,16 +72,15 @@ void CMario::Update(DWORD dt, vector<LPGAMEOBJECT> *coObjects)
 		// how to push back Mario if collides with a moving objects, what if Mario is pushed this way into another object?
 		//if (rdx != 0 && rdx!=dx)
 		//	x += nx*abs(rdx); 
-		
-		// block every object first!
-		/*x += min_tx*dx + nx*0.4f;
-		y += min_ty*dy + ny*0.4f;*/
 
-		/*if (nx !=0) vx = 0;*/
-		/*if (ny < 0) vy = 0;*/
-		if (ny < 0) jumpable = true;//jump condition
+		if (ny < 0) jumpable = true;
+		else jumpable = false;//jump condition
 		if (vy < 0 && jumpable == false) isjumping = true;
+		else isjumping = false;
+		if (vy > 0 && jumpable == false) isfalling = true;
+		else isfalling = false;
 
+		
 		//
 		// Collision logic with other objects
 		//
@@ -131,12 +130,21 @@ void CMario::Update(DWORD dt, vector<LPGAMEOBJECT> *coObjects)
 				{
 					if (koopas->GetState() == KOOPAS_STATE_SHELL)
 					{
-						if (e->nx < 0)
-							koopas->SetState(KOOPAS_STATE_SPIN_RIGHT);
-						else
-							koopas->SetState(KOOPAS_STATE_SPIN_LEFT);
+						if (speed_up == false) 
+						{
+							if (this->nx>0)
+								koopas->SetState(KOOPAS_STATE_SPIN_RIGHT);
+							else
+								koopas->SetState(KOOPAS_STATE_SPIN_LEFT);//kick the shell
+						}
+						else 
+						{//hold koopas
+							holding = true;
+							koopas->setHolded(true);
+						}
+						
 							
-					} //kick the shell
+					} 
 					else
 					if (untouchable == 0) 
 					{
@@ -181,12 +189,22 @@ void CMario::Update(DWORD dt, vector<LPGAMEOBJECT> *coObjects)
 					else
 					if (e->ny != 0)
 					{
-						vy = 0;
-						y += min_ty * rdy + ny * 0.4f;
+						if (brick->getType() == BRICK_TYPE_CLOUD) //gach may
+						{
+							if (e->ny > 0) y += dy;
+							else 
+							{
+								vy = 0;
+								y += min_ty * rdy + ny * 0.4f;
+							}
+						}
+						else
+						{// gach thuong
+							vy = 0;
+							y += min_ty * rdy + ny * 0.4f;
 							/*x += dx;*/ //loi di xuyen gach
+						}
 					}
-					
-					
 				} //if brick
 				else
 			if (dynamic_cast<CBlock*> (e->obj))
@@ -197,6 +215,12 @@ void CMario::Update(DWORD dt, vector<LPGAMEOBJECT> *coObjects)
 					x += dx;
 					y += min_ty * rdy + ny * 0.4f;
 				}
+				else
+					if (e->ny > 0) 
+					{
+						x += dx;
+						y += dy;
+					}
 				if (e->nx != 0)
 				{
 					x += dx;
@@ -235,6 +259,7 @@ void CMario::Update(DWORD dt, vector<LPGAMEOBJECT> *coObjects)
 	
 	for (int i = 0; i < firebullets.size(); i++)
 	{
+		if(firebullets[i]->isEnabled())
 		firebullets[i]->Update(dt, coObjects);
 	} //update fireballs
 }
@@ -262,8 +287,17 @@ void CMario::Render()
 		else
 		if (vx == 0)
 		{
-			if (nx>0) ani = MARIO_ANI_BIG_IDLE_RIGHT;
-			else ani = MARIO_ANI_BIG_IDLE_LEFT;
+			if (nx > 0) 
+			{
+				if(!holding)
+				ani = MARIO_ANI_BIG_IDLE_RIGHT;
+				else ani = MARIO_ANI_BIG_HOLD_RIGHT;
+			}
+			else 
+			{
+				if(!holding) ani = MARIO_ANI_BIG_IDLE_LEFT;
+				else ani = MARIO_ANI_BIG_HOLD_LEFT;
+			} 
 		}
 		else if (vx > 0) 
 			ani = MARIO_ANI_BIG_WALKING_RIGHT; 
@@ -277,12 +311,20 @@ void CMario::Render()
 			else
 				ani = MARIO_ANI_SMALL_JUMP_LEFT;
 		} //jump animation
-		else
-		if (vx == 0)
-		{
-			if (nx>0) ani = MARIO_ANI_SMALL_IDLE_RIGHT;
-			else ani = MARIO_ANI_SMALL_IDLE_LEFT;
-		}
+		else if (vx == 0)
+			{
+				if (nx > 0)
+				{
+					if (!holding)
+						ani = MARIO_ANI_SMALL_IDLE_RIGHT;
+					else ani = MARIO_ANI_SMALL_HOLD_RIGHT;
+				}
+				else
+				{
+					if (!holding) ani = MARIO_ANI_SMALL_IDLE_LEFT;
+					else ani = MARIO_ANI_SMALL_HOLD_LEFT;
+				}
+			}
 		else if (vx > 0)
 			ani = MARIO_ANI_SMALL_WALKING_RIGHT;
 		else ani = MARIO_ANI_SMALL_WALKING_LEFT;
@@ -297,6 +339,13 @@ void CMario::Render()
 			else
 				ani = MARIO_ANI_LEAF_SIT_LEFT;
 		}
+		else if (state==MARIO_STATE_SPIN)
+		{
+			if (nx > 0)
+				ani = MARIO_ANI_LEAF_SPIN_RIGHT;
+			else
+				ani = MARIO_ANI_LEAF_SPIN_LEFT;
+		}
 		else
 		if (vy < 0)
 		{
@@ -306,8 +355,17 @@ void CMario::Render()
 		else
 			if (vx == 0)
 			{
-				if (nx > 0) ani = MARIO_ANI_LEAF_IDLE_RIGHT;
-				else ani = MARIO_ANI_LEAF_IDLE_LEFT;
+				if (nx > 0)
+				{
+					if (!holding)
+						ani = MARIO_ANI_LEAF_IDLE_RIGHT;
+					else ani = MARIO_ANI_LEAF_HOLD_RIGHT;
+				}
+				else
+				{
+					if (!holding) ani = MARIO_ANI_LEAF_IDLE_LEFT;
+					else ani = MARIO_ANI_LEAF_HOLD_LEFT;
+				}
 			}
 			else if (vx > 0)
 				ani = MARIO_ANI_LEAF_WALK_RIGHT;
@@ -329,10 +387,19 @@ void CMario::Render()
 					else ani = MARIO_ANI_FIRE_JUMP_RIGHT_LOW;
 				}
 				else
-					if (vx == 0)
+					if (vx == 0) //idle and hold shell
 					{
-						if (nx > 0) ani = MARIO_ANI_FIRE_IDLE_RIGHT;
-						else ani = MARIO_ANI_FIRE_IDLE_LEFT;
+						if (nx > 0)
+						{
+							if (!holding)
+								ani = MARIO_ANI_FIRE_IDLE_RIGHT;
+							else ani = MARIO_ANI_FIRE_HOLD_RIGHT;
+						}
+						else
+						{
+							if (!holding) ani = MARIO_ANI_FIRE_IDLE_LEFT;
+							else ani = MARIO_ANI_FIRE_HOLD_LEFT;
+						}
 					}
 					else if (vx > 0)
 						ani = MARIO_ANI_FIRE_WALK_RIGHT;
@@ -347,6 +414,7 @@ void CMario::Render()
 
 	for (int i = 0; i < firebullets.size(); i++)
 	{
+		if(firebullets[i]->isVisabled())
 		firebullets[i]->Render();
 	} //render shooting
 	RenderBoundingBox();
@@ -368,10 +436,10 @@ void CMario::SetState(int state)
 		break;
 	case MARIO_STATE_JUMP:
 		// TODO: need to check if Mario is *current* on a platform before allowing to jump again
-		if (jumpable)
+		if (true)
 		{
+			jumpable = false;
 			vy = -MARIO_JUMP_SPEED_Y;
-			/*jumpable = false;*/
 		}
 		else
 		if (isjumping == true)
@@ -381,6 +449,9 @@ void CMario::SetState(int state)
 		vx = 0;
 		break;
 	case MARIO_STATE_SIT:
+		vx = 0;
+		break;
+	case MARIO_STATE_SPIN:
 		vx = 0;
 		break;
 	case MARIO_STATE_DIE:
@@ -415,9 +486,25 @@ void CMario::GetBoundingBox(float &left, float &top, float &right, float &bottom
 				bottom = y + MARIO_BBOX_LEAF_SIT_HEIGHT - 1;
 			}
 			else
+				if (state == MARIO_STATE_SPIN)
+				{
+					right = x + MARIO_LEAF_BBOX_SPIN_WIDTH;
+					bottom = y + MARIO_LEAF_BBOX_HEIGHT;
+				}
+				else
 			{
-				right = x + MARIO_LEAF_BBOX_WIDTH;
-				bottom = y + MARIO_LEAF_BBOX_HEIGHT;
+					if (nx < 0)
+					{
+						right = x + MARIO_BIG_BBOX_WIDTH;
+						bottom = y + MARIO_LEAF_BBOX_HEIGHT;
+					}
+					else
+					{
+						left = x + 6;
+						right = left + MARIO_BIG_BBOX_WIDTH ;
+						top = y;
+						bottom= y + MARIO_LEAF_BBOX_HEIGHT;
+					}
 			}
 		}//leaf mario
 	else if (level == MARIO_LEVEL_FIRE)
@@ -461,3 +548,5 @@ void CMario::Shot()
 	}
 	firebullets.push_back(fireball);
 }
+
+

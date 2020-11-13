@@ -327,21 +327,27 @@ void CPlayScenceKeyHandler::OnKeyDown(int KeyCode)
 			mario->SetState(MARIO_STATE_JUMP);
 		mario->setJumpable(false);
 		break;
-	case DIK_W: //tranform to leaf mario
+	case DIK_2: //tranform to leaf mario
 		mario->SetLevel(MARIO_LEVEL_LEAF);
 		mario->SetPosition(mario->x, mario->y - (MARIO_LEAF_BBOX_HEIGHT - MARIO_SMALL_BBOX_HEIGHT)); //push mario up a bit
 		break;
-	case DIK_E: //tranform to leaf mario
+	case DIK_3: //tranform to leaf mario
 		mario->SetLevel(MARIO_LEVEL_FIRE);
-		mario->SetPosition(mario->x, mario->y - (MARIO_FIRE_BBOX_HEIGHT - MARIO_FIRE_BBOX_HEIGHT)); //push mario up a bit
+		mario->SetPosition(mario->x, mario->y - (MARIO_FIRE_BBOX_HEIGHT - MARIO_SMALL_BBOX_HEIGHT)); //push mario up a bit
 		break;
-	case DIK_Q: //reset
+	case DIK_1: //reset
 		mario->Reset();
 		break;
 	case DIK_S:
-		if (mario->getLevel() == MARIO_LEVEL_FIRE)
+		if (!mario->isHolding()) 
 		{
-			mario->Shot();
+			if (mario->getLevel() == MARIO_LEVEL_FIRE)
+			{
+				mario->Shot();
+			}
+			else if (mario->getLevel() == MARIO_LEVEL_LEAF)
+				mario->StartSpinning();
+			mario->SetState(MARIO_STATE_SPIN);
 		}
 		break;
 	}
@@ -353,7 +359,12 @@ void CPlayScenceKeyHandler::OnKeyUp(int KeyCode)
 	switch (KeyCode)
 	{
 	case DIK_DOWN:
-		mario->SetPosition(mario->x, mario->y - (MARIO_BIG_BBOX_HEIGHT - MARIO_BBOX_SIT_HEIGHT) -1 ); //push mario up a bit after stand up
+		mario->SetPosition(mario->x, mario->y - (MARIO_BIG_BBOX_HEIGHT - MARIO_BBOX_SIT_HEIGHT) -1 );
+		break;//push mario up a bit after stand up
+	case DIK_A:
+		mario->setSpeedUp(false);
+		mario->setHolding(false);
+		
 	}
 }
 
@@ -370,15 +381,23 @@ void CPlayScenceKeyHandler::KeyState(BYTE *states)
 	else
 	if (game->IsKeyDown(DIK_SPACE))
 	{
-		
-			mario->SetState(MARIO_STATE_JUMP);
+		mario->SetState(MARIO_STATE_JUMP);
 		
 	}
 	else
-	if (game->IsKeyDown(DIK_RIGHT))
-		mario->SetState(MARIO_STATE_WALKING_RIGHT);
-	else if (game->IsKeyDown(DIK_LEFT))
-		mario->SetState(MARIO_STATE_WALKING_LEFT);
+		if (game->IsKeyDown(DIK_RIGHT))
+		{
+			mario->SetState(MARIO_STATE_WALKING_RIGHT);
+			if (game->IsKeyDown(DIK_A))
+				mario->setSpeedUp(true);
+		}
+		else if (game->IsKeyDown(DIK_LEFT))
+		{
+			mario->SetState(MARIO_STATE_WALKING_LEFT);
+			if (game->IsKeyDown(DIK_A))
+				mario->setSpeedUp(true);
+		}
+		
 	else
 		mario->SetState(MARIO_STATE_IDLE);
 }

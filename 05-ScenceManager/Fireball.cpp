@@ -4,6 +4,7 @@
 #include "Brick.h"
 #include "Pine.h"
 #include "Block.h"
+#include "Utils.h"
 
 CFireBall::CFireBall(float left, float top)
 {
@@ -27,6 +28,13 @@ void CFireBall::GetBoundingBox(float & left, float & top, float & right, float &
 void CFireBall::Update(DWORD dt, vector<LPGAMEOBJECT>* coObjects)
 {
 	CGameObject::Update(dt, coObjects);
+	if (vy < 0)
+	{
+		if (GetTickCount() - switchSpeedtime >= 100)
+		{
+			SetSpeed(vx, -vy);
+		}
+	} // reverse speed y
 
 	vector<LPCOLLISIONEVENT> coEvents;
 	vector<LPCOLLISIONEVENT> coEventsResult;
@@ -64,8 +72,64 @@ void CFireBall::Update(DWORD dt, vector<LPGAMEOBJECT>* coObjects)
 		for (UINT i = 0; i < coEventsResult.size(); i++)
 		{
 			LPCOLLISIONEVENT e = coEventsResult[i];
-			if (dynamic_cast<CKoopas*>(e->obj))
+			if (dynamic_cast<CBrick*>(e->obj))
 			{
+				CBrick *brick = dynamic_cast<CBrick*>(e->obj);
+				if (e->nx != 0)
+				{
+					if(brick->canBounce() == 1)
+					{
+						enable = false;
+						visable = false;
+					}// fix dissapear on ground, now only dissapear when hitting an edge
+				}
+				if (e->ny != 0)
+				{
+					SetSpeed(vx, -vy);
+					StartSwitchSpeed();
+				}
+			}
+			else if (dynamic_cast<CBlock*>(e->obj))
+			{
+				CBlock *block = dynamic_cast<CBlock*>(e->obj);
+				if (e->nx != 0)
+				{
+					x += dx;
+					y += dy;
+				}
+				if (e->ny != 0)
+				{
+					SetSpeed(vx, -vy);
+					StartSwitchSpeed();
+				}
+			}
+			else if (dynamic_cast<CPine*>(e->obj))
+			{
+				CPine *pine = dynamic_cast<CPine*>(e->obj);
+				if (e->nx != 0)
+				{
+					enable = false;
+					visable = false;
+				}
+				if (e->ny != 0)
+				{
+					SetSpeed(vx, -vy);
+					StartSwitchSpeed();
+				}
+			}
+			else if (dynamic_cast<CGoomba*>(e->obj))
+			{
+				CGoomba *goomba = dynamic_cast<CGoomba*>(e->obj);
+				goomba->SetState(GOOMBA_STATE_DIE);
+				enable = false;
+				visable = false;
+			}
+			else if (dynamic_cast<CKoopas*>(e->obj))
+			{
+				CKoopas *koopas = dynamic_cast<CKoopas*>(e->obj);
+				koopas->SetState(KOOPAS_STATE_DIE);
+				enable = false;
+				visable = false;
 			}
 		}
 	}
