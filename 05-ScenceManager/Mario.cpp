@@ -43,6 +43,10 @@ void CMario::Update(DWORD dt, vector<LPGAMEOBJECT> *coObjects)
 	if (state!=MARIO_STATE_DIE)
 		CalcPotentialCollisions(coObjects, coEvents);
 
+	if (flapping)
+		vy = MARIO_LEAF_FLAPPING_SPEED; //if mario is flapping then falling down slowly
+		
+
 	// reset untouchable timer if untouchable time has passed
 	if ( GetTickCount() - untouchable_start > MARIO_UNTOUCHABLE_TIME) 
 	{
@@ -54,6 +58,12 @@ void CMario::Update(DWORD dt, vector<LPGAMEOBJECT> *coObjects)
 	{
 		spin_start = 0; //reset timer
 		spinning = false; //no more spinning
+	}
+
+	if (GetTickCount() - flap_start > 100) //reset timer flapping  2 sprites = (2*25ms)*2
+	{
+		flap_start = 0; //reset timer
+		flapping = false; //no more spinning
 	}
 
 	// No collision occured, proceed normally
@@ -79,11 +89,12 @@ void CMario::Update(DWORD dt, vector<LPGAMEOBJECT> *coObjects)
 		//if (rdx != 0 && rdx!=dx)
 		//	x += nx*abs(rdx); 
 
-		if (ny < 0) jumpable = true;
+		if (ny < 0) { jumpable = true; DebugOut(L"Jumpable");}
 		else jumpable = false;//jump condition
-		if (vy < 0 && jumpable == false) isjumping = true;
+		if (vy < 0 && jumpable == false) { isjumping = true; DebugOut(L"Jumping");
+		}
 		else isjumping = false;
-		if (vy > 0 && jumpable == false) isfalling = true;
+		if (vy > 0 /*&& jumpable ==false*/ ) { isfalling = true; DebugOut(L"Falling"); }
 		else isfalling = false;
 
 		
@@ -206,6 +217,11 @@ void CMario::Update(DWORD dt, vector<LPGAMEOBJECT> *coObjects)
 							{
 								vy = 0;
 								y += min_ty * rdy + ny * 0.4f;
+							}
+							if (e->nx != 0)
+							{
+								x += dx;
+								y += dy;
 							}
 						}
 						else
@@ -349,6 +365,14 @@ void CMario::Render()
 			else
 				ani = MARIO_ANI_LEAF_SIT_LEFT;
 		}
+		else
+			if (flapping)
+			{
+				if (nx > 0)
+					ani = MARIO_ANI_LEAF_FLAP_RIGHT;
+				else
+					ani = MARIO_ANI_LEAF_FLAP_LEFT;
+			}
 		else if (spinning == true)
 		{
 			if (nx > 0)

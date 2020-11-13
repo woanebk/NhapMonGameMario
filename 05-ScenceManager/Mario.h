@@ -22,6 +22,9 @@ class CMario : public CGameObject
 	//hold shell
 	bool speed_up = false;
 	bool holding = false;
+	//flap
+	bool flapping = false;
+	DWORD flap_start;
 
 	float start_x;			// initial position of Mario at scene
 	float start_y; 
@@ -42,6 +45,11 @@ public:
 	//spinning tail
 	DWORD getStartSpinning() { return spin_start; }
 	void StartSpinning() { spin_start = GetTickCount(); spinning = true; }
+
+	//flapping tail
+	DWORD getStartFlapping() { return flap_start; }
+	void StartFlapping() { flap_start = GetTickCount(); flapping = true; }
+
 	//can jump or not
 	void setJumpable(bool jump) { jumpable = jump; }
 	bool canJump() { return jumpable; }
@@ -51,6 +59,7 @@ public:
 	//falling
 	void setIsFalling(bool f) { isfalling = f; }
 	bool isFalling() { return isfalling; }
+
 	//holding
 	void setHolding(bool h) { holding = h; }
 	bool isHolding() { return holding; }
