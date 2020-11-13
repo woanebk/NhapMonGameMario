@@ -5,6 +5,7 @@
 #include "Utils.h"
 #include "Textures.h"
 #include "Sprites.h"
+#include "Fireball.h"
 #include "Pine.h"
 #include "Block.h"
 #include "Portal.h"
@@ -30,12 +31,7 @@ CPlayScene::CPlayScene(int id, LPCWSTR filePath):
 #define SCENE_SECTION_ANIMATION_SETS	5
 #define SCENE_SECTION_OBJECTS	6
 
-#define OBJECT_TYPE_MARIO	0
-#define OBJECT_TYPE_BRICK	1
-#define OBJECT_TYPE_GOOMBA	2
-#define OBJECT_TYPE_KOOPAS	3
 
-#define OBJECT_TYPE_PORTAL	50
 
 #define MAX_SCENE_LINE 1024
 
@@ -326,17 +322,27 @@ void CPlayScenceKeyHandler::OnKeyDown(int KeyCode)
 	CMario *mario = ((CPlayScene*)scence)->GetPlayer();
 	switch (KeyCode)
 	{
-	case DIK_Z:
+	case DIK_Z: //small jump
 		if (mario->canJump())
 			mario->SetState(MARIO_STATE_JUMP);
 		mario->setJumpable(false);
 		break;
-	case DIK_S:
+	case DIK_W: //tranform to leaf mario
 		mario->SetLevel(MARIO_LEVEL_LEAF);
 		mario->SetPosition(mario->x, mario->y - (MARIO_LEAF_BBOX_HEIGHT - MARIO_SMALL_BBOX_HEIGHT)); //push mario up a bit
 		break;
-	case DIK_A: 
+	case DIK_E: //tranform to leaf mario
+		mario->SetLevel(MARIO_LEVEL_FIRE);
+		mario->SetPosition(mario->x, mario->y - (MARIO_FIRE_BBOX_HEIGHT - MARIO_FIRE_BBOX_HEIGHT)); //push mario up a bit
+		break;
+	case DIK_Q: //reset
 		mario->Reset();
+		break;
+	case DIK_S:
+		if (mario->getLevel() == MARIO_LEVEL_FIRE)
+		{
+			mario->Shot();
+		}
 		break;
 	}
 }

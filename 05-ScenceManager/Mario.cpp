@@ -4,7 +4,9 @@
 
 #include "Mario.h"
 #include "Game.h"
+#include "PlayScence.h"
 
+#include "Fireball.h"
 #include "Pine.h"
 #include "Goomba.h"
 #include "Portal.h"
@@ -231,6 +233,10 @@ void CMario::Update(DWORD dt, vector<LPGAMEOBJECT> *coObjects)
 	// clean up collision events
 	for (UINT i = 0; i < coEvents.size(); i++) delete coEvents[i];
 	
+	for (int i = 0; i < firebullets.size(); i++)
+	{
+		firebullets[i]->Update(dt, coObjects);
+	} //update fireballs
 }
 
 void CMario::Render()
@@ -238,7 +244,8 @@ void CMario::Render()
 	int ani = -1;
 	if (state == MARIO_STATE_DIE)
 		ani = MARIO_ANI_DIE;
-	else
+	else if (level == MARIO_LEVEL_BIG)
+	{
 		if (state == MARIO_STATE_SIT) //mario sit
 		{
 			if (nx > 0)
@@ -246,9 +253,7 @@ void CMario::Render()
 			else
 				ani = MARIO_ANI_BIG_SIT_LEFT;
 		}
-	else
-	if (level == MARIO_LEVEL_BIG)
-	{
+		else
 		if (vy < 0)
 		{
 			if (nx < 0) ani = MARIO_ANI_BIG_JUMP_LEFT;
@@ -263,7 +268,7 @@ void CMario::Render()
 		else if (vx > 0) 
 			ani = MARIO_ANI_BIG_WALKING_RIGHT; 
 		else ani = MARIO_ANI_BIG_WALKING_LEFT;
-	}
+	} // level BIG
 	else if (level == MARIO_LEVEL_SMALL)
 	{
 		if (vy < 0)
@@ -281,10 +286,18 @@ void CMario::Render()
 		else if (vx > 0)
 			ani = MARIO_ANI_SMALL_WALKING_RIGHT;
 		else ani = MARIO_ANI_SMALL_WALKING_LEFT;
-	}
+	} //level SMALL
 	else
 	if (level == MARIO_LEVEL_LEAF)
 	{
+		if (state == MARIO_STATE_SIT) //mario sit
+		{
+			if (nx > 0)
+				ani = MARIO_ANI_LEAF_SIT_RIGHT;
+			else
+				ani = MARIO_ANI_LEAF_SIT_LEFT;
+		}
+		else
 		if (vy < 0)
 		{
 			if (nx < 0) ani = MARIO_ANI_LEAF_JUMP_LEFT_LOW;
@@ -299,7 +312,32 @@ void CMario::Render()
 			else if (vx > 0)
 				ani = MARIO_ANI_LEAF_WALK_RIGHT;
 			else ani = MARIO_ANI_LEAF_WALK_LEFT;
-	}
+	} //level LEAF
+	else if (level == MARIO_LEVEL_FIRE)
+		{
+			if (state == MARIO_STATE_SIT) //mario sit
+			{
+				if (nx > 0)
+					ani = MARIO_ANI_FIRE_SIT_RIGHT;
+				else
+					ani = MARIO_ANI_FIRE_SIT_LEFT;
+			}
+			else
+				if (vy < 0)
+				{
+					if (nx < 0) ani = MARIO_ANI_FIRE_JUMP_LEFT_LOW;
+					else ani = MARIO_ANI_FIRE_JUMP_RIGHT_LOW;
+				}
+				else
+					if (vx == 0)
+					{
+						if (nx > 0) ani = MARIO_ANI_FIRE_IDLE_RIGHT;
+						else ani = MARIO_ANI_FIRE_IDLE_LEFT;
+					}
+					else if (vx > 0)
+						ani = MARIO_ANI_FIRE_WALK_RIGHT;
+					else ani = MARIO_ANI_FIRE_WALK_LEFT;
+		} //level FIRE
 	
 
 	int alpha = 255;
@@ -307,6 +345,10 @@ void CMario::Render()
 
 	animation_set->at(ani)->Render(x, y, alpha);
 
+	for (int i = 0; i < firebullets.size(); i++)
+	{
+		firebullets[i]->Render();
+	} //render shooting
 	RenderBoundingBox();
 }
 
@@ -364,17 +406,38 @@ void CMario::GetBoundingBox(float &left, float &top, float &right, float &bottom
 			right = x + MARIO_BIG_BBOX_WIDTH;
 			bottom = y + MARIO_BIG_BBOX_HEIGHT;
 		}
-	}
-	else
-		if (level == MARIO_LEVEL_LEAF){
-			right = x + MARIO_LEAF_BBOX_WIDTH;
-			bottom = y + MARIO_LEAF_BBOX_HEIGHT;
+	}//big mario
+	else if (level == MARIO_LEVEL_LEAF)
+		{
+			if (state == MARIO_STATE_SIT)
+			{
+				right = x + MARIO_BBOX_LEAF_SIT_WIDTH;
+				bottom = y + MARIO_BBOX_LEAF_SIT_HEIGHT - 1;
+			}
+			else
+			{
+				right = x + MARIO_LEAF_BBOX_WIDTH;
+				bottom = y + MARIO_LEAF_BBOX_HEIGHT;
+			}
+		}//leaf mario
+	else if (level == MARIO_LEVEL_FIRE)
+	{
+		if (state == MARIO_STATE_SIT)
+		{
+			right = x + MARIO_FIRE_BBOX_SIT_WIDTH;
+			bottom = y + MARIO_FIRE_BBOX_SIT_HEIGHT - 1;
 		}
 		else
+		{
+			right = x + MARIO_FIRE_BBOX_WIDTH;
+			bottom = y + MARIO_FIRE_BBOX_HEIGHT;
+		}
+	}// FIRE mario
+		else 
 	{
 		right = x + MARIO_SMALL_BBOX_WIDTH;
 		bottom = y + MARIO_SMALL_BBOX_HEIGHT;
-	}
+	}//small mario
 }
 
 /*
@@ -388,3 +451,13 @@ void CMario::Reset()
 	SetSpeed(0, 0);
 }
 
+void CMario::Shot() 
+{
+	CFireBall *fireball = new CFireBall(x + MARIO_LEAF_BBOX_WIDTH, y + MARIO_LEAF_BBOX_HEIGHT / 2); //shoot right
+	if (nx < 0) //if mario is facing left shoot left
+	{
+		fireball->SetSpeed(-FIREBALL_SPEED_X, FIREBALL_SPEED_Y);
+		fireball->SetPosition(x, y + MARIO_LEAF_BBOX_HEIGHT / 2);
+	}
+	firebullets.push_back(fireball);
+}

@@ -59,6 +59,30 @@
 11015	31	754	54	781	0
 #jump right low
 11016	392	754	416	781	0
+#sit left
+11017	2	719	24	737	0
+#sit right
+11018	422	719	444	737	0
+
+#FIRE MARIO
+#idle left
+12001	186	394	200	421	0
+idle right
+12002	246	394	260	421	0
+#walk left
+12003	155	394	171	421	0
+12004	125	394	141	421	0
+#walk right
+12005	275	394	291	421	0
+12006	305	394	321	421	0
+#jump left low
+12007	35	515	51	541	0
+#jump right low
+12008	395	515	411	541	0
+#sit left
+12009	6	479	20	497	0
+#sit right
+12010	426	479	440	497	0
 
 #COIN
 60001	303	99	313	115	20
@@ -101,6 +125,9 @@
 50043	273	202	289	218	30
 50044	290	202	306	218	30
 
+# FIREBALL !!!!!!!!!!!!!!!!!!!!!!
+70000	569	120	578	128	20
+70001	582	119	589	128	20
 # ani_id	sprite1_id	time1	sprite2_id	time2	...
 [ANIMATIONS]
 # ==== MARIO =========
@@ -136,7 +163,7 @@
 #jump small right
 507	10042	100
 
-#LEAF MARIO
+#LEAF MARIO 530++
 #idle left
 530	11001	100
 #idle right
@@ -149,6 +176,28 @@
 534	11015	100
 #jump right low
 535	11016	100
+#sit left
+536	11017	100
+#sit right
+537	11018	100
+
+#FIRE MARIO 560++
+#ide left
+560	12001	100
+#idle right
+561	12002	100
+#walk left
+562	12003	100	12004	100
+#walk right
+563	12005	100	12006	100
+#jump left low
+564	12007	100
+#jump right low
+565	12008	100
+#sit left
+566	12009	100
+#sit right
+567	12010	100
 
 # ==== BRICK =========
 601	20001	100
@@ -182,13 +231,16 @@
 # ====== COIN ==========
 901	60001	100	60002	100	60003	100
 
+# === FIREBALL =====
+1000	70000	100	70001	100
+
 #
 # id	ani1	ani2	ani3
 #
 [ANIMATION_SETS]
 # MARIO
-1	400	401	402	403	500	501	502	503	599	504	505	506	507	508	509	530	531	532	533	534	535
-# BRICK (question, wood, ground1, ground 2, cloud)
+1	400	401	402	403	500	501	502	503	599	504	505	506	507	508	509	530	531	532	533	534	535	536	537	560	561	562	563	564	565	566	567
+# BRICK (wood, question, ground1, ground 2, cloud)
 2	601	602	603	604	605
 # GOOMBA
 3	701	702
@@ -196,10 +248,12 @@
 4	801	802	803	804	805
 # COIN
 5	901
+# FIREBALL
+6	1000
 
 [OBJECTS]
 # type	x	y	ani_set_id	extra_settings per object type
-# type: 0 = Mario , 1 = Brick, 2 = Goomba, 3 = Koopas, Block = 4, Coin = 5, Pine = 6
+# type: 0 = Mario , 1 = Brick, 2 = Goomba, 3 = Koopas, Block = 4, Coin = 5, Pine = 6, FireBall = 7
 # MARIO
 0	17	115	1
 # KOOPAS

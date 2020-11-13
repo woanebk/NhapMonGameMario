@@ -11,6 +11,7 @@ class CMario : public CGameObject
 	DWORD untouchable_start;
 	bool jumpable = true;
 	bool isjumping = false;
+	vector <LPGAMEOBJECT> firebullets;
 
 	float start_x;			// initial position of Mario at scene
 	float start_y; 
@@ -21,6 +22,7 @@ public:
 
 	void SetState(int state);
 	void SetLevel(int l) { level = l; }
+	int getLevel() { return level; }
 	void StartUntouchable() { untouchable = 1; untouchable_start = GetTickCount(); }
 
 	void setJumpable(bool jump) { jumpable = jump; }
@@ -31,6 +33,9 @@ public:
 
 
 	void Reset();
+
+	void Shot();
+
 
 	virtual void GetBoundingBox(float &left, float &top, float &right, float &bottom);
 };
