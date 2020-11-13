@@ -345,9 +345,10 @@ void CPlayScenceKeyHandler::OnKeyDown(int KeyCode)
 			{
 				mario->Shot();
 			}
-			else if (mario->getLevel() == MARIO_LEVEL_LEAF)
+			else if (mario->getLevel() == MARIO_LEVEL_LEAF && mario->isSpeedUp() == false)
+			{
 				mario->StartSpinning();
-			mario->SetState(MARIO_STATE_SPIN);
+			}
 		}
 		break;
 	}

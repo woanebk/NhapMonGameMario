@@ -9,12 +9,17 @@ class CMario : public CGameObject
 	int level;
 	int untouchable;
 	DWORD untouchable_start;
+	//jump
 	bool jumpable = false;
 	bool isjumping = false;
+	//fall
 	bool isfalling = false;
+	//shoot
 	vector <LPGAMEOBJECT> firebullets;
+	//spin tail
+	bool spinning = false;
 	DWORD spin_start;
-
+	//hold shell
 	bool speed_up = false;
 	bool holding = false;
 
@@ -36,7 +41,7 @@ public:
 	bool isSpeedUp() { return speed_up; }
 	//spinning tail
 	DWORD getStartSpinning() { return spin_start; }
-	void StartSpinning() { spin_start = GetTickCount(); }
+	void StartSpinning() { spin_start = GetTickCount(); spinning = true; }
 	//can jump or not
 	void setJumpable(bool jump) { jumpable = jump; }
 	bool canJump() { return jumpable; }

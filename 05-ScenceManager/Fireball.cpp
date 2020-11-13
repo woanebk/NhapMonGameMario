@@ -4,6 +4,7 @@
 #include "Brick.h"
 #include "Pine.h"
 #include "Block.h"
+#include "Coin.h"
 #include "Utils.h"
 
 CFireBall::CFireBall(float left, float top)
@@ -58,16 +59,6 @@ void CFireBall::Update(DWORD dt, vector<LPGAMEOBJECT>* coObjects)
 		// TODO: This is a very ugly designed function!!!!
 		FilterCollision(coEvents, coEventsResult, min_tx, min_ty, nx, ny, rdx, rdy);
 
-		// how to push back Mario if collides with a moving objects, what if Mario is pushed this way into another object?
-		//if (rdx != 0 && rdx!=dx)
-		//	x += nx*abs(rdx); 
-
-		// block every object first!
-		/*x += min_tx * dx + nx * 0.4f;
-		y += min_ty * dy + ny * 0.4f;
-
-		if (nx != 0) vx = 0;
-		if (ny != 0) vy = 0;*/
 
 		for (UINT i = 0; i < coEventsResult.size(); i++)
 		{
@@ -79,6 +70,7 @@ void CFireBall::Update(DWORD dt, vector<LPGAMEOBJECT>* coObjects)
 				{
 					if(brick->canBounce() == 1)
 					{
+						RenderExplosion();
 						enable = false;
 						visable = false;
 					}// fix dissapear on ground, now only dissapear when hitting an edge
@@ -131,6 +123,12 @@ void CFireBall::Update(DWORD dt, vector<LPGAMEOBJECT>* coObjects)
 				enable = false;
 				visable = false;
 			}
+			else if (dynamic_cast<CCoin*>(e->obj))
+			{
+				CCoin *coin = dynamic_cast<CCoin*>(e->obj);
+				x += dx;
+				y += dy;
+			}
 		}
 	}
 	for (UINT i = 0; i < coEvents.size(); i++) delete coEvents[i];
@@ -142,5 +140,12 @@ void CFireBall::Render()
 
 	//RenderBoundingBox();
 }
+
+void CFireBall::RenderExplosion()
+{
+	CAnimations * animations = CAnimations::GetInstance();
+	
+}
+
 
 

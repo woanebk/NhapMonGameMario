@@ -10,6 +10,8 @@ class CFireBall : public CGameObject
 	virtual void Update(DWORD dt, vector<LPGAMEOBJECT> *coObjects);
 	virtual void Render();
 
+	void RenderExplosion();
+
 public:
 	CFireBall(float left, float top);
 	void StartSwitchSpeed() { switchSpeedtime = GetTickCount(); }

@@ -49,6 +49,12 @@ void CMario::Update(DWORD dt, vector<LPGAMEOBJECT> *coObjects)
 		untouchable_start = 0;
 		untouchable = 0;
 	}
+	//if leaf mario is spinning tail then stop
+	if (GetTickCount() - spin_start > 400) //4 sprites = 4*100ms
+	{
+		spin_start = 0; //reset timer
+		spinning = false; //no more spinning
+	}
 
 	// No collision occured, proceed normally
 	if (coEvents.size()==0)
@@ -103,6 +109,8 @@ void CMario::Update(DWORD dt, vector<LPGAMEOBJECT> *coObjects)
 				}
 				else if (e->nx != 0)
 				{
+					if (spinning) goomba->SetState(GOOMBA_STATE_DIE);
+					else
 					if (untouchable==0)
 					{
 						if (goomba->GetState()!=GOOMBA_STATE_DIE)
@@ -128,6 +136,8 @@ void CMario::Update(DWORD dt, vector<LPGAMEOBJECT> *coObjects)
 				CKoopas *koopas = dynamic_cast<CKoopas *>(e->obj);
 				if (e->nx != 0)
 				{
+					if (spinning) koopas->SetState(KOOPAS_STATE_DIE); //spin tail
+					else 
 					if (koopas->GetState() == KOOPAS_STATE_SHELL)
 					{
 						if (speed_up == false) 
@@ -339,7 +349,7 @@ void CMario::Render()
 			else
 				ani = MARIO_ANI_LEAF_SIT_LEFT;
 		}
-		else if (state==MARIO_STATE_SPIN)
+		else if (spinning == true)
 		{
 			if (nx > 0)
 				ani = MARIO_ANI_LEAF_SPIN_RIGHT;
@@ -370,7 +380,7 @@ void CMario::Render()
 			else if (vx > 0)
 				ani = MARIO_ANI_LEAF_WALK_RIGHT;
 			else ani = MARIO_ANI_LEAF_WALK_LEFT;
-	} //level LEAF
+	} ////////////////level LEAF
 	else if (level == MARIO_LEVEL_FIRE)
 		{
 			if (state == MARIO_STATE_SIT) //mario sit
@@ -451,9 +461,6 @@ void CMario::SetState(int state)
 	case MARIO_STATE_SIT:
 		vx = 0;
 		break;
-	case MARIO_STATE_SPIN:
-		vx = 0;
-		break;
 	case MARIO_STATE_DIE:
 		vy = -MARIO_DIE_DEFLECT_SPEED;
 		break;
@@ -486,10 +493,14 @@ void CMario::GetBoundingBox(float &left, float &top, float &right, float &bottom
 				bottom = y + MARIO_BBOX_LEAF_SIT_HEIGHT - 1;
 			}
 			else
-				if (state == MARIO_STATE_SPIN)
+				if (spinning) //mario is spinning tail
 				{
-					right = x + MARIO_LEAF_BBOX_SPIN_WIDTH;
-					bottom = y + MARIO_LEAF_BBOX_HEIGHT;
+					{
+						left = x - 7;// tail long
+						top = y + MARIO_BIG_BBOX_HEIGHT / 2;
+						right = x + MARIO_LEAF_BBOX_SPIN_WIDTH;
+						bottom = y + MARIO_LEAF_BBOX_HEIGHT;
+					}
 				}
 				else
 			{

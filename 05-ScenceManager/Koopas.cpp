@@ -95,6 +95,9 @@ void CKoopas::Update(DWORD dt, vector<LPGAMEOBJECT> *coObjects)
 				if (e->ny != 0)
 				{
 					y += min_ty * rdy + ny * 0.4f;
+					if (brick->canBounce() == 1)
+						if (state != KOOPAS_STATE_SPIN_LEFT && state != KOOPAS_STATE_SPIN_RIGHT)
+							vx = -vx;
 					/*x += dx;*/
 				}
 			} // if Brick
@@ -139,8 +142,10 @@ void CKoopas::Update(DWORD dt, vector<LPGAMEOBJECT> *coObjects)
 			if (dynamic_cast<CKoopas*> (e->obj))
 			{
 				CKoopas *koopas = dynamic_cast<CKoopas*>(e->obj);
-				if(state==KOOPAS_STATE_SPIN_LEFT || state == KOOPAS_STATE_SPIN_RIGHT)
-				koopas->SetState(KOOPAS_STATE_DIE);
+				if (state == KOOPAS_STATE_SPIN_LEFT || state == KOOPAS_STATE_SPIN_RIGHT)
+					koopas->SetState(KOOPAS_STATE_DIE);
+				else
+					vx = -vx;
 			}//if Koopas
 		}
 

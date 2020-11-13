@@ -134,6 +134,8 @@ void CGoomba::Update(DWORD dt, vector<LPGAMEOBJECT> *coObjects)
 						{
 							vy = 0;
 							y += min_ty * rdy + ny * 0.4f;
+							if (brick->canBounce() == 1)
+								vx = -vx;
 						}
 						if (e->nx != 0)
 						{
