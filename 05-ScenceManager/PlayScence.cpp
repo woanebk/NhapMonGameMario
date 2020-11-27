@@ -201,9 +201,9 @@ void CPlayScene::_ParseSection_OBJECTS(string line)
 void CPlayScene::Load()
 {
 	//Load background
-	mapbackground = new MapBackground(176, 27, 16, 16, 12, 11);
-	mapbackground->SetTileSet(L"map1-1_bank.png", D3DCOLOR_XRGB(255, 255, 255));
-	mapbackground->LoadMatrix(L"map1-1.txt");
+	mapbackground = new MapBackground(WORLD_1_1_TILE_COLUMNS, WORLD_1_1_TILE_ROWS, TILE_WIDTH, TILE_HEIGHT, WORLD_1_1_MAP_TILESET_ROWS, WORLD_1_1_MAP_TILESET_COLUMNS);
+	mapbackground->SetTileSet(WORLD_1_1_TILESET, D3DCOLOR_XRGB(255, 255, 255));
+	mapbackground->LoadMatrix(WORLD_1_1_MATRIX_TXT);
 	//
 	DebugOut(L"[INFO] Start loading scene resources from : %s \n", sceneFilePath);
 

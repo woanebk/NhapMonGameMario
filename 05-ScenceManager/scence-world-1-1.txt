@@ -311,7 +311,7 @@ idle right
 # type	x	y	ani_set_id	extra_settings per object type
 # type: 0 = Mario , 1 = Brick, 2 = Goomba, 3 = Koopas, Block = 4, Coin = 5, Pine = 6, FireBall = 7
 # MARIO
-0	17	115	1
+0	17	350	1
 # KOOPAS
 3	560	383	4
 3	650	370	4

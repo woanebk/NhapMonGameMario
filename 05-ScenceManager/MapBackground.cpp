@@ -3,6 +3,7 @@
 #include <string>
 #include "Utils.h"
 #include "Game.h"
+#include "define.h"
 
 MapBackground::MapBackground(int mapcolumns, int maprows, int tileheight, int tilewidth, int tilesetrows, int tilesetcolumns)
 {
@@ -55,10 +56,18 @@ void MapBackground::DrawTile(int tileID, LPDIRECT3DTEXTURE9 tileset, int i, int 
 //draw every tile
 void MapBackground::Render(LPDIRECT3DTEXTURE9 tileset)
 {
+	CGame *game = CGame::GetInstance();
+	float camX, camY;
+	game->GetCamPos(camX, camY);
+	int rendered_start_column = (int)camX / TILE_WIDTH;
+	int rendered_end_column = rendered_start_column + (int)SCREEN_WIDTH / TILE_WIDTH;
+	int rendered_start_row = (int)camY / TILE_HEIGHT;
+	int rendered_end_row = rendered_start_row + (int)SCREEN_HEIGHT / TILE_HEIGHT;
 	for (int i = 0; i < MapRows; i++)
 	{
 		for (int j = 0; j < MapColumns; j++)
 		{
+			if(rendered_start_column <= j && j <= rendered_end_column && rendered_start_row <= i && i <= rendered_end_row)
 			DrawTile(map[i][j], tileset, i, j);
 		}
 	}

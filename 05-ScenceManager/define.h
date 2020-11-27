@@ -1,6 +1,25 @@
 #pragma once
+#define WINDOW_CLASS_NAME L"SampleWindow"
+#define MAIN_WINDOW_TITLE L"SAMPLE 05 - SCENCE MANAGER"
+
+#define BACKGROUND_COLOR D3DCOLOR_XRGB(255, 255, 200)
+#define SCREEN_WIDTH 320
+#define SCREEN_HEIGHT 240
+
+#define MAX_FRAME_RATE 120
+
+//=======================================
 #define WORLD_1_1_WIDTH 2800
 #define WORLD_1_1_HEIGHT 416
+#define WORLD_1_1_TILE_COLUMNS 176
+#define WORLD_1_1_TILE_ROWS 27
+#define WORLD_1_1_MAP_TILESET_COLUMNS 11
+#define WORLD_1_1_MAP_TILESET_ROWS 12
+#define TILE_WIDTH 16
+#define TILE_HEIGHT 16
+
+#define WORLD_1_1_TILESET L"map1-1_bank.png"
+#define WORLD_1_1_MATRIX_TXT L"map1-1.txt"
 //MARIO
 #define MARIO_WALKING_SPEED		0.1f 
 #define MARIO_LEAF_FLAPPING_SPEED	0.05f
