@@ -8,7 +8,7 @@
 
 # id	left	top	right	bottom	texture_id
 [SPRITES]
-# BIG MARIO 
+# BIG MARIO (10001 -> 10019 && 10100 ->....)
 # idle right
 10001	246	154	260	181	0
 # walk
@@ -32,8 +32,12 @@
 10018	96	234	110	261	0
 #hold shell right
 10019	336	234	350	261	0
+#kick left
+10100	2	274	23	301	0
+#kick right
+10101	423	274	444	301	0
 
-# SMALL MARIO
+# SMALL MARIO (10021 -> ....)
 # idle small right
 10021	247	0	259	15	0
 # walk
@@ -52,6 +56,10 @@
 10043	186	120	200	136	0
 #hold shell right
 10044	246	120	260	136	0
+#kick left
+10045	5	80	21	96	0
+#kick right
+10046	425	80	441	96	0
 
 #LEAF MARIO
 #idle left
@@ -87,6 +95,10 @@
 #flap right
 #11014
 #11016
+#kick left
+11025	2	754	24	782	0
+#kick right
+11026	422	754	444	782	0
 
 #FIRE MARIO
 #idle left
@@ -111,6 +123,10 @@ idle right
 12011	185	594	201	621	0
 #hold shell right
 12012	245	594	261	621	0
+#kick left
+12013	2	514	23	541	0
+#kick right
+12014	423	514	444	541	0
 
 #COIN
 60001	303	99	313	115	20
@@ -201,6 +217,14 @@ idle right
 512	10018	100
 #big hold shell right
 513	10019	100
+#small kick left
+514	10045	100
+#small kick right 
+515	10046	100
+#big kick left
+516	10100	100
+#big kick right
+517	10101	100
 
 #LEAF MARIO 530++
 #idle left
@@ -231,6 +255,10 @@ idle right
 542	11012	25	11015	25
 #flap right 
 543	11014	25	11016	25
+#kick left
+544	11025	100
+#kick right
+545	11026	100
 
 #FIRE MARIO 560++
 #ide left
@@ -253,6 +281,10 @@ idle right
 568	12011	100
 #hold shell right
 569	12012	100
+#kick left
+570	12013	100
+#kick right
+571	12014	100
 
 # ==== BRICK =========
 601	20001	100
@@ -295,7 +327,7 @@ idle right
 #
 [ANIMATION_SETS]
 # MARIO
-1	400	401	402	403	500	501	502	503	599	504	505	506	507	508	509	530	531	532	533	534	535	536	537	560	561	562	563	564	565	566	567	538	539	510	511	512	513	540	541	568	569	542	543
+1	400	401	402	403	500	501	502	503	599	504	505	506	507	508	509	530	531	532	533	534	535	536	537	560	561	562	563	564	565	566	567	538	539	510	511	512	513	540	541	568	569	542	543	514	515	516	517	544	545	570	571
 # BRICK (wood, question, ground1, ground 2, cloud)
 2	601	602	603	604	605
 # GOOMBA

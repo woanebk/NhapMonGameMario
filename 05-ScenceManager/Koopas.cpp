@@ -222,10 +222,21 @@ void CKoopas::getHoldedbyMario()
 		{
 			vy = 0;
 			vx = 0;
-			if (mario->nx > 0)
-				SetPosition(right - 1, top + (bottom - top) / 3);
-			else
-				SetPosition(left - KOOPAS_BBOX_WIDTH + 1, top + (bottom - top) / 3);
+			if (mario->getLevel() != MARIO_LEVEL_SMALL)
+			{
+				if (mario->nx > 0)
+					SetPosition(right - 1, top + (bottom - top) / 3); 
+				else
+					SetPosition(left - KOOPAS_BBOX_WIDTH + 1, top + (bottom - top) / 3);
+			}
+			else //small mario need to hold lower
+			{
+				if (mario->nx > 0)
+					SetPosition(right - 1, top - (bottom - top) / 3 );
+				else
+					SetPosition(left - KOOPAS_BBOX_WIDTH + 1, top - (bottom - top) / 3 );
+			}
+
 		}
 			
 		

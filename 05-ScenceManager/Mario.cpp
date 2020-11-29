@@ -66,6 +66,12 @@ void CMario::Update(DWORD dt, vector<LPGAMEOBJECT> *coObjects)
 		flapping = false; //no more spinning
 	}
 
+	if (GetTickCount() - kick_start > 300) //reset timer kicking
+	{
+		kick_start = 0; //reset timer
+		kicking = false;//no more kicking
+	}
+
 	// No collision occured, proceed normally
 	if (coEvents.size()==0)
 	{
@@ -89,12 +95,12 @@ void CMario::Update(DWORD dt, vector<LPGAMEOBJECT> *coObjects)
 		//if (rdx != 0 && rdx!=dx)
 		//	x += nx*abs(rdx); 
 
-		if (ny < 0) { jumpable = true; DebugOut(L"Jumpable");}
+		if (ny < 0) { jumpable = true; /*DebugOut(L"Jumpable");*/}
 		else jumpable = false;//jump condition
-		if (vy < 0 && jumpable == false) { isjumping = true; DebugOut(L"Jumping");
+		if (vy < 0 && jumpable == false) { isjumping = true; /*DebugOut(L"Jumping")*/;
 		}
 		else isjumping = false;
-		if (vy > 0 /*&& jumpable ==false*/ ) { isfalling = true; DebugOut(L"Falling"); }
+		if (vy > 0 /*&& jumpable ==false*/ ) { isfalling = true; /*DebugOut(L"Falling");*/ }
 		else isfalling = false;
 
 		
@@ -153,10 +159,20 @@ void CMario::Update(DWORD dt, vector<LPGAMEOBJECT> *coObjects)
 					{
 						if (speed_up == false) 
 						{
-							if (this->nx>0)
+							if (this->nx > 0)
+							{
+								kicking = true;
+								kick_start = GetTickCount();
+								DebugOut(L"%d",kicking);
 								koopas->SetState(KOOPAS_STATE_SPIN_RIGHT);
+							}
 							else
+							{
+								kicking = true;
+								kick_start = GetTickCount();
+								DebugOut(L"%d", kicking);
 								koopas->SetState(KOOPAS_STATE_SPIN_LEFT);//kick the shell
+							}
 						}
 						else 
 						{//hold koopas
@@ -315,14 +331,15 @@ void CMario::Render()
 		{
 			if (nx > 0) 
 			{
-				if(!holding)
 				ani = MARIO_ANI_BIG_IDLE_RIGHT;
-				else ani = MARIO_ANI_BIG_HOLD_RIGHT;
+				if (holding) ani = MARIO_ANI_BIG_HOLD_RIGHT;
+				else if (kicking) ani = MARIO_ANI_BIG_KICK_RIGHT;
 			}
 			else 
 			{
-				if(!holding) ani = MARIO_ANI_BIG_IDLE_LEFT;
-				else ani = MARIO_ANI_BIG_HOLD_LEFT;
+				ani = MARIO_ANI_BIG_IDLE_LEFT;
+				if (holding) ani = MARIO_ANI_BIG_HOLD_LEFT;
+				else if (kicking) ani = MARIO_ANI_BIG_KICK_LEFT;
 			} 
 		}
 		else if (vx > 0) 
@@ -341,14 +358,15 @@ void CMario::Render()
 			{
 				if (nx > 0)
 				{
-					if (!holding)
-						ani = MARIO_ANI_SMALL_IDLE_RIGHT;
-					else ani = MARIO_ANI_SMALL_HOLD_RIGHT;
+					ani = MARIO_ANI_SMALL_IDLE_RIGHT;
+					if (holding) ani = MARIO_ANI_SMALL_HOLD_RIGHT;
+					else if (kicking) ani = MARIO_ANI_SMALL_KICK_RIGHT;					
 				}
 				else
 				{
-					if (!holding) ani = MARIO_ANI_SMALL_IDLE_LEFT;
-					else ani = MARIO_ANI_SMALL_HOLD_LEFT;
+					ani = MARIO_ANI_SMALL_IDLE_LEFT;
+					if(holding) ani = MARIO_ANI_SMALL_HOLD_LEFT;
+					else if (kicking) ani = MARIO_ANI_SMALL_KICK_LEFT;
 				}
 			}
 		else if (vx > 0)
@@ -391,14 +409,15 @@ void CMario::Render()
 			{
 				if (nx > 0)
 				{
-					if (!holding)
-						ani = MARIO_ANI_LEAF_IDLE_RIGHT;
-					else ani = MARIO_ANI_LEAF_HOLD_RIGHT;
+					ani = MARIO_ANI_LEAF_IDLE_RIGHT;
+					if (holding) ani = MARIO_ANI_LEAF_HOLD_RIGHT;
+					else if (kicking) ani = MARIO_ANI_LEAF_KICK_RIGHT;
 				}
 				else
 				{
-					if (!holding) ani = MARIO_ANI_LEAF_IDLE_LEFT;
-					else ani = MARIO_ANI_LEAF_HOLD_LEFT;
+					ani = MARIO_ANI_LEAF_IDLE_LEFT;
+					if (holding) ani = MARIO_ANI_LEAF_HOLD_LEFT;
+					else if (kicking) ani = MARIO_ANI_LEAF_KICK_LEFT;
 				}
 			}
 			else if (vx > 0)
@@ -425,14 +444,15 @@ void CMario::Render()
 					{
 						if (nx > 0)
 						{
-							if (!holding)
-								ani = MARIO_ANI_FIRE_IDLE_RIGHT;
-							else ani = MARIO_ANI_FIRE_HOLD_RIGHT;
+							ani = MARIO_ANI_FIRE_IDLE_RIGHT;
+							if (holding) ani = MARIO_ANI_FIRE_HOLD_RIGHT;
+							else if (kicking) ani = MARIO_ANI_FIRE_KICK_RIGHT;
 						}
 						else
 						{
-							if (!holding) ani = MARIO_ANI_FIRE_IDLE_LEFT;
-							else ani = MARIO_ANI_FIRE_HOLD_LEFT;
+							ani = MARIO_ANI_FIRE_IDLE_LEFT;
+							if (holding) ani = MARIO_ANI_FIRE_HOLD_LEFT;
+							else if (kicking) ani = MARIO_ANI_FIRE_KICK_LEFT;
 						}
 					}
 					else if (vx > 0)

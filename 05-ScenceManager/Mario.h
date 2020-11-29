@@ -25,6 +25,9 @@ class CMario : public CGameObject
 	//flap
 	bool flapping = false;
 	DWORD flap_start;
+	//kick
+	bool kicking = false;
+	DWORD kick_start;
 
 	float start_x;			// initial position of Mario at scene
 	float start_y; 
