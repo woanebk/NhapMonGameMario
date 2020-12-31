@@ -345,7 +345,7 @@ void CPlayScenceKeyHandler::OnKeyDown(int KeyCode)
 			{
 				mario->Shot();
 			}
-			else if (mario->getLevel() == MARIO_LEVEL_LEAF && mario->isSpeedUp() == false)
+			else if (mario->getLevel() == MARIO_LEVEL_LEAF /*&& mario->isSpeedUp() == false*/)
 			{
 				mario->StartSpinning();
 			}
@@ -365,6 +365,10 @@ void CPlayScenceKeyHandler::OnKeyUp(int KeyCode)
 	case DIK_A:
 		mario->setSpeedUp(false);
 		mario->setHolding(false);
+		break;
+	case DIK_RIGHT:
+		//mario->setAcceleration(0.1f); -a on update 0.002 to slowly slow down
+		break;
 		
 	}
 }
@@ -395,8 +399,12 @@ void CPlayScenceKeyHandler::KeyState(BYTE *states)
 		if (game->IsKeyDown(DIK_RIGHT))
 		{
 			mario->SetState(MARIO_STATE_WALKING_RIGHT);
+			/*mario->setAcceleration(0.1f);*/
 			if (game->IsKeyDown(DIK_A))
+			{
 				mario->setSpeedUp(true);
+
+			}
 		}
 		else if (game->IsKeyDown(DIK_LEFT))
 		{

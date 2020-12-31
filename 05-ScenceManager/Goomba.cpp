@@ -3,6 +3,12 @@
 #include "Brick.h"
 #include "Pine.h"
 #include "Block.h"
+#include "Block.h"
+#include "PlayScence.h"
+#include "Mario.h"
+#include "Utils.h"
+#include "Game.h"
+
 CGoomba::CGoomba()
 {
 	SetState(GOOMBA_STATE_WALKING);
@@ -59,7 +65,7 @@ void CGoomba::Update(DWORD dt, vector<LPGAMEOBJECT> *coObjects)
 		float min_tx, min_ty, nx = 0, ny;
 		float rdx = 0;
 		float rdy = 0;
-
+		HitByTail();
 		// TODO: This is a very ugly designed function!!!!
 		FilterCollision(coEvents, coEventsResult, min_tx, min_ty, nx, ny, rdx, rdy);
 
@@ -82,7 +88,7 @@ void CGoomba::Update(DWORD dt, vector<LPGAMEOBJECT> *coObjects)
 				CKoopas *koopas = dynamic_cast<CKoopas *>(e->obj);
 				if (e->nx != 0)
 				{
-					if (koopas->GetState() == KOOPAS_STATE_SPIN_LEFT | koopas->GetState() == KOOPAS_STATE_SPIN_RIGHT)
+					if (koopas->GetState() == KOOPAS_STATE_SPIN_LEFT || koopas->GetState() == KOOPAS_STATE_SPIN_RIGHT)
 						SetState(GOOMBA_STATE_DIE); //die if get hit by a spinning koopas
 					else
 						vx = -vx; //turn if meet an alive koopas
@@ -178,4 +184,19 @@ void CGoomba::SetState(int state)
 		case GOOMBA_STATE_WALKING: 
 			vx = -GOOMBA_WALKING_SPEED;
 	}
+}
+
+void CGoomba::HitByTail()
+{
+	float bb_left, bb_top, bb_right, bb_bottom;
+	float mario_bb_left, mario_bb_top, mario_bb_right, mario_bb_bottom;
+
+	GetBoundingBox(bb_left, bb_top, bb_right, bb_bottom);
+	CPlayScene* scence = (CPlayScene*)CGame::GetInstance()->GetCurrentScene();
+	CMario* mario = scence->GetPlayer();
+	mario->GetBoundingBox(mario_bb_left, mario_bb_top, mario_bb_right, mario_bb_bottom);
+	if (mario->isSpinning())
+		if ((bb_left <= mario_bb_right && bb_right >= mario_bb_left) || (bb_right >= mario_bb_left && bb_left <= mario_bb_right))
+			if ((bb_top <= mario_bb_bottom && bb_bottom >= mario_bb_top) || (bb_bottom >= mario_bb_top && bb_top <= mario_bb_bottom))
+				SetState(GOOMBA_STATE_DIE);
 }

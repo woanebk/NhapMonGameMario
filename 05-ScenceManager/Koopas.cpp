@@ -51,7 +51,8 @@ void CKoopas::Update(DWORD dt, vector<LPGAMEOBJECT> *coObjects)
 
 	//holded by mario///////////////////
 	getHoldedbyMario();
-	////////////////////////////////////
+	//get hit by tail///////////////////
+	HitByTail();
 	if (coEvents.size() == 0)
 	{
 		x += dx;
@@ -237,8 +238,20 @@ void CKoopas::getHoldedbyMario()
 					SetPosition(left - KOOPAS_BBOX_WIDTH + 1, top - (bottom - top) / 3 );
 			}
 
-		}
-			
-		
+		}		
 }
 
+void CKoopas::HitByTail()
+{
+	float bb_left, bb_top, bb_right, bb_bottom;
+	float mario_bb_left, mario_bb_top, mario_bb_right, mario_bb_bottom;
+
+	GetBoundingBox(bb_left, bb_top, bb_right, bb_bottom);
+	CPlayScene* scence = (CPlayScene*)CGame::GetInstance()->GetCurrentScene();
+	CMario* mario = scence->GetPlayer();
+	mario->GetBoundingBox(mario_bb_left, mario_bb_top, mario_bb_right, mario_bb_bottom);
+	if (mario->isSpinning())
+		if ((bb_left <= mario_bb_right && bb_right >= mario_bb_left) || (bb_right >= mario_bb_left && bb_left <= mario_bb_right))
+			if ((bb_top <= mario_bb_bottom && bb_bottom >= mario_bb_top) || (bb_bottom >= mario_bb_top && bb_top <= mario_bb_bottom))
+				SetState(KOOPAS_STATE_DIE);
+}

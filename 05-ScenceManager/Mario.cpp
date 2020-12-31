@@ -24,6 +24,7 @@ CMario::CMario(float x, float y) : CGameObject()
 	start_y = y; 
 	this->x = x; 
 	this->y = y; 
+	ax = 0;
 }
 
 void CMario::Update(DWORD dt, vector<LPGAMEOBJECT> *coObjects)
@@ -46,7 +47,7 @@ void CMario::Update(DWORD dt, vector<LPGAMEOBJECT> *coObjects)
 	if (flapping)
 		vy = MARIO_LEAF_FLAPPING_SPEED; //if mario is flapping then falling down slowly
 		
-
+	ManageAcceleration();
 	// reset untouchable timer if untouchable time has passed
 	if ( GetTickCount() - untouchable_start > MARIO_UNTOUCHABLE_TIME) 
 	{
@@ -214,40 +215,6 @@ void CMario::Update(DWORD dt, vector<LPGAMEOBJECT> *coObjects)
 					DebugOut(L"y");
 				}
 			} //if Koopas
-			else
-				if (dynamic_cast<CBrick*>(e->obj))
-				{
-					CBrick *brick = dynamic_cast<CBrick*>(e->obj);
-					if (e->nx != 0)
-					{
-						vx = 0;
-						x += min_tx * rdx + nx * 0.4f;
-					}
-					else
-					if (e->ny != 0)
-					{
-						if (brick->getType() == BRICK_TYPE_CLOUD) //gach may
-						{
-							if (e->ny > 0) y += dy;
-							else 
-							{
-								vy = 0;
-								y += min_ty * rdy + ny * 0.4f;
-							}
-							if (e->nx != 0)
-							{
-								x += dx;
-								y += dy;
-							}
-						}
-						else
-						{// gach thuong
-							vy = 0;
-							y += min_ty * rdy + ny * 0.4f;
-							/*x += dx;*/ //loi di xuyen gach
-						}
-					}
-				} //if brick
 				else
 			if (dynamic_cast<CBlock*> (e->obj))
 			{
@@ -293,6 +260,41 @@ void CMario::Update(DWORD dt, vector<LPGAMEOBJECT> *coObjects)
 					y += min_ty * rdy + ny * 0.4f;
 				}
 			} //if Pine
+			else
+				if (dynamic_cast<CBrick*>(e->obj))
+				{
+					CBrick *brick = dynamic_cast<CBrick*>(e->obj);
+					if (e->nx != 0)
+					{
+						vx = 0;
+						x += min_tx * rdx + nx * 0.4f;
+					}
+					else
+						if (e->ny != 0)
+						{
+							if (brick->getType() == BRICK_TYPE_CLOUD) //gach may
+							{
+								if (e->ny > 0) y += dy;
+								else
+								{
+									vy = 0;
+									y += min_ty * rdy + ny * 0.4f;
+									x += dx;
+								}
+								if (e->nx != 0)
+								{
+									x += dx;
+									y += dy;
+								}
+							}
+							else
+							{// gach thuong
+								vy = 0;
+								y += min_ty * rdy + ny * 0.4f;
+								x += dx +ax*dt; //loi di xuyen gach
+							}
+						}
+				} //if brick
 		}
 	}
 
@@ -540,9 +542,9 @@ void CMario::GetBoundingBox(float &left, float &top, float &right, float &bottom
 				if (spinning) //mario is spinning tail
 				{
 					{
-						left = x - 7;// tail long
-						top = y + MARIO_BIG_BBOX_HEIGHT / 2;
-						right = x + MARIO_LEAF_BBOX_SPIN_WIDTH;
+						left = x - MARIO_LEAF_BBOX_TAIL_WIDTH;// tail long
+						top = y + MARIO_LEAF_ISSPINNING_BBOX_HEIGHT;
+						right = x + MARIO_LEAF_BBOX_WIDTH + MARIO_LEAF_BBOX_TAIL_WIDTH;
 						bottom = y + MARIO_LEAF_BBOX_HEIGHT;
 					}
 				}
@@ -580,6 +582,12 @@ void CMario::GetBoundingBox(float &left, float &top, float &right, float &bottom
 		right = x + MARIO_SMALL_BBOX_WIDTH;
 		bottom = y + MARIO_SMALL_BBOX_HEIGHT;
 	}//small mario
+}
+
+void CMario::ManageAcceleration()
+{
+	/*if (!isSpeedUp) {};*/
+
 }
 
 /*

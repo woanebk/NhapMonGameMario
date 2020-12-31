@@ -9,6 +9,8 @@ class CMario : public CGameObject
 	int level;
 	int untouchable;
 	DWORD untouchable_start;
+	//accrelation
+	float ax;
 	//jump
 	bool jumpable = false;
 	bool isjumping = false;
@@ -48,6 +50,7 @@ public:
 	//spinning tail
 	DWORD getStartSpinning() { return spin_start; }
 	void StartSpinning() { spin_start = GetTickCount(); spinning = true; }
+	bool isSpinning() { return spinning; }
 
 	//flapping tail
 	DWORD getStartFlapping() { return flap_start; }
@@ -66,7 +69,11 @@ public:
 	//holding
 	void setHolding(bool h) { holding = h; }
 	bool isHolding() { return holding; }
+	// acceleration
 
+	void setAcceleration(float a) { ax = a; }
+	
+	void ManageAcceleration();
 
 	void Reset();
 
