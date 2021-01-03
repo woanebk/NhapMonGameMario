@@ -36,6 +36,10 @@
 10100	2	274	23	301	0
 #kick right
 10101	423	274	444	301	0
+#brake left
+10102	425	154	441	182	0
+#brake right
+10103	5	154	21	182	0
 
 # SMALL MARIO (10021 -> ....)
 # idle small right
@@ -60,8 +64,12 @@
 10045	5	80	21	96	0
 #kick right
 10046	425	80	441	96	0
+#brake left
+10047	426	0	440	16	0
+#brake right
+10048	6	0	20	16	0
 
-#LEAF MARIO
+#LEAF MARIO (11001 -> ...)
 #idle left
 11001	182	634	203	662	0
 #idle right
@@ -99,6 +107,11 @@
 11025	2	754	24	782	0
 #kick right
 11026	422	754	444	782	0
+#brake left
+11027	425	633	441	663	0
+#brake right
+11028	5	633	21	663	0
+
 
 #FIRE MARIO
 #idle left
@@ -127,6 +140,10 @@ idle right
 12013	2	514	23	541	0
 #kick right
 12014	423	514	444	541	0
+#brake left
+12015	425	394	441	422	0
+#brake right
+12016	5	394	21	422	0
 
 #COIN
 60001	303	99	313	115	20
@@ -225,6 +242,22 @@ idle right
 516	10100	100
 #big kick right
 517	10101	100
+#small brake left
+518	10047	100
+#small brake right
+519	10048	100
+#big brake left
+520	10102	100
+#big brake right
+521	10103	100
+#big / walk right fast
+522	10001	50	10002	20	10003	50
+#big / walk left fast
+523	10011	50	10012	20	10013	50
+#small / walk right fast
+524	10021	50	10022	50	10023	50
+#small / walk left fast
+525	10031	50	10032	50	10033	50
 
 #LEAF MARIO 530++
 #idle left
@@ -259,6 +292,14 @@ idle right
 544	11025	100
 #kick right
 545	11026	100
+#brake left
+546	11027	100
+#brake right
+547	11028	100
+#walk left fast
+548	11011	50	11012	50
+#walk right fast
+549	11013	50	11014	50
 
 #FIRE MARIO 560++
 #ide left
@@ -285,6 +326,14 @@ idle right
 570	12013	100
 #kick right
 571	12014	100
+#brake left
+572	12015	100
+#brake right
+573	12016	100
+#walk right fast
+574	12005	50	12006	50
+#walk left fast
+575	12003	50	12004	50
 
 # ==== BRICK =========
 601	20001	100
@@ -327,7 +376,7 @@ idle right
 #
 [ANIMATION_SETS]
 # MARIO
-1	400	401	402	403	500	501	502	503	599	504	505	506	507	508	509	530	531	532	533	534	535	536	537	560	561	562	563	564	565	566	567	538	539	510	511	512	513	540	541	568	569	542	543	514	515	516	517	544	545	570	571
+1	400	401	402	403	500	501	502	503	599	504	505	506	507	508	509	530	531	532	533	534	535	536	537	560	561	562	563	564	565	566	567	538	539	510	511	512	513	540	541	568	569	542	543	514	515	516	517	544	545	570	571	518	519	520	521	572	573	546	547	522	523	524	525	548	549	574	575
 # BRICK (wood, question, ground1, ground 2, cloud)
 2	601	602	603	604	605
 # GOOMBA

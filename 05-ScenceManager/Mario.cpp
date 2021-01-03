@@ -297,7 +297,7 @@ void CMario::Render()
 	int ani = -1;
 	if (state == MARIO_STATE_DIE)
 		ani = MARIO_ANI_DIE;
-	else if (level == MARIO_LEVEL_BIG)
+	else if (level == MARIO_LEVEL_BIG) //============================================================ MARIO BIG ANIMATION
 	{
 		if (state == MARIO_STATE_SIT) //mario sit
 		{
@@ -306,33 +306,52 @@ void CMario::Render()
 			else
 				ani = MARIO_ANI_BIG_SIT_LEFT;
 		}
-		else
-			if (vy < 0)
+		else if (vy < 0)
+		{
+			if (nx < 0) ani = MARIO_ANI_BIG_JUMP_LEFT;
+			else ani = MARIO_ANI_BIG_JUMP_RIGHT;
+		}
+		else if (vx == 0)
+		{
+			if (nx > 0)
 			{
-				if (nx < 0) ani = MARIO_ANI_BIG_JUMP_LEFT;
-				else ani = MARIO_ANI_BIG_JUMP_RIGHT;
+				ani = MARIO_ANI_BIG_IDLE_RIGHT;
+				if (holding) ani = MARIO_ANI_BIG_HOLD_RIGHT;
+				else if (kicking) ani = MARIO_ANI_BIG_KICK_RIGHT;
 			}
 			else
-				if (vx == 0)
-				{
-					if (nx > 0)
-					{
-						ani = MARIO_ANI_BIG_IDLE_RIGHT;
-						if (holding) ani = MARIO_ANI_BIG_HOLD_RIGHT;
-						else if (kicking) ani = MARIO_ANI_BIG_KICK_RIGHT;
-					}
-					else
-					{
-						ani = MARIO_ANI_BIG_IDLE_LEFT;
-						if (holding) ani = MARIO_ANI_BIG_HOLD_LEFT;
-						else if (kicking) ani = MARIO_ANI_BIG_KICK_LEFT;
-					}
-				}
-				else if (vx > 0)
+			{
+				ani = MARIO_ANI_BIG_IDLE_LEFT;
+				if (holding) ani = MARIO_ANI_BIG_HOLD_LEFT;
+				else if (kicking) ani = MARIO_ANI_BIG_KICK_LEFT;
+			}
+		}
+		else if (vx > 0 )//walk or run right
+		{
+			if (vx * ax < 0 && state == MARIO_STATE_WALKING_LEFT)
+				ani = MARIO_ANI_BIG_BRAKE_RIGHT;
+			else
+			{
+				if (abs(vx) > MARIO_MAX_WALK_SPEED && Stack <= MARIO_WALKING_STACK_MAX)
+					ani = MARIO_ANI_BIG_WALK_FAST_RIGHT;
+				else
 					ani = MARIO_ANI_BIG_WALKING_RIGHT;
-				else ani = MARIO_ANI_BIG_WALKING_LEFT;
-	} // level BIG
-	else if (level == MARIO_LEVEL_SMALL)
+			}
+		}
+		else //walk or run left
+		{
+			if (vx * ax < 0 && state == MARIO_STATE_WALKING_RIGHT)
+				ani = MARIO_ANI_BIG_BRAKE_LEFT;
+			else
+			{
+				if (abs(vx) > MARIO_MAX_WALK_SPEED && Stack <= MARIO_WALKING_STACK_MAX)
+					ani = MARIO_ANI_BIG_WALK_FAST_LEFT;
+				else
+					ani = MARIO_ANI_BIG_WALKING_LEFT;
+			}
+		}
+	} 
+	else if (level == MARIO_LEVEL_SMALL)//==========================================================================MARIO SMALL ANIMATION
 	{
 		if (vy < 0)
 		{
@@ -356,11 +375,32 @@ void CMario::Render()
 			}
 		}
 		else if (vx > 0)
-			ani = MARIO_ANI_SMALL_WALKING_RIGHT;
-		else ani = MARIO_ANI_SMALL_WALKING_LEFT;
-	} //level SMALL
+		{
+			if (vx * ax < 0 && state == MARIO_STATE_WALKING_LEFT)
+				ani = MARIO_ANI_SMALL_BRAKE_RIGHT;
+			else
+			{
+				if (abs(vx) > MARIO_MAX_WALK_SPEED && Stack <= MARIO_WALKING_STACK_MAX)
+					ani = MARIO_ANI_SMALL_WALK_FAST_RIGHT;
+				else
+					ani = MARIO_ANI_SMALL_WALKING_RIGHT;
+			}
+		}
+		else
+		{
+			if (vx * ax < 0 && state == MARIO_STATE_WALKING_RIGHT)
+				ani = MARIO_ANI_SMALL_BRAKE_LEFT;
+			else
+			{
+				if (abs(vx) > MARIO_MAX_WALK_SPEED && Stack <= MARIO_WALKING_STACK_MAX)
+					ani = MARIO_ANI_SMALL_WALK_FAST_LEFT;
+				else
+					ani = MARIO_ANI_SMALL_WALKING_LEFT;
+			}
+		}
+	} 
 	else
-		if (level == MARIO_LEVEL_LEAF)
+		if (level == MARIO_LEVEL_LEAF)//===================================================== MARIO LEAF ANIMATION ==========================
 		{
 			if (state == MARIO_STATE_SIT) //mario sit
 			{
@@ -407,8 +447,29 @@ void CMario::Render()
 							}
 						}
 						else if (vx > 0)
-							ani = MARIO_ANI_LEAF_WALK_RIGHT;
-						else ani = MARIO_ANI_LEAF_WALK_LEFT;
+						{
+							if (vx * ax < 0 && state == MARIO_STATE_WALKING_LEFT)
+								ani = MARIO_ANI_LEAF_BRAKE_RIGHT;
+							else
+							{
+								if (abs(vx) > MARIO_MAX_WALK_SPEED && Stack <= MARIO_WALKING_STACK_MAX)
+									ani = MARIO_ANI_LEAF_WALK_FAST_RIGHT;
+								else
+									ani = MARIO_ANI_LEAF_WALK_RIGHT;
+							}
+						}
+						else
+						{
+							if (vx * ax < 0 && state == MARIO_STATE_WALKING_RIGHT)
+								ani = MARIO_ANI_LEAF_BRAKE_LEFT;
+							else
+							{
+								if (abs(vx) > MARIO_MAX_WALK_SPEED && Stack <= MARIO_WALKING_STACK_MAX)
+									ani = MARIO_ANI_LEAF_WALK_FAST_LEFT;
+								else
+									ani = MARIO_ANI_LEAF_WALK_LEFT;
+							}
+						}
 		} ////////////////level LEAF
 		else if (level == MARIO_LEVEL_FIRE)
 		{
@@ -442,8 +503,29 @@ void CMario::Render()
 						}
 					}
 					else if (vx > 0)
-						ani = MARIO_ANI_FIRE_WALK_RIGHT;
-					else ani = MARIO_ANI_FIRE_WALK_LEFT;
+					{
+						if (vx * ax < 0 && state == MARIO_STATE_WALKING_LEFT)
+							ani = MARIO_ANI_FIRE_BRAKE_RIGHT;
+						else
+						{
+							if (abs(vx) > MARIO_MAX_WALK_SPEED && Stack <= MARIO_WALKING_STACK_MAX)
+								ani = MARIO_ANI_FIRE_WALK_FAST_RIGHT;
+							else
+								ani = MARIO_ANI_FIRE_WALK_RIGHT;
+						}
+					}
+					else
+					{
+						if (vx * ax < 0 && state == MARIO_STATE_WALKING_RIGHT)
+							ani = MARIO_ANI_FIRE_BRAKE_LEFT;
+						else
+						{
+							if (abs(vx) > MARIO_MAX_WALK_SPEED && Stack <= MARIO_WALKING_STACK_MAX)
+								ani = MARIO_ANI_FIRE_WALK_FAST_LEFT;
+							else
+								ani = MARIO_ANI_FIRE_WALK_LEFT;
+						}
+					}
 		} //level FIRE
 	
 
@@ -605,13 +687,11 @@ void CMario::ManageAccelerationAndSpeed()
 	if (abs(vx) > MARIO_MAX_RUN_SPEED ) //on key up A button still limit
 		vx = nx * MARIO_MAX_RUN_SPEED;
 	//slow down if change direction when running
-	/*if (vx * ax < 0 && abs(vx) > MARIO_MAX_WALK_SPEED && (state == MARIO_STATE_WALKING_LEFT || state == MARIO_STATE_WALKING_RIGHT))
+	if (vx * ax < 0 && abs(vx) > MARIO_MAX_WALK_SPEED && (state == MARIO_STATE_WALKING_LEFT || state == MARIO_STATE_WALKING_RIGHT))
 	{
 		vx = -nx * MARIO_MAX_WALK_SPEED;
-		Stack = 4;
-		if (Stack < 0)
-			Stack = 0;
-	}*/
+		Stack = MARIO_WALKING_STACK_MAX;
+	}
 
 	if (speed_up && GetTickCount() - speedup_start > MARIO_STACKUP_TIME)
 	{
