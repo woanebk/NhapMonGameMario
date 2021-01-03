@@ -12,6 +12,7 @@ CGameObject::CGameObject()
 {
 	x = y = 0;
 	vx = vy = 0;
+	ax = 0;
 	nx = 1;	
 }
 
@@ -130,6 +131,21 @@ void CGameObject::RenderBoundingBox()
 	rect.bottom = (int)b - (int)t;
 
 	CGame::GetInstance()->Draw(l, t, bbox, rect.left, rect.top, rect.right, rect.bottom, 100); //32 // change (x, y... ==> (l, t...
+}
+
+bool CGameObject::SpecialCollision(float friend_left, float friend_top, float friend_right, float friend_bottom)
+{
+	float this_left, this_top, this_right, this_bottom;
+
+	GetBoundingBox(
+		this_left,
+		this_top,
+		this_right,
+		this_bottom);
+	if (friend_left <= this_right && friend_right >= this_left
+		&& friend_top <= this_bottom && friend_bottom >= this_top)
+		return true;
+	return false; 
 }
 
 

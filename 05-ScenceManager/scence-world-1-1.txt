@@ -252,9 +252,9 @@ idle right
 #hold shell right 
 541	11024	100
 #flap left
-542	11012	25	11015	25
+542	11012	50	11015	50
 #flap right 
-543	11014	25	11016	25
+543	11014	50	11016	50
 #kick left
 544	11025	100
 #kick right

@@ -25,6 +25,7 @@ CMario::CMario(float x, float y) : CGameObject()
 	this->x = x; 
 	this->y = y; 
 	ax = 0;
+	Stack = 0;
 }
 
 void CMario::Update(DWORD dt, vector<LPGAMEOBJECT> *coObjects)
@@ -34,6 +35,9 @@ void CMario::Update(DWORD dt, vector<LPGAMEOBJECT> *coObjects)
 
 	// Simple fall down
 	vy += MARIO_GRAVITY*dt;
+	
+	//acceleration
+	vx += ax * dt + Stack * ax;
 
 	vector<LPCOLLISIONEVENT> coEvents;
 	vector<LPCOLLISIONEVENT> coEventsResult;
@@ -47,31 +51,9 @@ void CMario::Update(DWORD dt, vector<LPGAMEOBJECT> *coObjects)
 	if (flapping)
 		vy = MARIO_LEAF_FLAPPING_SPEED; //if mario is flapping then falling down slowly
 		
-	ManageAcceleration();
-	// reset untouchable timer if untouchable time has passed
-	if ( GetTickCount() - untouchable_start > MARIO_UNTOUCHABLE_TIME) 
-	{
-		untouchable_start = 0;
-		untouchable = 0;
-	}
-	//if leaf mario is spinning tail then stop
-	if (GetTickCount() - spin_start > 400) //4 sprites = 4*100ms
-	{
-		spin_start = 0; //reset timer
-		spinning = false; //no more spinning
-	}
-
-	if (GetTickCount() - flap_start > 100) //reset timer flapping  2 sprites = (2*25ms)*2
-	{
-		flap_start = 0; //reset timer
-		flapping = false; //no more spinning
-	}
-
-	if (GetTickCount() - kick_start > 300) //reset timer kicking
-	{
-		kick_start = 0; //reset timer
-		kicking = false;//no more kicking
-	}
+	
+	ManageAccelerationAndSpeed();
+	TimingEvent();
 
 	// No collision occured, proceed normally
 	if (coEvents.size()==0)
@@ -164,14 +146,12 @@ void CMario::Update(DWORD dt, vector<LPGAMEOBJECT> *coObjects)
 							{
 								kicking = true;
 								kick_start = GetTickCount();
-								DebugOut(L"%d",kicking);
 								koopas->SetState(KOOPAS_STATE_SPIN_RIGHT);
 							}
 							else
 							{
 								kicking = true;
 								kick_start = GetTickCount();
-								DebugOut(L"%d", kicking);
 								koopas->SetState(KOOPAS_STATE_SPIN_LEFT);//kick the shell
 							}
 						}
@@ -248,16 +228,20 @@ void CMario::Update(DWORD dt, vector<LPGAMEOBJECT> *coObjects)
 					coin->setVisable(false);
 				} //if Coin : ==== earn money =====
 			}
+			else
 			if (dynamic_cast<CPine*>(e->obj))
 			{
 				CPine *pine = dynamic_cast<CPine*>(e->obj);
 				if (e->nx != 0) {
 					vx = 0;
+					dx = 0;
 					x += min_tx * rdx + nx * 0.4f;
 				}
 				if (e->ny != 0) {
 					vy = 0;
 					y += min_ty * rdy + ny * 0.4f;
+					x += dx;
+					vx = 0;
 				}
 			} //if Pine
 			else
@@ -266,7 +250,7 @@ void CMario::Update(DWORD dt, vector<LPGAMEOBJECT> *coObjects)
 					CBrick *brick = dynamic_cast<CBrick*>(e->obj);
 					if (e->nx != 0)
 					{
-						vx = 0;
+						//vx = 0; //mario bi khung lai tren gach
 						x += min_tx * rdx + nx * 0.4f;
 					}
 					else
@@ -291,7 +275,7 @@ void CMario::Update(DWORD dt, vector<LPGAMEOBJECT> *coObjects)
 							{// gach thuong
 								vy = 0;
 								y += min_ty * rdy + ny * 0.4f;
-								x += dx +ax*dt; //loi di xuyen gach
+								x += dx;//loi di xuyen dach
 							}
 						}
 				} //if brick
@@ -323,30 +307,30 @@ void CMario::Render()
 				ani = MARIO_ANI_BIG_SIT_LEFT;
 		}
 		else
-		if (vy < 0)
-		{
-			if (nx < 0) ani = MARIO_ANI_BIG_JUMP_LEFT;
-			else ani = MARIO_ANI_BIG_JUMP_RIGHT;
-		}
-		else
-		if (vx == 0)
-		{
-			if (nx > 0) 
+			if (vy < 0)
 			{
-				ani = MARIO_ANI_BIG_IDLE_RIGHT;
-				if (holding) ani = MARIO_ANI_BIG_HOLD_RIGHT;
-				else if (kicking) ani = MARIO_ANI_BIG_KICK_RIGHT;
+				if (nx < 0) ani = MARIO_ANI_BIG_JUMP_LEFT;
+				else ani = MARIO_ANI_BIG_JUMP_RIGHT;
 			}
-			else 
-			{
-				ani = MARIO_ANI_BIG_IDLE_LEFT;
-				if (holding) ani = MARIO_ANI_BIG_HOLD_LEFT;
-				else if (kicking) ani = MARIO_ANI_BIG_KICK_LEFT;
-			} 
-		}
-		else if (vx > 0) 
-			ani = MARIO_ANI_BIG_WALKING_RIGHT; 
-		else ani = MARIO_ANI_BIG_WALKING_LEFT;
+			else
+				if (vx == 0)
+				{
+					if (nx > 0)
+					{
+						ani = MARIO_ANI_BIG_IDLE_RIGHT;
+						if (holding) ani = MARIO_ANI_BIG_HOLD_RIGHT;
+						else if (kicking) ani = MARIO_ANI_BIG_KICK_RIGHT;
+					}
+					else
+					{
+						ani = MARIO_ANI_BIG_IDLE_LEFT;
+						if (holding) ani = MARIO_ANI_BIG_HOLD_LEFT;
+						else if (kicking) ani = MARIO_ANI_BIG_KICK_LEFT;
+					}
+				}
+				else if (vx > 0)
+					ani = MARIO_ANI_BIG_WALKING_RIGHT;
+				else ani = MARIO_ANI_BIG_WALKING_LEFT;
 	} // level BIG
 	else if (level == MARIO_LEVEL_SMALL)
 	{
@@ -357,76 +341,76 @@ void CMario::Render()
 				ani = MARIO_ANI_SMALL_JUMP_LEFT;
 		} //jump animation
 		else if (vx == 0)
+		{
+			if (nx > 0)
 			{
-				if (nx > 0)
-				{
-					ani = MARIO_ANI_SMALL_IDLE_RIGHT;
-					if (holding) ani = MARIO_ANI_SMALL_HOLD_RIGHT;
-					else if (kicking) ani = MARIO_ANI_SMALL_KICK_RIGHT;					
-				}
-				else
-				{
-					ani = MARIO_ANI_SMALL_IDLE_LEFT;
-					if(holding) ani = MARIO_ANI_SMALL_HOLD_LEFT;
-					else if (kicking) ani = MARIO_ANI_SMALL_KICK_LEFT;
-				}
+				ani = MARIO_ANI_SMALL_IDLE_RIGHT;
+				if (holding) ani = MARIO_ANI_SMALL_HOLD_RIGHT;
+				else if (kicking) ani = MARIO_ANI_SMALL_KICK_RIGHT;
 			}
+			else
+			{
+				ani = MARIO_ANI_SMALL_IDLE_LEFT;
+				if (holding) ani = MARIO_ANI_SMALL_HOLD_LEFT;
+				else if (kicking) ani = MARIO_ANI_SMALL_KICK_LEFT;
+			}
+		}
 		else if (vx > 0)
 			ani = MARIO_ANI_SMALL_WALKING_RIGHT;
 		else ani = MARIO_ANI_SMALL_WALKING_LEFT;
 	} //level SMALL
 	else
-	if (level == MARIO_LEVEL_LEAF)
-	{
-		if (state == MARIO_STATE_SIT) //mario sit
+		if (level == MARIO_LEVEL_LEAF)
 		{
-			if (nx > 0)
-				ani = MARIO_ANI_LEAF_SIT_RIGHT;
-			else
-				ani = MARIO_ANI_LEAF_SIT_LEFT;
-		}
-		else
-			if (flapping)
+			if (state == MARIO_STATE_SIT) //mario sit
 			{
 				if (nx > 0)
-					ani = MARIO_ANI_LEAF_FLAP_RIGHT;
+					ani = MARIO_ANI_LEAF_SIT_RIGHT;
 				else
-					ani = MARIO_ANI_LEAF_FLAP_LEFT;
+					ani = MARIO_ANI_LEAF_SIT_LEFT;
 			}
-		else if (spinning == true)
-		{
-			if (nx > 0)
-				ani = MARIO_ANI_LEAF_SPIN_RIGHT;
 			else
-				ani = MARIO_ANI_LEAF_SPIN_LEFT;
-		}
-		else
-		if (vy < 0)
-		{
-			if (nx < 0) ani = MARIO_ANI_LEAF_JUMP_LEFT_LOW;
-			else ani = MARIO_ANI_LEAF_JUMP_RIGHT_LOW;
-		}
-		else
-			if (vx == 0)
-			{
-				if (nx > 0)
+				if (flapping)
 				{
-					ani = MARIO_ANI_LEAF_IDLE_RIGHT;
-					if (holding) ani = MARIO_ANI_LEAF_HOLD_RIGHT;
-					else if (kicking) ani = MARIO_ANI_LEAF_KICK_RIGHT;
+					if (nx > 0)
+						ani = MARIO_ANI_LEAF_FLAP_RIGHT;
+					else
+						ani = MARIO_ANI_LEAF_FLAP_LEFT;
+				}
+				else if (spinning == true)
+				{
+					if (nx > 0)
+						ani = MARIO_ANI_LEAF_SPIN_RIGHT;
+					else
+						ani = MARIO_ANI_LEAF_SPIN_LEFT;
 				}
 				else
-				{
-					ani = MARIO_ANI_LEAF_IDLE_LEFT;
-					if (holding) ani = MARIO_ANI_LEAF_HOLD_LEFT;
-					else if (kicking) ani = MARIO_ANI_LEAF_KICK_LEFT;
-				}
-			}
-			else if (vx > 0)
-				ani = MARIO_ANI_LEAF_WALK_RIGHT;
-			else ani = MARIO_ANI_LEAF_WALK_LEFT;
-	} ////////////////level LEAF
-	else if (level == MARIO_LEVEL_FIRE)
+					if (vy < 0)
+					{
+						if (nx < 0) ani = MARIO_ANI_LEAF_JUMP_LEFT_LOW;
+						else ani = MARIO_ANI_LEAF_JUMP_RIGHT_LOW;
+					}
+					else
+						if (vx == 0)
+						{
+							if (nx > 0)
+							{
+								ani = MARIO_ANI_LEAF_IDLE_RIGHT;
+								if (holding) ani = MARIO_ANI_LEAF_HOLD_RIGHT;
+								else if (kicking) ani = MARIO_ANI_LEAF_KICK_RIGHT;
+							}
+							else
+							{
+								ani = MARIO_ANI_LEAF_IDLE_LEFT;
+								if (holding) ani = MARIO_ANI_LEAF_HOLD_LEFT;
+								else if (kicking) ani = MARIO_ANI_LEAF_KICK_LEFT;
+							}
+						}
+						else if (vx > 0)
+							ani = MARIO_ANI_LEAF_WALK_RIGHT;
+						else ani = MARIO_ANI_LEAF_WALK_LEFT;
+		} ////////////////level LEAF
+		else if (level == MARIO_LEVEL_FIRE)
 		{
 			if (state == MARIO_STATE_SIT) //mario sit
 			{
@@ -483,11 +467,17 @@ void CMario::SetState(int state)
 	switch (state)
 	{
 	case MARIO_STATE_WALKING_RIGHT:
-		vx = MARIO_WALKING_SPEED;
+		if (ax < 0 && vy > 0)
+		{
+			ischangingdirection = true;
+		}
+		ax = MARIO_ACCELERATION;
 		nx = 1;
 		break;
 	case MARIO_STATE_WALKING_LEFT: 
-		vx = -MARIO_WALKING_SPEED;
+		if (ax > 0 && vy > 0)
+			ischangingdirection = true;
+		ax = -MARIO_ACCELERATION;
 		nx = -1;
 		break;
 	case MARIO_STATE_JUMP:
@@ -502,7 +492,20 @@ void CMario::SetState(int state)
 				vy -= 0.005f;
 		break; 
 	case MARIO_STATE_IDLE: 
-		vx = 0;
+		if (vx > 0) 
+		{
+			ax = -MARIO_ACCELERATION;
+		}
+		if (vx < 0)
+		{
+			ax = MARIO_ACCELERATION;
+		}
+
+		if (abs(vx) <= MARIO_MIN_WALK_SPEED) //if mario is slow enough then stop
+		{
+			vx = 0;
+			ax = 0;
+		}
 		break;
 	case MARIO_STATE_SIT:
 		vx = 0;
@@ -541,29 +544,37 @@ void CMario::GetBoundingBox(float &left, float &top, float &right, float &bottom
 			else
 				if (spinning) //mario is spinning tail
 				{
+					if(nx<0)
 					{
 						left = x - MARIO_LEAF_BBOX_TAIL_WIDTH;// tail long
 						top = y + MARIO_LEAF_ISSPINNING_BBOX_HEIGHT;
 						right = x + MARIO_LEAF_BBOX_WIDTH + MARIO_LEAF_BBOX_TAIL_WIDTH;
 						bottom = y + MARIO_LEAF_BBOX_HEIGHT;
 					}
+					else
+					{
+						left = x + MARIO_LEAF_BBOX_TAILDOWN_WIDTH - MARIO_LEAF_BBOX_TAIL_WIDTH;
+						right = x + MARIO_LEAF_BBOX_TAILDOWN_WIDTH + MARIO_LEAF_BBOX_WIDTH + MARIO_LEAF_BBOX_TAIL_WIDTH;
+						top = y + MARIO_LEAF_ISSPINNING_BBOX_HEIGHT;
+						bottom = y + MARIO_LEAF_BBOX_HEIGHT;
+					}
 				}
-				else
-			{
+				else 
+				{ //standing
 					if (nx < 0)
 					{
-						right = x + MARIO_BIG_BBOX_WIDTH;
+						right = x + MARIO_LEAF_BBOX_WIDTH;
 						bottom = y + MARIO_LEAF_BBOX_HEIGHT;
 					}
 					else
 					{
-						left = x + 6;
-						right = left + MARIO_BIG_BBOX_WIDTH ;
+						left = x + MARIO_LEAF_BBOX_TAILDOWN_WIDTH;
+						right = left + MARIO_LEAF_BBOX_WIDTH;
 						top = y;
-						bottom= y + MARIO_LEAF_BBOX_HEIGHT;
+						bottom = y + MARIO_LEAF_BBOX_HEIGHT;
 					}
-			}
-		}//leaf mario
+				}
+	}//leaf mario
 	else if (level == MARIO_LEVEL_FIRE)
 	{
 		if (state == MARIO_STATE_SIT)
@@ -584,11 +595,41 @@ void CMario::GetBoundingBox(float &left, float &top, float &right, float &bottom
 	}//small mario
 }
 
-void CMario::ManageAcceleration()
+void CMario::ManageAccelerationAndSpeed()
 {
-	/*if (!isSpeedUp) {};*/
+	//All the limit put here instead of setstae to avoid laggy bug
+	//limit mario walk speed
+	if (abs(vx) > MARIO_MAX_WALK_SPEED && !speed_up)
+		vx = nx * MARIO_MAX_WALK_SPEED;
+	//limit mario run speed
+	if (abs(vx) > MARIO_MAX_RUN_SPEED ) //on key up A button still limit
+		vx = nx * MARIO_MAX_RUN_SPEED;
+	//slow down if change direction when running
+	/*if (vx * ax < 0 && abs(vx) > MARIO_MAX_WALK_SPEED && (state == MARIO_STATE_WALKING_LEFT || state == MARIO_STATE_WALKING_RIGHT))
+	{
+		vx = -nx * MARIO_MAX_WALK_SPEED;
+		Stack = 4;
+		if (Stack < 0)
+			Stack = 0;
+	}*/
 
+	if (speed_up && GetTickCount() - speedup_start > MARIO_STACKUP_TIME)
+	{
+		Stack++;
+		speedup_start = GetTickCount();
+		if (Stack > MARIO_RUNNING_STACK_MAX)
+			Stack = MARIO_RUNNING_STACK_MAX;
+	}
+	DebugOut(L"%d \n", Stack);
+	if (!speed_up && GetTickCount() - speedup_stop > MARIO_STACKUP_TIME)
+	{
+		Stack--;
+		speedup_stop = GetTickCount();
+		if (Stack < 0)
+			Stack = 0;
+	}
 }
+	
 
 /*
 	Reset Mario status to the beginning state of a scene
@@ -612,4 +653,41 @@ void CMario::Shot()
 	firebullets.push_back(fireball);
 }
 
+bool CMario::isSpecialAnimation(int ani)
+{
+	if (ani == MARIO_ANI_LEAF_SPIN_LEFT)
+		return true;
+	if (ani == MARIO_ANI_LEAF_SPIN_RIGHT)
+		return true;
+	return false;
+}
+void CMario::RenderSpecialAnimation(int ani) {
+}
+
+void CMario::TimingEvent() {
+	// reset untouchable timer if untouchable time has passed
+	if (GetTickCount() - untouchable_start > MARIO_UNTOUCHABLE_TIME)
+	{
+		untouchable_start = 0;
+		untouchable = 0;
+	}
+	//if leaf mario is spinning tail then stop
+	if (GetTickCount() - spin_start > 400) //4 sprites = 4*100ms
+	{
+		spin_start = 0; //reset timer
+		spinning = false; //no more spinning
+	}
+
+	if (GetTickCount() - flap_start > 100) //reset timer flapping  2 sprites = (2*25ms)*2
+	{
+		flap_start = 0; //reset timer
+		flapping = false; //no more spinning
+	}
+
+	if (GetTickCount() - kick_start > 300) //reset timer kicking
+	{
+		kick_start = 0; //reset timer
+		kicking = false;//no more kicking
+	}
+}
 

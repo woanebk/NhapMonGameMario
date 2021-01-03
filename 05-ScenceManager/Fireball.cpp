@@ -31,7 +31,7 @@ void CFireBall::Update(DWORD dt, vector<LPGAMEOBJECT>* coObjects)
 	CGameObject::Update(dt, coObjects);
 	if (vy < 0)
 	{
-		if (GetTickCount() - switchSpeedtime >= 100)
+		if (GetTickCount() - switchSpeedtime >= FIREBALL_REVERSE_SPEED_TIME)
 		{
 			SetSpeed(vx, -vy);
 		}

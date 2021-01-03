@@ -9,8 +9,7 @@ class CMario : public CGameObject
 	int level;
 	int untouchable;
 	DWORD untouchable_start;
-	//accrelation
-	float ax;
+	
 	//jump
 	bool jumpable = false;
 	bool isjumping = false;
@@ -21,18 +20,24 @@ class CMario : public CGameObject
 	//spin tail
 	bool spinning = false;
 	DWORD spin_start;
-	//hold shell
-	bool speed_up = false;
+	//hold shell and speed up
 	bool holding = false;
+	bool speed_up = false;
+	DWORD speedup_start;
+	DWORD speedup_stop;
 	//flap
 	bool flapping = false;
 	DWORD flap_start;
 	//kick
 	bool kicking = false;
 	DWORD kick_start;
+	//is changing direction when brake
+	bool ischangingdirection = false;
 
 	float start_x;			// initial position of Mario at scene
 	float start_y; 
+
+	int Stack; // running acceleration stack (7 stacks overall)
 public: 
 	CMario(float x = 0.0f, float y = 0.0f);
 	virtual void Update(DWORD dt, vector<LPGAMEOBJECT> *colliable_objects = NULL);
@@ -47,6 +52,9 @@ public:
 	// hold to speed up
 	void setSpeedUp(bool s) { speed_up = s; }
 	bool isSpeedUp() { return speed_up; }
+	void StartRunning() { speedup_start = GetTickCount(); speed_up = true; }
+	void StopRunning() { speedup_stop = GetTickCount(); speed_up = false; }
+	
 	//spinning tail
 	DWORD getStartSpinning() { return spin_start; }
 	void StartSpinning() { spin_start = GetTickCount(); spinning = true; }
@@ -69,16 +77,18 @@ public:
 	//holding
 	void setHolding(bool h) { holding = h; }
 	bool isHolding() { return holding; }
-	// acceleration
-
-	void setAcceleration(float a) { ax = a; }
 	
-	void ManageAcceleration();
+	void ManageAccelerationAndSpeed();
 
 	void Reset();
 
 	void Shot();
 
+	bool isSpecialAnimation(int ani);
+
+	void RenderSpecialAnimation(int ani);
+
+	void TimingEvent();
 
 	virtual void GetBoundingBox(float &left, float &top, float &right, float &bottom);
 };

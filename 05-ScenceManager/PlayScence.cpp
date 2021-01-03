@@ -363,11 +363,9 @@ void CPlayScenceKeyHandler::OnKeyUp(int KeyCode)
 		mario->SetPosition(mario->x, mario->y - (MARIO_BIG_BBOX_HEIGHT - MARIO_BBOX_SIT_HEIGHT) -1 );
 		break;//push mario up a bit after stand up
 	case DIK_A:
-		mario->setSpeedUp(false);
+		mario->StopRunning();
+		//kick koopas shell
 		mario->setHolding(false);
-		break;
-	case DIK_RIGHT:
-		//mario->setAcceleration(0.1f); -a on update 0.002 to slowly slow down
 		break;
 		
 	}
@@ -381,38 +379,31 @@ void CPlayScenceKeyHandler::KeyState(BYTE *states)
 
 	// disable control key when Mario die 
 	if (mario->GetState() == MARIO_STATE_DIE) return;
+
+	if (game->IsKeyDown(DIK_A))
+		if(!mario->isSpeedUp())
+		mario->StartRunning();
+
 	if (game->IsKeyDown(DIK_X))
 	{
-		if (mario->isFalling() && mario->getLevel()== MARIO_LEVEL_LEAF)
+		if (mario->isFalling() && mario->getLevel() == MARIO_LEVEL_LEAF)
 			mario->StartFlapping();
 	}
-	else
-	if (game->IsKeyDown(DIK_DOWN))
+	else if (game->IsKeyDown(DIK_DOWN))
 		mario->SetState(MARIO_STATE_SIT);
-	else
-	if (game->IsKeyDown(DIK_SPACE))
+	else if (game->IsKeyDown(DIK_SPACE))
 	{
 		mario->SetState(MARIO_STATE_JUMP);
-		
-	}
-	else
-		if (game->IsKeyDown(DIK_RIGHT))
-		{
-			mario->SetState(MARIO_STATE_WALKING_RIGHT);
-			/*mario->setAcceleration(0.1f);*/
-			if (game->IsKeyDown(DIK_A))
-			{
-				mario->setSpeedUp(true);
 
-			}
-		}
-		else if (game->IsKeyDown(DIK_LEFT))
-		{
-			mario->SetState(MARIO_STATE_WALKING_LEFT);
-			if (game->IsKeyDown(DIK_A))
-				mario->setSpeedUp(true);
-		}
-		
+	}
+	else if (game->IsKeyDown(DIK_RIGHT))
+	{
+		mario->SetState(MARIO_STATE_WALKING_RIGHT);
+	}
+	else if (game->IsKeyDown(DIK_LEFT))
+	{
+		mario->SetState(MARIO_STATE_WALKING_LEFT);
+	}
 	else
 		mario->SetState(MARIO_STATE_IDLE);
 }

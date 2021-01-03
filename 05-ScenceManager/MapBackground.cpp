@@ -5,7 +5,7 @@
 #include "Game.h"
 #include "define.h"
 
-MapBackground::MapBackground(int mapcolumns, int maprows, int tileheight, int tilewidth, int tilesetrows, int tilesetcolumns)
+MapBackground::MapBackground(int mapcolumns, int maprows, float tileheight, float tilewidth, int tilesetrows, int tilesetcolumns)
 {
 		MapColumns = mapcolumns;
 		MapRows = maprows;

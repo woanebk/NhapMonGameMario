@@ -17,4 +17,5 @@ public:
 	bool isHolded() { return holded; }
 	void getHoldedbyMario();
 	void HitByTail();
+	void getKicked();
 };
