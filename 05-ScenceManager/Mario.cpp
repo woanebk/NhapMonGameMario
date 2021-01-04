@@ -334,6 +334,8 @@ void CMario::Render()
 			{
 				if (abs(vx) > MARIO_MAX_WALK_SPEED && Stack <= MARIO_WALKING_STACK_MAX)
 					ani = MARIO_ANI_BIG_WALK_FAST_RIGHT;
+				if (abs(vx) == MARIO_MAX_RUN_SPEED && Stack == MARIO_RUNNING_STACK_MAX)
+					ani = MARIO_ANI_BIG_RUN_RIGHT;
 				else
 					ani = MARIO_ANI_BIG_WALKING_RIGHT;
 			}
@@ -346,6 +348,8 @@ void CMario::Render()
 			{
 				if (abs(vx) > MARIO_MAX_WALK_SPEED && Stack <= MARIO_WALKING_STACK_MAX)
 					ani = MARIO_ANI_BIG_WALK_FAST_LEFT;
+				if (abs(vx) == MARIO_MAX_RUN_SPEED && Stack == MARIO_RUNNING_STACK_MAX)
+					ani = MARIO_ANI_BIG_RUN_LEFT;
 				else
 					ani = MARIO_ANI_BIG_WALKING_LEFT;
 			}
@@ -374,7 +378,7 @@ void CMario::Render()
 				else if (kicking) ani = MARIO_ANI_SMALL_KICK_LEFT;
 			}
 		}
-		else if (vx > 0)
+		else if (vx > 0) //walk or run right
 		{
 			if (vx * ax < 0 && state == MARIO_STATE_WALKING_LEFT)
 				ani = MARIO_ANI_SMALL_BRAKE_RIGHT;
@@ -382,11 +386,13 @@ void CMario::Render()
 			{
 				if (abs(vx) > MARIO_MAX_WALK_SPEED && Stack <= MARIO_WALKING_STACK_MAX)
 					ani = MARIO_ANI_SMALL_WALK_FAST_RIGHT;
+				if (abs(vx) == MARIO_MAX_RUN_SPEED && Stack == MARIO_RUNNING_STACK_MAX)
+					ani = MARIO_ANI_SMALL_RUN_RIGHT;
 				else
 					ani = MARIO_ANI_SMALL_WALKING_RIGHT;
 			}
 		}
-		else
+		else //walk or run left
 		{
 			if (vx * ax < 0 && state == MARIO_STATE_WALKING_RIGHT)
 				ani = MARIO_ANI_SMALL_BRAKE_LEFT;
@@ -394,6 +400,8 @@ void CMario::Render()
 			{
 				if (abs(vx) > MARIO_MAX_WALK_SPEED && Stack <= MARIO_WALKING_STACK_MAX)
 					ani = MARIO_ANI_SMALL_WALK_FAST_LEFT;
+				if (abs(vx) == MARIO_MAX_RUN_SPEED && Stack == MARIO_RUNNING_STACK_MAX)
+					ani = MARIO_ANI_SMALL_RUN_LEFT;
 				else
 					ani = MARIO_ANI_SMALL_WALKING_LEFT;
 			}
@@ -446,7 +454,7 @@ void CMario::Render()
 								else if (kicking) ani = MARIO_ANI_LEAF_KICK_LEFT;
 							}
 						}
-						else if (vx > 0)
+						else if (vx > 0) // walk or run right
 						{
 							if (vx * ax < 0 && state == MARIO_STATE_WALKING_LEFT)
 								ani = MARIO_ANI_LEAF_BRAKE_RIGHT;
@@ -454,11 +462,13 @@ void CMario::Render()
 							{
 								if (abs(vx) > MARIO_MAX_WALK_SPEED && Stack <= MARIO_WALKING_STACK_MAX)
 									ani = MARIO_ANI_LEAF_WALK_FAST_RIGHT;
+								if (abs(vx) == MARIO_MAX_RUN_SPEED && Stack == MARIO_RUNNING_STACK_MAX)
+									ani = MARIO_ANI_LEAF_RUN_RIGHT;
 								else
 									ani = MARIO_ANI_LEAF_WALK_RIGHT;
 							}
 						}
-						else
+						else //walk or run left
 						{
 							if (vx * ax < 0 && state == MARIO_STATE_WALKING_RIGHT)
 								ani = MARIO_ANI_LEAF_BRAKE_LEFT;
@@ -466,6 +476,8 @@ void CMario::Render()
 							{
 								if (abs(vx) > MARIO_MAX_WALK_SPEED && Stack <= MARIO_WALKING_STACK_MAX)
 									ani = MARIO_ANI_LEAF_WALK_FAST_LEFT;
+								if (abs(vx) == MARIO_MAX_RUN_SPEED && Stack == MARIO_RUNNING_STACK_MAX)
+									ani = MARIO_ANI_LEAF_RUN_LEFT;
 								else
 									ani = MARIO_ANI_LEAF_WALK_LEFT;
 							}
@@ -502,7 +514,7 @@ void CMario::Render()
 							else if (kicking) ani = MARIO_ANI_FIRE_KICK_LEFT;
 						}
 					}
-					else if (vx > 0)
+					else if (vx > 0) // walk or run right
 					{
 						if (vx * ax < 0 && state == MARIO_STATE_WALKING_LEFT)
 							ani = MARIO_ANI_FIRE_BRAKE_RIGHT;
@@ -510,11 +522,13 @@ void CMario::Render()
 						{
 							if (abs(vx) > MARIO_MAX_WALK_SPEED && Stack <= MARIO_WALKING_STACK_MAX)
 								ani = MARIO_ANI_FIRE_WALK_FAST_RIGHT;
+							if (abs(vx) == MARIO_MAX_RUN_SPEED && Stack == MARIO_RUNNING_STACK_MAX)
+								ani = MARIO_ANI_FIRE_RUN_RIGHT;
 							else
 								ani = MARIO_ANI_FIRE_WALK_RIGHT;
 						}
 					}
-					else
+					else // walk or run left
 					{
 						if (vx * ax < 0 && state == MARIO_STATE_WALKING_RIGHT)
 							ani = MARIO_ANI_FIRE_BRAKE_LEFT;
@@ -522,6 +536,8 @@ void CMario::Render()
 						{
 							if (abs(vx) > MARIO_MAX_WALK_SPEED && Stack <= MARIO_WALKING_STACK_MAX)
 								ani = MARIO_ANI_FIRE_WALK_FAST_LEFT;
+							if (abs(vx) == MARIO_MAX_RUN_SPEED && Stack == MARIO_RUNNING_STACK_MAX)
+								ani = MARIO_ANI_FIRE_RUN_LEFT;
 							else
 								ani = MARIO_ANI_FIRE_WALK_LEFT;
 						}
