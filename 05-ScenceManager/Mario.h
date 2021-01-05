@@ -11,6 +11,7 @@ class CMario : public CGameObject
 	DWORD untouchable_start;
 	
 	//jump
+	bool isonground = false;
 	bool jumpable = false;
 	bool isjumping = false;
 	//fall
@@ -65,8 +66,8 @@ public:
 	void StartFlapping() { flap_start = GetTickCount(); flapping = true; }
 
 	//can jump or not
-	void setJumpable(bool jump) { jumpable = jump; }
-	bool canJump() { return jumpable; }
+	void setOnGround(bool jump) { isonground = jump; }
+	bool isOnGround() { return isonground; }
 	//jumping
 	void setIsJumping(bool j) { isjumping = j; }
 	bool isJumping() { return isjumping; }
@@ -83,6 +84,8 @@ public:
 	void Reset();
 
 	void Shot();
+
+	void Kick();
 
 	bool isSpecialAnimation(int ani);
 

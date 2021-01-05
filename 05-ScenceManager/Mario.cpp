@@ -14,6 +14,8 @@
 #include "Koopas.h"
 #include "Coin.h"
 #include "Block.h"
+#include "BreakableBrick.h"
+#include "QuestionBrick.h"
 CMario::CMario(float x, float y) : CGameObject()
 {
 	level = MARIO_LEVEL_BIG;
@@ -50,7 +52,16 @@ void CMario::Update(DWORD dt, vector<LPGAMEOBJECT> *coObjects)
 
 	if (flapping)
 		vy = MARIO_LEAF_FLAPPING_SPEED; //if mario is flapping then falling down slowly
-		
+
+	//calculate action flag:
+	
+	if (vy < 0 && isonground == false) { //IS JUMPING
+		isjumping = true;/* DebugOut(L"Jumping \n");*/
+	}
+	else isjumping = false; 
+
+	if (vy > 0 && isonground == false) { isfalling = true; /*DebugOut(L"Falling \n"); */} //IS FALLING
+	else isfalling = false;
 	
 	ManageAccelerationAndSpeed();
 	TimingEvent();
@@ -64,6 +75,7 @@ void CMario::Update(DWORD dt, vector<LPGAMEOBJECT> *coObjects)
 			x = 0;
 		if (x > WORLD_1_1_WIDTH)
 			x = WORLD_1_1_WIDTH; //relocate mario inside map
+		isonground = false;
 	}
 	else
 	{
@@ -78,22 +90,17 @@ void CMario::Update(DWORD dt, vector<LPGAMEOBJECT> *coObjects)
 		//if (rdx != 0 && rdx!=dx)
 		//	x += nx*abs(rdx); 
 
-		if (ny < 0) { jumpable = true; /*DebugOut(L"Jumpable");*/}
-		else jumpable = false;//jump condition
-		if (vy < 0 && jumpable == false) { isjumping = true; /*DebugOut(L"Jumping")*/;
-		}
-		else isjumping = false;
-		if (vy > 0 /*&& jumpable ==false*/ ) { isfalling = true; /*DebugOut(L"Falling");*/ }
-		else isfalling = false;
+		if (ny < 0) { isonground = true; /*DebugOut(L"On_Groud \n");*/}
 
-		
+		//get MARIO bounding box to use later
+		float mario_bb_left, mario_bb_top, mario_bb_right, mario_bb_bottom;
+		GetBoundingBox(mario_bb_left, mario_bb_top, mario_bb_right, mario_bb_bottom);
 		//
 		// Collision logic with other objects
 		//
 		for (UINT i = 0; i < coEventsResult.size(); i++)
 		{
 			LPCOLLISIONEVENT e = coEventsResult[i];
-
 			if (dynamic_cast<CGoomba *>(e->obj)) // if e->obj is Goomba 
 			{
 				CGoomba *goomba = dynamic_cast<CGoomba *>(e->obj);
@@ -134,6 +141,9 @@ void CMario::Update(DWORD dt, vector<LPGAMEOBJECT> *coObjects)
 			else if (dynamic_cast<CKoopas *>(e->obj)) 
 			{
 				CKoopas *koopas = dynamic_cast<CKoopas *>(e->obj);
+				float koopas_bb_left, koopas_bb_top, koopas_bb_right, koopas_bb_bottom;
+				e->obj->GetBoundingBox(koopas_bb_left, koopas_bb_top, koopas_bb_right, koopas_bb_bottom); //koopas bounding box
+
 				if (e->nx != 0)
 				{
 					if (spinning) koopas->SetState(KOOPAS_STATE_DIE); //spin tail
@@ -144,14 +154,12 @@ void CMario::Update(DWORD dt, vector<LPGAMEOBJECT> *coObjects)
 						{
 							if (this->nx > 0)
 							{
-								kicking = true;
-								kick_start = GetTickCount();
+								Kick();
 								koopas->SetState(KOOPAS_STATE_SPIN_RIGHT);
 							}
 							else
 							{
-								kicking = true;
-								kick_start = GetTickCount();
+								Kick();
 								koopas->SetState(KOOPAS_STATE_SPIN_LEFT);//kick the shell
 							}
 						}
@@ -177,7 +185,6 @@ void CMario::Update(DWORD dt, vector<LPGAMEOBJECT> *coObjects)
 								SetState(MARIO_STATE_DIE);
 						}
 					}
-					DebugOut(L"x");
 				}
 				
 				 if (e->ny != 0)
@@ -188,11 +195,20 @@ void CMario::Update(DWORD dt, vector<LPGAMEOBJECT> *coObjects)
 						if (koopas->GetState() != KOOPAS_STATE_SHELL ) 
 						{
 							koopas->SetState(KOOPAS_STATE_SHELL);
-							
+							vy = -MARIO_JUMP_DEFLECT_SPEED;
 						}
-						vy = -MARIO_JUMP_DEFLECT_SPEED;	
+						else
+						if (e->ny < 0 && koopas->GetState() == KOOPAS_STATE_SHELL && mario_bb_left + MARIO_BIG_BBOX_WIDTH/2 < koopas_bb_left + KOOPAS_BBOX_WIDTH/2)
+						{
+							koopas->SetState(KOOPAS_STATE_SPIN_RIGHT);
+							y += dy;
+						}
+						else
+						{
+							koopas->SetState(KOOPAS_STATE_SPIN_LEFT);
+							y += dy;
+						}
 					}
-					DebugOut(L"y");
 				}
 			} //if Koopas
 				else
@@ -220,10 +236,12 @@ void CMario::Update(DWORD dt, vector<LPGAMEOBJECT> *coObjects)
 			{
 				CCoin *coin = dynamic_cast<CCoin*>(e->obj);
 				if (e->nx != 0 ) { 
+					isonground = false; // fix double jump bug
 					coin->setEnable(false);
 					coin->setVisable(false);
 				}
 				if (e->ny != 0) {
+					isonground = false;
 					coin->setEnable(false);
 					coin->setVisable(false);
 				} //if Coin : ==== earn money =====
@@ -234,51 +252,83 @@ void CMario::Update(DWORD dt, vector<LPGAMEOBJECT> *coObjects)
 				CPine *pine = dynamic_cast<CPine*>(e->obj);
 				if (e->nx != 0) {
 					vx = 0;
-					dx = 0;
-					x += min_tx * rdx + nx * 0.4f;
+					break;
 				}
 				if (e->ny != 0) {
 					vy = 0;
 					y += min_ty * rdy + ny * 0.4f;
 					x += dx;
-					vx = 0;
 				}
 			} //if Pine
-			else
-				if (dynamic_cast<CBrick*>(e->obj))
+			else if (dynamic_cast<CBreakableBrick*>(e->obj))
+			{
+				CBreakableBrick *breakablebrick = dynamic_cast<CBreakableBrick*>(e->obj);
+				if (e->nx != 0)
 				{
-					CBrick *brick = dynamic_cast<CBrick*>(e->obj);
-					if (e->nx != 0)
+					if (spinning) { breakablebrick->Break(); }
+						vx = 0;
+						break; //to stop interact walking when collide on y
+				}
+				if (e->ny != 0)
+				{
+					vy = 0;
+					x += dx;
+				}
+			} //if breakable brick
+			else if (dynamic_cast<CQuestionBrick*>(e->obj))
+			{
+				CQuestionBrick *questionbrick = dynamic_cast<CQuestionBrick*>(e->obj);
+				if (e->nx != 0)
+				{
+						vx = 0;
+						break; //to stop interact walking when collide on y
+				}
+
+				if (e->ny < 0)
+				{
+					vy = 0;
+					x += dx;
+				}
+				else
+				{
+					questionbrick->getUsed();
+					vy = -MARIO_GRAVITY;
+				}
+			} //if breakable brick
+			else if (dynamic_cast<CBrick*>(e->obj))
+			{
+				CBrick *brick = dynamic_cast<CBrick*>(e->obj);
+				if (e->nx != 0)
+				{
+					x += min_tx * rdx + nx * 0.4f;
+					if (brick->canBounce()) {
+						vx = 0;
+						break; //to stop interact walking when collide on y
+					}
+				}
+				if (e->ny != 0)
+				{
+					if (brick->getType() == BRICK_TYPE_CLOUD) //gach may
 					{
-						//vx = 0; //mario bi khung lai tren gach
-						x += min_tx * rdx + nx * 0.4f;
+						if (e->ny > 0) y += dy;
+						else
+						{
+							vy = 0;
+							x += dx;
+						}
+						if (e->nx != 0)
+						{
+							x += dx;
+							y += dy;
+						}
 					}
 					else
-						if (e->ny != 0)
-						{
-							if (brick->getType() == BRICK_TYPE_CLOUD) //gach may
-							{
-								if (e->ny > 0) y += dy;
-								else
-								{
-									vy = 0;
-									y += min_ty * rdy + ny * 0.4f;
-									x += dx;
-								}
-								if (e->nx != 0)
-								{
-									x += dx;
-									y += dy;
-								}
-							}
-							else
-							{// gach thuong
-								vy = 0;
-								y += min_ty * rdy + ny * 0.4f;
-								x += dx;//loi di xuyen dach
-							}
-						}
-				} //if brick
+					{// gach thuong
+						vy = 0;
+						x += dx;//loi di xuyen dach
+					}
+				}
+			} //if brick
 		}
 	}
 
@@ -580,14 +630,19 @@ void CMario::SetState(int state)
 		break;
 	case MARIO_STATE_JUMP:
 		// TODO: need to check if Mario is *current* on a platform before allowing to jump again
-		if (true)
+		if (!isfalling )
+		{
+			vy = -MARIO_JUMP_SPEED_Y;
+		}
+		
+		/*if (true)
 		{
 			jumpable = false;
 			vy = -MARIO_JUMP_SPEED_Y;
 		}
 		else
 		if (isjumping == true)
-				vy -= 0.005f;
+				vy -= 0.005f;*/
 		break; 
 	case MARIO_STATE_IDLE: 
 		if (vx > 0) 
@@ -696,6 +751,9 @@ void CMario::GetBoundingBox(float &left, float &top, float &right, float &bottom
 void CMario::ManageAccelerationAndSpeed()
 {
 	//All the limit put here instead of setstae to avoid laggy bug
+	//limit mario jump speed:
+		
+	
 	//limit mario walk speed
 	if (abs(vx) > MARIO_MAX_WALK_SPEED && !speed_up)
 		vx = nx * MARIO_MAX_WALK_SPEED;
@@ -716,7 +774,6 @@ void CMario::ManageAccelerationAndSpeed()
 		if (Stack > MARIO_RUNNING_STACK_MAX)
 			Stack = MARIO_RUNNING_STACK_MAX;
 	}
-	DebugOut(L"%d \n", Stack);
 	if (!speed_up && GetTickCount() - speedup_stop > MARIO_STACKUP_TIME)
 	{
 		Stack--;
@@ -747,6 +804,12 @@ void CMario::Shot()
 		fireball->SetPosition(x, y + MARIO_LEAF_BBOX_HEIGHT / 2);
 	}
 	firebullets.push_back(fireball);
+}
+
+void CMario::Kick()
+{
+	kicking = true;
+	kick_start = GetTickCount();
 }
 
 bool CMario::isSpecialAnimation(int ani)

@@ -10,6 +10,8 @@
 #include "Block.h"
 #include "Portal.h"
 #include "Coin.h"
+#include "BreakableBrick.h"
+#include "QuestionBrick.h"
 
 using namespace std;
 
@@ -184,6 +186,19 @@ void CPlayScene::_ParseSection_OBJECTS(string line)
 		obj = new CPine(x, y, r, b);
 	}
 	break;
+	case OBJECT_TYPE_BREAKABLE_BRICK:
+	{
+		int b = atof(tokens[4].c_str());
+		obj = new CBreakableBrick(b);
+	}
+	break;
+	case OBJECT_TYPE_QUESTION_BRICK:
+	{
+		int b = atof(tokens[4].c_str());
+		int r = atof(tokens[5].c_str());
+		obj = new CQuestionBrick(r, b);
+	}
+	break;
 	default:
 		DebugOut(L"[ERR] Invalid object type: %d\n", object_type);
 		return;
@@ -323,9 +338,9 @@ void CPlayScenceKeyHandler::OnKeyDown(int KeyCode)
 	switch (KeyCode)
 	{
 	case DIK_Z: //small jump
-		if (mario->canJump())
+		if (mario->isOnGround())
 			mario->SetState(MARIO_STATE_JUMP);
-		mario->setJumpable(false);
+		mario->setOnGround(false);
 		break;
 	case DIK_2: //tranform to leaf mario
 		mario->SetLevel(MARIO_LEVEL_LEAF);
@@ -345,7 +360,7 @@ void CPlayScenceKeyHandler::OnKeyDown(int KeyCode)
 			{
 				mario->Shot();
 			}
-			else if (mario->getLevel() == MARIO_LEVEL_LEAF /*&& mario->isSpeedUp() == false*/)
+			else if (mario->getLevel() == MARIO_LEVEL_LEAF /*&& mario->isOnGround()*/)
 			{
 				mario->StartSpinning();
 			}

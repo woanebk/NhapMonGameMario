@@ -7,6 +7,7 @@
 #include "PlayScence.h"
 #include "Mario.h"
 #include "Utils.h"
+#include "QuestionBrick.h"
 #include "Game.h"
 
 CGoomba::CGoomba()
@@ -122,34 +123,37 @@ void CGoomba::Update(DWORD dt, vector<LPGAMEOBJECT> *coObjects)
 						y += min_ty * rdy + ny * 0.4f;
 					}
 				}// if Pine
-			else
-				if (dynamic_cast<CGoomba*>(e->obj))
+				else if (dynamic_cast<CGoomba*>(e->obj))
 				{
 					CGoomba *goomba = dynamic_cast<CGoomba*>(e->obj);
 					if (e->nx != 0) {
 						x += min_tx * rdx + nx * 0.4f;
 						vx = -vx;
 					}
-					
+
 				}// if Goomba
-				else
-					if (dynamic_cast<CBrick*>(e->obj))
+				else if (dynamic_cast<CBrick*>(e->obj))
+				{
+					CBrick *brick = dynamic_cast<CBrick*>(e->obj);
+					if (e->ny != 0)
 					{
-						CBrick *brick = dynamic_cast<CBrick*>(e->obj);
-						if (e->ny != 0)
-						{
-							vy = 0;
-							y += min_ty * rdy + ny * 0.4f;
-							if (brick->canBounce() == 1)
-								vx = -vx;
-						}
-						if (e->nx != 0)
-						{
-							x += min_tx * dx + nx * 0.4f;
-							if (brick->canBounce() == 1)
-								vx = -vx;
-						}
-					}// if brick
+						vy = 0;
+						y += min_ty * rdy + ny * 0.4f;
+						if (brick->canBounce() == 1)
+							vx = -vx;
+					}
+					if (e->nx != 0)
+					{
+						x += min_tx * dx + nx * 0.4f;
+						if (brick->canBounce() == 1)
+							vx = -vx;
+					}
+				}// if brick
+				else if (dynamic_cast<CQuestionBrick*>(e->obj))
+				{
+					CQuestionBrick *questionbrick = dynamic_cast<CQuestionBrick*>(e->obj);
+					vx = -vx;
+				}// if brick
 		}
 
 	}

@@ -6,7 +6,8 @@
 #include "Goomba.h"
 #include "Block.h"
 #include "Playscence.h"
-
+#include "BreakableBrick.h"
+#include "QuestionBrick.h"
 CKoopas::CKoopas()
 {
 	SetState(KOOPAS_STATE_WALKING);
@@ -150,6 +151,27 @@ void CKoopas::Update(DWORD dt, vector<LPGAMEOBJECT> *coObjects)
 				else
 					vx = -vx;
 			}//if Koopas
+			if (dynamic_cast<CBreakableBrick*> (e->obj))
+			{
+				CBreakableBrick *breakablebrick = dynamic_cast<CBreakableBrick*>(e->obj);
+				if (state == KOOPAS_STATE_SPIN_LEFT || state == KOOPAS_STATE_SPIN_RIGHT)
+				{
+					breakablebrick->Break();
+					vx = -vx;
+				}
+			}//if Breakable brick
+			if (dynamic_cast<CQuestionBrick*> (e->obj))
+			{
+				CQuestionBrick *questionbrick = dynamic_cast<CQuestionBrick*>(e->obj);
+				if (state == KOOPAS_STATE_SPIN_LEFT || state == KOOPAS_STATE_SPIN_RIGHT)
+				{
+					vx = -vx;
+					questionbrick->getUsed();
+					//add get reward from brick here...
+				}
+				else
+					vx = -vx;
+			}//if Question brick
 		}
 
 		//
