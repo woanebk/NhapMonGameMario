@@ -1,5 +1,6 @@
 #include "Leaf.h"
 #include "Utils.h"
+#include "PlayScence.h"
 
 
 CLeaf::CLeaf()
@@ -38,6 +39,8 @@ void CLeaf::Update(DWORD dt, vector<LPGAMEOBJECT>* coObjects)
 		vx = -vx;
 		turn_around_time = GetTickCount64();
 	}
+	
+	HitMario();// in case leaf go through mario (fix bug)
 
 	vector<LPCOLLISIONEVENT> coEvents;
 	vector<LPCOLLISIONEVENT> coEventsResult;
@@ -78,4 +81,18 @@ void CLeaf::Render()
 
 CLeaf::~CLeaf()
 {
+}
+
+void CLeaf::HitMario()
+{
+	CPlayScene* scence = (CPlayScene*)CGame::GetInstance()->GetCurrentScene();
+	CMario* mario = scence->GetPlayer();
+	float mario_bb_l, mario_bb_t, mario_bb_r, mario_bb_b;
+	mario->GetBoundingBox(mario_bb_l, mario_bb_t, mario_bb_r, mario_bb_b);
+	if (SpecialCollision(mario_bb_l, mario_bb_t, mario_bb_r, mario_bb_b))
+	{
+		mario->LevelUp();
+		enable = false;
+		visable = false;
+	}
 }

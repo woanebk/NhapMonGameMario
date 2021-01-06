@@ -308,9 +308,11 @@ void CMario::Update(DWORD dt, vector<LPGAMEOBJECT> *coObjects)
 							}
 							else
 							{
+								if(questionbrick->hasItem() && level <= MARIO_LEVEL_LEAF)
+									questionbrick->CreateItem(ITEM_LEAF);
 								questionbrick->getUsed();
-								questionbrick->CreateItem(ITEM_LEAF);
-								vy = -MARIO_GRAVITY;
+								vy = MARIO_GRAVITY;
+								isfalling = true;
 							}
 						} //if breakable brick
 						else if (dynamic_cast<CBrick*>(e->obj))
@@ -351,8 +353,7 @@ void CMario::Update(DWORD dt, vector<LPGAMEOBJECT> *coObjects)
 						else if (dynamic_cast<CLeaf*>(e->obj))
 						{
 							CLeaf *leaf = dynamic_cast<CLeaf*>(e->obj);
-							if (level < MARIO_LEVEL_LEAF)
-								SetLevel(MARIO_LEVEL_LEAF);
+							LevelUp();
 							leaf->setVisable(false);
 							leaf->setEnable(false);
 						} //if Leaf
@@ -694,6 +695,25 @@ void CMario::SetState(int state)
 		vy = -MARIO_DIE_DEFLECT_SPEED;
 		break;
 	}
+}
+
+void CMario::SetLevel(int l)
+{
+	if (level == MARIO_LEVEL_SMALL)
+	{
+		level = l;
+		SetPosition(x , y - (MARIO_LEAF_BBOX_HEIGHT - MARIO_SMALL_BBOX_HEIGHT)); //push mario up a bit
+	}
+	else
+	{
+		level = l;
+	}
+}
+
+void CMario::LevelUp()
+{
+	if (level < MARIO_LEVEL_LEAF)
+		SetLevel(MARIO_LEVEL_LEAF);
 }
 
 void CMario::GetBoundingBox(float &left, float &top, float &right, float &bottom)

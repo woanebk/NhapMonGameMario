@@ -8,11 +8,11 @@ class CQuestionBrick :public CGameObject
 	int Coin = 0;
 	int Item = 0;
 public:
-	CQuestionBrick(int hasreward, int b) {
+	CQuestionBrick(int hasitem, int b) {
 		x = y = 0;
 		vx = vy = 0;
 		nx = 1;
-		Item = hasreward;
+		Item = hasitem;
 		bounce = b;
 		if (Item == 0)
 			Coin = 1;
@@ -26,10 +26,10 @@ public:
 	int canBounce() { return bounce; }
 	void setBounce(int b) { bounce = b; }
 
-	int hasCoin() { return Coin; }
+	bool hasCoin() { if (Coin != 0) return true; return false; }
 	void setHasCoin(int c) { Coin = c; }
 
-	int hasItem() { return Item; }
+	bool hasItem() { if (Item != 0) return true; return false; }
 	void setHasItem(int r) { Item = r; }
 
 	bool isEmpty();

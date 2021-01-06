@@ -45,7 +45,8 @@ public:
 	virtual void Render();
 
 	void SetState(int state);
-	void SetLevel(int l) { level = l; }
+	void SetLevel(int l);
+	void LevelUp();
 	int getLevel() { return level; }
 
 	void StartUntouchable() { untouchable = 1; untouchable_start = GetTickCount(); }

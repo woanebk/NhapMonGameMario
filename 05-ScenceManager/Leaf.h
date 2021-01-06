@@ -11,5 +11,6 @@ public:
 	virtual void Render();
 	DWORD turn_around_time;
 	~CLeaf();
+	void HitMario();
 };
 
