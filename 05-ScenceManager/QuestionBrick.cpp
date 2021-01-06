@@ -1,17 +1,36 @@
 #include "QuestionBrick.h"
 #include "Mario.h"
 #include "PlayScence.h"
+#include "Leaf.h"
 
 bool CQuestionBrick::isEmpty()
 {
-	if (Coin == 0 && Reward == 0) return true;
+	if (Coin == 0 && Item == 0) return true;
 	return false;
 }
 
 void CQuestionBrick::getUsed()
 {
 	Coin = 0;
-	Reward = 0;
+	Item = 0;
+}
+
+void CQuestionBrick::CreateItem(int item)
+{
+	if (item == ITEM_LEAF)
+	{
+		CLeaf *leaf = new CLeaf();
+		CAnimationSets * animation_sets = CAnimationSets::GetInstance();
+		LPANIMATION_SET ani_set = animation_sets->Get(ITEM_SET_ID);
+		leaf->SetAnimationSet(ani_set);
+
+		
+		leaf->SetPosition(this->x, this->y);
+		leaf->SetStartPosition(this->x, this->y);
+
+		CPlayScene *currenscence = (CPlayScene*)CGame::GetInstance()->GetCurrentScene();
+		currenscence->PushBackObject(leaf);
+	}
 }
 
 CQuestionBrick::~CQuestionBrick()
@@ -65,6 +84,11 @@ void CQuestionBrick::Update(DWORD dt, vector<LPGAMEOBJECT>* coObjects)
 
 void CQuestionBrick::GetBoundingBox(float & l, float & t, float & r, float & b)
 {
+	if (!enable)
+	{
+		l = t = r = b = 0;
+		return;
+	}
 	l = x;
 	t = y;
 	r = x + BRICK_BBOX_WIDTH;

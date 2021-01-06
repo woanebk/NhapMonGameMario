@@ -3,12 +3,13 @@
 #include "Mario.h"
 
 
-CBreakableBrick::CBreakableBrick(int b)
+CBreakableBrick::CBreakableBrick(int b, int s)
 {
 	x = y = 0;
 	vx = vy = 0;
 	nx = 1;
 	bounce = b;
+	Special = s;
 }
 
 void CBreakableBrick::Update(DWORD dt, vector<LPGAMEOBJECT> *coObjects)

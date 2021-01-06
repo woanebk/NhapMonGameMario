@@ -1,13 +1,15 @@
 #pragma once
-#include"GameObject.h"
+#include "GameObject.h"
+#include "define.h"
 
-class Leaf: CGameObject
+class CLeaf : public CGameObject
 {
+public:
+	CLeaf();
 	virtual void GetBoundingBox(float &left, float &top, float &right, float &bottom);
 	virtual void Update(DWORD dt, vector<LPGAMEOBJECT> *coObjects);
 	virtual void Render();
-public:
-	Leaf();
-	~Leaf();
+	DWORD turn_around_time;
+	~CLeaf();
 };
 

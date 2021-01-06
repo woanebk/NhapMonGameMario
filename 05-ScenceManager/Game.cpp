@@ -196,6 +196,13 @@ void CGame::ProcessKeyboard()
 	}
 }
 
+bool CGame::isInCamera(float l, float t, float r, float b)
+{
+	if (r > cam_x && l < cam_x + SCREEN_WIDTH && b > cam_y && t < cam_y + SCREEN_HEIGHT)
+		return true;
+	return false;
+}
+
 CGame::~CGame()
 {
 	if (spriteHandler != NULL) spriteHandler->Release();

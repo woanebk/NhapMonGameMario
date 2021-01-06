@@ -12,6 +12,7 @@
 #include "Coin.h"
 #include "BreakableBrick.h"
 #include "QuestionBrick.h"
+#include "Leaf.h"
 
 using namespace std;
 
@@ -154,14 +155,24 @@ void CPlayScene::_ParseSection_OBJECTS(string line)
 
 		DebugOut(L"[INFO] Player object created!\n");
 		break;
-	case OBJECT_TYPE_GOOMBA: obj = new CGoomba(); break;
+	case OBJECT_TYPE_GOOMBA: 
+	{
+		int level = atof(tokens[4].c_str());
+		obj = new CGoomba(level);
+	}
+	break;
 	case OBJECT_TYPE_BRICK: { 
 		int t = atof(tokens[4].c_str());
 		int b = atof(tokens[5].c_str());
 		obj = new CBrick(t,b);
 	}
 		break;
-	case OBJECT_TYPE_KOOPAS: obj = new CKoopas(); break;
+	case OBJECT_TYPE_KOOPAS:
+	{
+		int level = atof(tokens[4].c_str());
+		obj = new CKoopas(level);
+	}
+	break;
 	case OBJECT_TYPE_PORTAL:
 	{
 		float r = atof(tokens[4].c_str());
@@ -189,7 +200,8 @@ void CPlayScene::_ParseSection_OBJECTS(string line)
 	case OBJECT_TYPE_BREAKABLE_BRICK:
 	{
 		int b = atof(tokens[4].c_str());
-		obj = new CBreakableBrick(b);
+		int s = atof(tokens[5].c_str());
+		obj = new CBreakableBrick(b,s);
 	}
 	break;
 	case OBJECT_TYPE_QUESTION_BRICK:
@@ -199,6 +211,11 @@ void CPlayScene::_ParseSection_OBJECTS(string line)
 		obj = new CQuestionBrick(r, b);
 	}
 	break;
+	case OBJECT_TYPE_LEAF:
+	{
+		obj = new CLeaf();
+	}
+	break;
 	default:
 		DebugOut(L"[ERR] Invalid object type: %d\n", object_type);
 		return;
@@ -206,6 +223,7 @@ void CPlayScene::_ParseSection_OBJECTS(string line)
 
 	// General object setup
 	obj->SetPosition(x, y);
+	obj->SetStartPosition(x, y);
 
 	LPANIMATION_SET ani_set = animation_sets->Get(ani_set_id);
 

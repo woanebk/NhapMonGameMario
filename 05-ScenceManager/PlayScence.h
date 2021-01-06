@@ -33,7 +33,7 @@ public:
 	virtual void Update(DWORD dt);
 	virtual void Render();
 	virtual void Unload();
-
+	void PushBackObject(CGameObject *gameobject) { objects.push_back(gameobject); }
 	CMario * GetPlayer() { return player; } 
 
 	//friend class CPlayScenceKeyHandler;

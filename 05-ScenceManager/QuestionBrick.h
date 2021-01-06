@@ -6,15 +6,15 @@ class CQuestionBrick :public CGameObject
 {
 	int bounce = 0;
 	int Coin = 0;
-	int Reward = 0;
+	int Item = 0;
 public:
 	CQuestionBrick(int hasreward, int b) {
 		x = y = 0;
 		vx = vy = 0;
 		nx = 1;
-		Reward = hasreward;
+		Item = hasreward;
 		bounce = b;
-		if (Reward == 0)
+		if (Item == 0)
 			Coin = 1;
 	}
 	virtual void Render();
@@ -29,12 +29,13 @@ public:
 	int hasCoin() { return Coin; }
 	void setHasCoin(int c) { Coin = c; }
 
-	int hasReward() { return Reward; }
-	void setHasReward(int r) { Reward = r; }
+	int hasItem() { return Item; }
+	void setHasItem(int r) { Item = r; }
 
 	bool isEmpty();
 
 	void getUsed();
+	void CreateItem(int item);
 	~CQuestionBrick();
 };
 

@@ -5,6 +5,8 @@
 10	textures\enemies.png	3	26	110
 30	textures\enemies-2.png	0	128	128
 40	textures\map1-1_bank.png	255	255	255
+50	textures\enemies-3.png	0	128	128
+60	textures\misc-2.png	176	224	248
 
 # id	left	top	right	bottom	texture_id
 [SPRITES]
@@ -206,7 +208,11 @@ idle right
 30002	25	14	41	29	10
 #die
 30003	45	21	61	29	10
-
+#flygoomba
+30004	393	79	413	103	30
+30005	414	79	434	103	30
+30006	435	84	455	103	30
+30007	456	84	476	103	30
 #KOOPAS(50000->....)
 #walk left
 50001	205	191	221	217	30
@@ -223,13 +229,29 @@ idle right
 50042	256	202	272	218	30
 50043	273	202	289	218	30
 50044	290	202	306	218	30
-
-# FIREBALL !!!!!!!!!!!!!!!!!!!!!!
+#fly left green
+50045	205	248	221	276	30
+50046	222	250	238	276	30
+50047	239	249	255	276	30
+50048	256	249	272	276	30
+# fly right green
+50049	313	248	329	276	50
+50050	296	250	312	276	50
+50051	279	249	295	276	50
+50052	262	249	278	276	50
+# FIREBALL !!!!!!!!!!!!!!!!!!!!!! (70000 ++)
 70000	569	120	578	128	20
 70001	582	119	589	128	20
 #hit explosion
 70002	527	20	543	36	20
 70003	475	20	490	35	20
+
+#LEAF_REWARD(70100++)
+#go left
+70100	300	208	316	222	20
+#go right
+70101	323	208	339	222	60
+
 # ani_id	sprite1_id	time1	sprite2_id	time2	...
 [ANIMATIONS]
 # ==== MARIO ========= 500++
@@ -410,6 +432,8 @@ idle right
 701	30001	100	30002	100
 # die
 702	30003	100
+#fly goomba walk
+703	30004	100	30005	100	30006	100	30007	100
 
 # ==== KOOPAS  =========
 #walk left
@@ -422,14 +446,24 @@ idle right
 804	50021	100
 #spin green
 805	50041	100	50042	100	50043	100	50044	100
+#fly left green
+806	50045	100	50046	100	50047	100	50048	100
+#fly right green
+807	50049	100	50050	100	50051	100	50052	100
 # ====== COIN ==========
 901	60001	100	60002	100	60003	100
 
-# === FIREBALL =====
+# === FIREBALL ===== (1000 - > 1029)
 1000	70000	50	70001	50
 1001	70002	100	70003	100
 
-#
+# ===== SPECIAL REWARD ==========
+# ===== LEAF =====(1030++)
+#go left
+1030	70100	100
+#go right
+1031	70101	100
+
 # id	ani1	ani2	ani3
 #
 [ANIMATION_SETS]
@@ -438,23 +472,25 @@ idle right
 # BRICK (wood, question, ground1, ground 2, cloud, brickable)
 2	601	602	603	604	605	650	606
 # GOOMBA
-3	701	702
+3	701	702	703
 # KOOPAS
-4	801	802	803	804	805
+4	801	802	803	804	805	806	807
 # COIN
 5	901
 # FIREBALL
 6	1000	1001
+#ITEM (LEAF)
+7	1030	1031
 [OBJECTS]
 # type	x	y	ani_set_id	extra_settings per object type
-# type: 0 = Mario , 1 = Brick, 2 = Goomba, 3 = Koopas, Block = 4, Coin = 5, Pine = 6, FireBall = 7, Brickable Brick= 8, Question Brick = 9
+# type: 0 = Mario , 1 = Brick, 2 = Goomba, 3 = Koopas, Block = 4, Coin = 5, Pine = 6, FireBall = 7, Brickable Brick= 8, Question Brick = 9, Leaf = 10
 # MARIO
 0	17	350	1
 # KOOPAS
-3	560	383	4
-3	650	370	4
-3	750	370	4
-3	1440	200	4
+3	560	383	4	2
+3	650	370	4	1
+3	750	370	4	1
+3	1440	200	4	1
 # BRICK 
 #type	l	t	aniset_id	animation	bounce
 #BRICK(GROUND)					
@@ -704,22 +740,26 @@ idle right
 1	1680	176	2	5	1
 
 #brickable brick 
-8	1952	400	2	1
-8	1968	400	2	1
-8	1984	400	2	1
-8	2000	400	2	1
-8	2016	400	2	1
-8	2032	400	2	1
-8	2048	400	2	1
-8	1968	384	2	1
-8	1984	384	2	1
-8	2000	384	2	1
-8	2016	384	2	1
-8	2032	384	2	1
-8	1984	368	2	1
-8	2000	368	2	1
-8	2016	368	2	1
-8	2032	368	2	1
+8	1952	400	2	1	0
+8	1968	400	2	1	0
+8	1984	400	2	1	0
+8	2000	400	2	1	0
+8	2016	400	2	1	0
+8	2032	400	2	1	0
+8	2048	400	2	1	0
+8	1968	384	2	1	0
+8	1984	384	2	1	0
+8	2000	384	2	1	0
+8	2016	384	2	1	0
+8	2032	384	2	1	0
+8	1984	368	2	1	0
+8	2000	368	2	1	0
+8	2016	368	2	1	0
+8	2032	368	2	1	1
+
+8	2096	400	2	1	0
+8	2096	384	2	1	0
+8	2112	400	2	1	0
 
 #Question Brick: 
 #type	l	t	aniset_id	bounce	Reward
@@ -737,11 +777,11 @@ idle right
 
 9	1472	368	2	1	1
 
-# GOOMBA
-2	192	400	3
-2	512	400	3
-2	1424	400	3
-2	1376	400	3
+# GOOMBA (type	left	top	aniset_id	level) normal_lvl = 1, fly_lvl =2
+2	192	391	3	2
+2	512	391	3	2
+2	1424	400	3	1
+2	1376	400	3	1
 
 # BLOCK
 #type	l	t	ani_set_id	r	b
@@ -798,10 +838,11 @@ idle right
 6	1794	384	0	1822	416
 6	1858	368	0	1886	416
 6	2258	384	0	2286	416
-6	2258	128	0	2286	304
+6	2258	112	0	2286	304
 6	2322	384	0	2350	416
 
 # --- SCENE PORTAL ----
 # type	l	t	ani_set_id	r	b	scene_id
 50	115	98	0	148	150	1
+1
 

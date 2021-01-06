@@ -7,6 +7,7 @@
 #include "Game.h"
 #include "GameObject.h"
 #include "Sprites.h"
+#include "define.h"
 
 CGameObject::CGameObject()
 {
@@ -14,6 +15,9 @@ CGameObject::CGameObject()
 	vx = vy = 0;
 	ax = 0;
 	nx = 1;	
+
+	start_x = x;
+	start_y = y;
 }
 
 void CGameObject::Update(DWORD dt, vector<LPGAMEOBJECT> *coObjects)
@@ -148,6 +152,25 @@ bool CGameObject::SpecialCollision(float friend_left, float friend_top, float fr
 	return false; 
 }
 
+
+bool CGameObject::isInCamera()
+{
+	float cam_left, cam_top;
+	float bb_left, bb_top, bb_right, bb_bottom;
+	float left, top, right, bottom;
+	CGame* game = CGame::GetInstance();
+	game->GetCamPos(cam_left, cam_top);
+	float cam_right = cam_left + SCREEN_WIDTH;
+	float cam_bottom = cam_top + SCREEN_HEIGHT;
+	GetBoundingBox(bb_left, bb_top, bb_right, bb_bottom);
+	left = x;
+	right = x + (bb_right - bb_left);
+	top = y;
+	bottom = (bb_bottom - bb_top);
+	if (right > cam_left && left < cam_right && top < cam_bottom && bottom > cam_top)
+		return true;
+	return false;
+}
 
 CGameObject::~CGameObject()
 {

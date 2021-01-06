@@ -5,9 +5,10 @@
 class CBreakableBrick : public CGameObject
 {
 	int bounce = 0;
+	int Special = 0;
 
 public:
-	CBreakableBrick( int b);
+	CBreakableBrick( int b, int s);
 	void Update(DWORD dt, vector<LPGAMEOBJECT>* coObjects);
 	virtual void Render();
 	virtual void GetBoundingBox(float &l, float &t, float &r, float &b);

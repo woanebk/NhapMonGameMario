@@ -8,8 +8,9 @@
 #include "Playscence.h"
 #include "BreakableBrick.h"
 #include "QuestionBrick.h"
-CKoopas::CKoopas()
+CKoopas::CKoopas(int lvl)
 {
+	level = lvl;
 	SetState(KOOPAS_STATE_WALKING);
 }
 
@@ -19,16 +20,20 @@ void CKoopas::GetBoundingBox(float &left, float &top, float &right, float &botto
 	top = y;
 	right = x + KOOPAS_BBOX_WIDTH;
 
+
+	if (level == KOOPAS_LEVEL_FLY)
+	{
+		bottom = y + FLYKOOPAS_BBOX_HEIGHT;
+		return;
+	}
+
 	if (state == KOOPAS_STATE_DIE)
 		bottom = y + KOOPAS_BBOX_HEIGHT_DIE;
+	else if (state == KOOPAS_STATE_SHELL)
+		bottom = y + KOOPAS_BBOX_HEIGHT_SHELL;
+	else if (state == KOOPAS_STATE_SPIN_LEFT || state == KOOPAS_STATE_SPIN_RIGHT)
+		bottom = y + KOOPAS_BBOX_HEIGHT_SHELL;
 	else
-		if (state == KOOPAS_STATE_SHELL)
-			bottom = y + KOOPAS_BBOX_HEIGHT_SHELL ;
-		else
-			if (state == KOOPAS_STATE_SPIN_LEFT || state == KOOPAS_STATE_SPIN_RIGHT)
-				bottom = y + KOOPAS_BBOX_HEIGHT_SHELL ;
-			else
-		
 		bottom = y + KOOPAS_BBOX_HEIGHT;
 }
 
@@ -40,7 +45,7 @@ void CKoopas::Update(DWORD dt, vector<LPGAMEOBJECT> *coObjects)
 	// TO-DO: make sure Koopas can interact with the world and to each of them too!
 	// 
 	// Simple fall down
-	vy += MARIO_GRAVITY * dt;
+	vy += KOOPAS_FLY_GRAVITY * dt;
 
 	vector<LPCOLLISIONEVENT> coEvents;
 	vector<LPCOLLISIONEVENT> coEventsResult;
@@ -61,9 +66,9 @@ void CKoopas::Update(DWORD dt, vector<LPGAMEOBJECT> *coObjects)
 		x += dx;
 		y += dy;
 
-		if (vx > 0 && x > WORLD_1_1_WIDTH ) {
-			 vx = -vx;
-			 x = WORLD_1_1_WIDTH;
+		if (vx > 0 && x > WORLD_1_1_WIDTH) {
+			vx = -vx;
+			x = WORLD_1_1_WIDTH;
 		}
 	}
 	else
@@ -78,7 +83,7 @@ void CKoopas::Update(DWORD dt, vector<LPGAMEOBJECT> *coObjects)
 		// block every object first!
 		/*x += min_tx * dx + nx * 0.4f;
 		y += min_ty * dy + ny * 0.4f;*/
-		
+
 
 		/*if (nx != 0) vx = 0;*/
 		if (ny != 0) vy = 0;
@@ -86,33 +91,22 @@ void CKoopas::Update(DWORD dt, vector<LPGAMEOBJECT> *coObjects)
 		for (UINT i = 0; i < coEventsResult.size(); i++)
 		{
 			LPCOLLISIONEVENT e = coEventsResult[i];
-			if (dynamic_cast<CBrick*>(e->obj))
-			{
-				CBrick *brick = dynamic_cast<CBrick*>(e->obj);
-				if (e->nx != 0)
-				{
-					x += min_tx * rdx + nx * 0.4f;
-					
-					if(brick->canBounce() == 1 )
-						vx = -vx;
-				}
-				if (e->ny != 0)
-				{
-					y += min_ty * rdy + ny * 0.4f;
-					if (brick->canBounce() == 1)
-						if (state != KOOPAS_STATE_SPIN_LEFT && state != KOOPAS_STATE_SPIN_RIGHT)
-							vx = -vx;
-					/*x += dx;*/
-				}
-			} // if Brick
-			else
 			if (dynamic_cast<CBlock*> (e->obj))
 			{
 				CBlock *block = dynamic_cast<CBlock*>(e->obj);
-				if (e->ny < 0) {
-					vy = 0;
-					x += dx;
-					y += min_ty * rdy + ny * 0.4f;
+				if (e->ny < 0)
+				{
+					if (level == KOOPAS_LEVEL_FLY)
+					{
+						x += dx;
+						vy = -KOOPAS_FLY_SPEED;
+					}
+					else
+					{
+						vy = 0;
+						x += dx;
+						y += min_ty * rdy + ny * 0.4f;
+					}
 				}
 				if (e->nx != 0)
 				{
@@ -120,30 +114,29 @@ void CKoopas::Update(DWORD dt, vector<LPGAMEOBJECT> *coObjects)
 					x += dx;
 				}
 			}//if block
-			else
-			if (dynamic_cast<CPine*>(e->obj))
+			else if (dynamic_cast<CPine*>(e->obj))
 			{
 				CPine *pine = dynamic_cast<CPine*>(e->obj);
 				if (e->nx != 0) {
 					x += min_tx * rdx + nx * 0.4f;
 					vx = -vx;
+					break;
 				}
 				if (e->ny != 0) {
 					vy = 0;
 					y += min_ty * rdy + ny * 0.4f;
 				}
 			}// if Pine
-			else
-			if (dynamic_cast<CGoomba*> (e->obj))
+			else if (dynamic_cast<CGoomba*> (e->obj))
 			{
 				CGoomba *goomba = dynamic_cast<CGoomba*>(e->obj);
 				if (e->nx != 0)
 				{
-					if(state != KOOPAS_STATE_SPIN_LEFT && state !=KOOPAS_STATE_SPIN_RIGHT)
-					vx = -vx;
+					if (state != KOOPAS_STATE_SPIN_LEFT && state != KOOPAS_STATE_SPIN_RIGHT)
+						vx = -vx;
 				}
 			}//if Goomba
-			if (dynamic_cast<CKoopas*> (e->obj))
+			else if (dynamic_cast<CKoopas*> (e->obj))
 			{
 				CKoopas *koopas = dynamic_cast<CKoopas*>(e->obj);
 				if (state == KOOPAS_STATE_SPIN_LEFT || state == KOOPAS_STATE_SPIN_RIGHT)
@@ -151,7 +144,7 @@ void CKoopas::Update(DWORD dt, vector<LPGAMEOBJECT> *coObjects)
 				else
 					vx = -vx;
 			}//if Koopas
-			if (dynamic_cast<CBreakableBrick*> (e->obj))
+			else if (dynamic_cast<CBreakableBrick*> (e->obj))
 			{
 				CBreakableBrick *breakablebrick = dynamic_cast<CBreakableBrick*>(e->obj);
 				if (state == KOOPAS_STATE_SPIN_LEFT || state == KOOPAS_STATE_SPIN_RIGHT)
@@ -160,24 +153,61 @@ void CKoopas::Update(DWORD dt, vector<LPGAMEOBJECT> *coObjects)
 					vx = -vx;
 				}
 			}//if Breakable brick
-			if (dynamic_cast<CQuestionBrick*> (e->obj))
+			else if (dynamic_cast<CQuestionBrick*> (e->obj))
 			{
 				CQuestionBrick *questionbrick = dynamic_cast<CQuestionBrick*>(e->obj);
-				if (state == KOOPAS_STATE_SPIN_LEFT || state == KOOPAS_STATE_SPIN_RIGHT)
+				if (e->nx != 0)
 				{
-					vx = -vx;
-					questionbrick->getUsed();
-					//add get reward from brick here...
+					if (state == KOOPAS_STATE_SPIN_LEFT || state == KOOPAS_STATE_SPIN_RIGHT)
+					{
+						vx = -vx;
+						questionbrick->getUsed();
+						break;
+						//add get reward from brick here...
+					}
+					else
+					{
+						vx = -vx;
+						break;
+					}
 				}
-				else
-					vx = -vx;
+				if (e->ny != 0)
+				{
+					x += dx;
+				}
 			}//if Question brick
+			else if (dynamic_cast<CBrick*>(e->obj))
+			{
+				CBrick *brick = dynamic_cast<CBrick*>(e->obj);
+				if (e->nx != 0)
+				{
+					x += min_tx * rdx + nx * 0.4f;
+
+					if (brick->canBounce() == 1)
+						vx = -vx;
+				}
+				if (e->ny != 0)
+				{
+					if (level == KOOPAS_LEVEL_FLY && e->ny < 0)
+					{
+						x += dx;
+						vy = -KOOPAS_FLY_SPEED;
+					}
+					else
+					{
+						x += dx;
+					}
+					//if (brick->canBounce() == 1)
+					//	if (state != KOOPAS_STATE_SPIN_LEFT && state != KOOPAS_STATE_SPIN_RIGHT)
+					//		vx = -vx; //turn around on edge
+				}
+			} // if Brick
 		}
 
 		//
 		// Collision logic with other objects
 		//
-		
+
 
 	}
 	//code mau cua thay
@@ -206,8 +236,20 @@ void CKoopas::Render()
 	else if (state == KOOPAS_STATE_SPIN_LEFT || state == KOOPAS_STATE_SPIN_RIGHT) {
 		ani = KOOPAS_ANI_SPIN;
 	}
-	else if (vx > 0) ani = KOOPAS_ANI_WALKING_RIGHT;
-	else if (vx <= 0) ani = KOOPAS_ANI_WALKING_LEFT;
+	else if (vx > 0)
+	{
+		if (level == KOOPAS_LEVEL_NORMAL)
+			ani = KOOPAS_ANI_WALKING_RIGHT;
+		else
+			ani = FLYKOOPAS_ANI_FLY_RIGHT;
+	}
+	else if (vx <= 0)
+	{
+		if (level == KOOPAS_LEVEL_NORMAL)
+			ani = KOOPAS_ANI_WALKING_LEFT;
+		else
+			ani = FLYKOOPAS_ANI_FLY_LEFT;
+	}
 
 	animation_set->at(ani)->Render(x, y);
 
@@ -239,30 +281,30 @@ void CKoopas::SetState(int state)
 
 void CKoopas::getHoldedbyMario()
 {
-		CMario* mario = ((CPlayScene*)CGame::GetInstance()->GetCurrentScene())->GetPlayer();
-		float left, top, right, bottom;
-		mario->GetBoundingBox(left, top, right, bottom); 
-		if (!mario->isHolding()) holded = false;	//if mario stop Holding every koopas then holded == false
-		if (holded) //stick koopas with mario depend on bounding box(more accurate)
+	CMario* mario = ((CPlayScene*)CGame::GetInstance()->GetCurrentScene())->GetPlayer();
+	float left, top, right, bottom;
+	mario->GetBoundingBox(left, top, right, bottom);
+	if (!mario->isHolding()) holded = false;	//if mario stop Holding every koopas then holded == false
+	if (holded) //stick koopas with mario depend on bounding box(more accurate)
+	{
+		vy = 0;
+		vx = 0;
+		if (mario->getLevel() != MARIO_LEVEL_SMALL)
 		{
-			vy = 0;
-			vx = 0;
-			if (mario->getLevel() != MARIO_LEVEL_SMALL)
-			{
-				if (mario->nx > 0)
-					SetPosition(right - 1, top + (bottom - top) / 3); 
-				else
-					SetPosition(left - KOOPAS_BBOX_WIDTH + 1, top + (bottom - top) / 3);
-			}
-			else //small mario need to hold lower
-			{
-				if (mario->nx > 0)
-					SetPosition(right - 1, top - (bottom - top) / 3 );
-				else
-					SetPosition(left - KOOPAS_BBOX_WIDTH + 1, top - (bottom - top) / 3 );
-			}
+			if (mario->nx > 0)
+				SetPosition(right - 1, top + (bottom - top) / 3);
+			else
+				SetPosition(left - KOOPAS_BBOX_WIDTH + 1, top + (bottom - top) / 3);
+		}
+		else //small mario need to hold lower
+		{
+			if (mario->nx > 0)
+				SetPosition(right - 1, top - (bottom - top) / 3);
+			else
+				SetPosition(left - KOOPAS_BBOX_WIDTH + 1, top - (bottom - top) / 3);
+		}
 
-		}		
+	}
 }
 
 void CKoopas::HitByTail()
@@ -297,6 +339,12 @@ void CKoopas::getKicked()
 				SetState(KOOPAS_STATE_SPIN_RIGHT);
 		}
 	}
-	
-	
+
+
+}
+
+void CKoopas::LevelDown()
+{
+	if (level == KOOPAS_LEVEL_FLY)
+		level = KOOPAS_LEVEL_NORMAL;
 }

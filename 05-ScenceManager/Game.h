@@ -87,6 +87,7 @@ public:
 
 	static CGame * GetInstance();
 
+	bool isInCamera(float l, float t, float r, float b);
 	~CGame();
 };
 

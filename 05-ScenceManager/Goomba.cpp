@@ -10,8 +10,10 @@
 #include "QuestionBrick.h"
 #include "Game.h"
 
-CGoomba::CGoomba()
+CGoomba::CGoomba(int lvl)
 {
+	level = lvl;
+	start_level = lvl;
 	SetState(GOOMBA_STATE_WALKING);
 }
 
@@ -31,8 +33,14 @@ void CGoomba::GetBoundingBox(float &left, float &top, float &right, float &botto
 
 	if (state == GOOMBA_STATE_DIE)
 		bottom = y + GOOMBA_BBOX_HEIGHT_DIE;
-	else 	
-		bottom = y + GOOMBA_BBOX_HEIGHT;
+	else
+	{
+		if (level == GOOMBA_LEVEL_FLY)
+			bottom = y + FLYGOOMBA_BBOX_HEIGHT;
+		else
+			bottom = y + GOOMBA_BBOX_HEIGHT;
+	}
+		
 }
 
 void CGoomba::Update(DWORD dt, vector<LPGAMEOBJECT> *coObjects)
@@ -40,7 +48,7 @@ void CGoomba::Update(DWORD dt, vector<LPGAMEOBJECT> *coObjects)
 	CGameObject::Update(dt, coObjects);
 
 	// Simple fall down
-	vy += MARIO_GRAVITY * dt;
+	vy += GOOMBA_FLY_GRAVITY * dt;
 	//
 	// TO-DO: make sure Goomba can interact with the world and to each of them too!
 	// 
@@ -48,9 +56,16 @@ void CGoomba::Update(DWORD dt, vector<LPGAMEOBJECT> *coObjects)
 	vector<LPCOLLISIONEVENT> coEventsResult;
 
 	coEvents.clear();
-
-		CalcPotentialCollisions(coObjects, coEvents);
-
+	Reset();
+	CalcPotentialCollisions(coObjects, coEvents);
+	if (level == GOOMBA_LEVEL_FLY)
+	{
+			if (GetTickCount64() - fly_goomba_start_walking > FLYGOOMBA_HIGH_JUMP_TIME)
+			{
+					vy = -FLYGOOMBA_HIGH_JUMP_SPEED;
+				fly_goomba_start_walking = GetTickCount64();
+			}	
+	}
 	if (coEvents.size() == 0)
 	{
 		x += dx;
@@ -59,7 +74,7 @@ void CGoomba::Update(DWORD dt, vector<LPGAMEOBJECT> *coObjects)
 		if (vx > 0 && x > WORLD_1_1_WIDTH) {
 			x = WORLD_1_1_WIDTH; vx = -vx;
 		}
-		
+
 	}
 	else
 	{
@@ -96,12 +111,11 @@ void CGoomba::Update(DWORD dt, vector<LPGAMEOBJECT> *coObjects)
 				}
 
 			} //if koopas
-			else if (dynamic_cast<CBlock*>(e->obj)) 
+			else if (dynamic_cast<CBlock*>(e->obj))
 			{
 				CBlock *block = dynamic_cast<CBlock*>(e->obj);
 				if (e->ny < 0) {
 					vy = 0;
-					y += min_ty * rdy + ny * 0.4f;
 					x += dx;
 				}
 				if (e->nx != 0)
@@ -135,12 +149,25 @@ void CGoomba::Update(DWORD dt, vector<LPGAMEOBJECT> *coObjects)
 				else if (dynamic_cast<CBrick*>(e->obj))
 				{
 					CBrick *brick = dynamic_cast<CBrick*>(e->obj);
+
 					if (e->ny != 0)
 					{
-						vy = 0;
-						y += min_ty * rdy + ny * 0.4f;
-						if (brick->canBounce() == 1)
-							vx = -vx;
+						if (level == GOOMBA_LEVEL_NORMAL)
+						{
+							vy = 0;
+							y += min_ty * rdy + ny * 0.4f;
+							x += dx;
+							if (brick->canBounce() == 1)
+								vx = -vx;
+						}
+						else
+						{
+							vy = 0;
+							y += min_ty * rdy + ny * 0.4f;
+							if (brick->canBounce() == 1)
+								vx = -vx;
+						}
+
 					}
 					if (e->nx != 0)
 					{
@@ -148,6 +175,8 @@ void CGoomba::Update(DWORD dt, vector<LPGAMEOBJECT> *coObjects)
 						if (brick->canBounce() == 1)
 							vx = -vx;
 					}
+
+
 				}// if brick
 				else if (dynamic_cast<CQuestionBrick*>(e->obj))
 				{
@@ -167,8 +196,10 @@ void CGoomba::Render()
 	if (state == GOOMBA_STATE_DIE) {
 		ani = GOOMBA_ANI_DIE;
 	}
+	else if (level == GOOMBA_LEVEL_FLY)
+		ani = GOOMBA_ANI_FLAY_RED;
 
-	animation_set->at(ani)->Render(x,y);
+	animation_set->at(ani)->Render(x, y);
 
 	//RenderBoundingBox();
 }
@@ -178,15 +209,24 @@ void CGoomba::SetState(int state)
 	CGameObject::SetState(state);
 	switch (state)
 	{
-		case GOOMBA_STATE_DIE:
-			y += GOOMBA_BBOX_HEIGHT - GOOMBA_BBOX_HEIGHT_DIE + 1;
-			enable = false;
-			visable = false;
-			vx = 0;
-			vy = 0;
-			break;
-		case GOOMBA_STATE_WALKING: 
+	case GOOMBA_STATE_DIE:
+		y += GOOMBA_BBOX_HEIGHT - GOOMBA_BBOX_HEIGHT_DIE + 1;
+		enable = false;
+		visable = false;
+		vx = 0;
+		vy = 0;
+		break;
+	case GOOMBA_STATE_WALKING:
+		if (level == GOOMBA_LEVEL_NORMAL)
+		{
 			vx = -GOOMBA_WALKING_SPEED;
+		}
+		else
+		{
+			vx = -GOOMBA_WALKING_SPEED;
+			FlyGoombaStartWalking();
+		}
+		break;
 	}
 }
 
@@ -203,4 +243,30 @@ void CGoomba::HitByTail()
 		if ((bb_left <= mario_bb_right && bb_right >= mario_bb_left) || (bb_right >= mario_bb_left && bb_left <= mario_bb_right))
 			if ((bb_top <= mario_bb_bottom && bb_bottom >= mario_bb_top) || (bb_bottom >= mario_bb_top && bb_top <= mario_bb_bottom))
 				SetState(GOOMBA_STATE_DIE);
+}
+
+void CGoomba::LevelDown()
+{
+	if (level == GOOMBA_LEVEL_FLY)
+		level = GOOMBA_LEVEL_NORMAL;
+}
+
+void CGoomba::Reset()
+{
+	CGame *game = CGame::GetInstance();
+	float bb_left, bb_top, bb_right, bb_bottom;
+	GetBoundingBox(bb_left, bb_top, bb_right, bb_bottom);
+	if (!isInCamera() && game->isInCamera(start_x, start_y, start_x + (bb_right - bb_left), start_y + (bb_bottom - bb_top)))
+	{
+		DebugOut(L"Reset \n");
+		if (state == GOOMBA_STATE_DIE || enable == false || visable == false)
+		{
+			enable = true;
+			visable = true;
+			SetPosition(start_x, start_y);
+			setLevel(start_level);
+			SetState(GOOMBA_STATE_WALKING);
+		}
+	}
+		
 }
