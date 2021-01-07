@@ -2,6 +2,7 @@
 #include "Mario.h"
 #include "PlayScence.h"
 #include "Leaf.h"
+#include "Mushroom.h"
 
 bool CQuestionBrick::isEmpty()
 {
@@ -30,7 +31,44 @@ void CQuestionBrick::CreateItem(int item)
 
 		CPlayScene *currenscence = (CPlayScene*)CGame::GetInstance()->GetCurrentScene();
 		currenscence->PushBackObject(leaf);
+		leaf->Jump();
 	}
+	if (item == ITEM_MUSHROOM_RED)
+	{
+		CMushroom *red_mushroom = new CMushroom(MUSHROOM_TYPE_RED);
+		CAnimationSets * animation_sets = CAnimationSets::GetInstance();
+		LPANIMATION_SET ani_set = animation_sets->Get(ITEM_SET_ID);
+		red_mushroom->SetAnimationSet(ani_set);
+
+
+		red_mushroom->SetPosition(this->x, this->y - MUSHROOM_BBOX_HEIGHT);
+		red_mushroom->SetStartPosition(this->x, this->y - MUSHROOM_BBOX_HEIGHT);
+		red_mushroom->ChooseDirection();
+
+		CPlayScene *currenscence = (CPlayScene*)CGame::GetInstance()->GetCurrentScene();
+		currenscence->PushBackObject(red_mushroom);
+	}
+	if (item == ITEM_MUSHROOM_GREEN)
+	{
+		CMushroom *green_mushroom = new CMushroom(MUSHROOM_TYPE_GREEN);
+		CAnimationSets * animation_sets = CAnimationSets::GetInstance();
+		LPANIMATION_SET ani_set = animation_sets->Get(ITEM_SET_ID);
+		green_mushroom->SetAnimationSet(ani_set);
+
+
+		green_mushroom->SetPosition(this->x, this->y - MUSHROOM_BBOX_HEIGHT);
+		green_mushroom->SetStartPosition(this->x, this->y - MUSHROOM_BBOX_HEIGHT);
+		green_mushroom->ChooseDirection();
+
+		CPlayScene *currenscence = (CPlayScene*)CGame::GetInstance()->GetCurrentScene();
+		currenscence->PushBackObject(green_mushroom);
+	}
+}
+
+void CQuestionBrick::Jump()
+{
+	vy = -BRICK_QUESTION_JUMP_SPEED;
+	jumptime = GetTickCount64();
 }
 
 CQuestionBrick::~CQuestionBrick()
@@ -42,7 +80,12 @@ void CQuestionBrick::Render()
 	if(isEmpty())
 		animation_set->at(BRICK_ANI_EMPTY_QUESTION)->Render(x, y);
 	else
-		animation_set->at(BRICK_ANI_QUESTION)->Render(x, y);
+	{
+		if(type == QUESTION_BREAK_TYPE_NORMAL)
+			animation_set->at(BRICK_ANI_QUESTION)->Render(x, y);
+		else if (type== QUESTION_BREAK_TYPE_ONSKY_BREAKABLE_ALIKE)
+			animation_set->at(BRICK_ANI_BREAKABLE)->Render(x, y);
+	}
 }
 
 void CQuestionBrick::Update(DWORD dt, vector<LPGAMEOBJECT>* coObjects)
@@ -53,6 +96,21 @@ void CQuestionBrick::Update(DWORD dt, vector<LPGAMEOBJECT>* coObjects)
 
 	coEvents.clear();
 	CalcPotentialCollisions(coObjects, coEvents);
+	
+	// jump and go back to old position======
+	if (GetTickCount64() - jumptime > BRICK_QUESTION_JUMP_TIME)
+	{
+		jumptime = 0;
+		if (y < start_y)
+			vy = BRICK_QUESTION_JUMP_SPEED;
+		
+	}
+	if (y > start_y)
+	{
+		y = start_y;
+		vy = 0;
+	}
+	//==========================================
 
 	if (coEvents.size() == 0)
 	{
@@ -65,7 +123,8 @@ void CQuestionBrick::Update(DWORD dt, vector<LPGAMEOBJECT>* coObjects)
 		float min_tx, min_ty, nx = 0, ny;
 		float rdx = 0;
 		float rdy = 0;
-
+		x += dx;
+		y += dy;
 
 		// TODO: This is a very ugly designed function!!!!
 		FilterCollision(coEvents, coEventsResult, min_tx, min_ty, nx, ny, rdx, rdy);
@@ -104,9 +163,15 @@ void CQuestionBrick::HitByTail()
 	CMario* mario = scence->GetPlayer();
 	mario->GetBoundingBox(mario_bb_left, mario_bb_top, mario_bb_right, mario_bb_bottom);
 	if (mario->isSpinning())
-		if ((bb_left <= mario_bb_right && bb_right >= mario_bb_left) || (bb_right >= mario_bb_left && bb_left <= mario_bb_right))
-			if ((bb_top <= mario_bb_bottom && bb_bottom >= mario_bb_top) || (bb_bottom >= mario_bb_top && bb_top <= mario_bb_bottom))
+		if (bb_left <= mario_bb_right + MARIO_LEAF_BBOX_TAIL_WIDTH && bb_right >= mario_bb_left - MARIO_LEAF_BBOX_TAIL_WIDTH)
+			if (bb_top <= mario_bb_bottom && bb_bottom >= mario_bb_top + (mario_bb_bottom - mario_bb_top) / 2)
 			{
+				if (hasItem() && mario->getLevel() == MARIO_LEVEL_SMALL)
+					CreateItem(ITEM_MUSHROOM_RED);
+				else if (hasItem() && mario->getLevel() <= MARIO_LEVEL_LEAF)
+					CreateItem(ITEM_LEAF);
+				if (!isEmpty())
+					Jump();
 				getUsed();
 			}
 }

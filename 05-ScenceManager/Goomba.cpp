@@ -14,6 +14,10 @@ CGoomba::CGoomba(int lvl)
 {
 	level = lvl;
 	start_level = lvl;
+	if (lvl == GOOMBA_LEVEL_FLY)
+		type = GOOMBA_TYPE_RED;
+	else
+		type = GOOMBA_TYPE_NORMAL;
 	SetState(GOOMBA_STATE_WALKING);
 }
 
@@ -109,6 +113,11 @@ void CGoomba::Update(DWORD dt, vector<LPGAMEOBJECT> *coObjects)
 					else
 						vx = -vx; //turn if meet an alive koopas
 				}
+				if (e->ny != 0)
+				{
+					x += dx;
+					y += dy;
+				}
 
 			} //if koopas
 			else if (dynamic_cast<CBlock*>(e->obj))
@@ -162,7 +171,7 @@ void CGoomba::Update(DWORD dt, vector<LPGAMEOBJECT> *coObjects)
 						}
 						else
 						{
-							vy = 0;
+							x += dx;
 							y += min_ty * rdy + ny * 0.4f;
 							if (brick->canBounce() == 1)
 								vx = -vx;
@@ -182,6 +191,7 @@ void CGoomba::Update(DWORD dt, vector<LPGAMEOBJECT> *coObjects)
 				{
 					CQuestionBrick *questionbrick = dynamic_cast<CQuestionBrick*>(e->obj);
 					vx = -vx;
+					y += dy;
 				}// if brick
 		}
 
@@ -192,12 +202,21 @@ void CGoomba::Update(DWORD dt, vector<LPGAMEOBJECT> *coObjects)
 
 void CGoomba::Render()
 {
-	int ani = GOOMBA_ANI_WALKING;
+	int ani = 0;
+
+	if (type == GOOMBA_TYPE_NORMAL)
+		 ani = GOOMBA_ANI_WALKING;
+	else
+		ani = GOOMBA_ANI_LV2_WAlKING;
+
 	if (state == GOOMBA_STATE_DIE) {
-		ani = GOOMBA_ANI_DIE;
+		if (type == GOOMBA_TYPE_NORMAL)
+			ani = GOOMBA_ANI_DIE;
+		else
+			ani = GOOMBA_ANI_LV2_DIE;
 	}
 	else if (level == GOOMBA_LEVEL_FLY)
-		ani = GOOMBA_ANI_FLAY_RED;
+		ani = GOOMBA_ANI_FLY_RED;
 
 	animation_set->at(ani)->Render(x, y);
 
@@ -240,9 +259,11 @@ void CGoomba::HitByTail()
 	CMario* mario = scence->GetPlayer();
 	mario->GetBoundingBox(mario_bb_left, mario_bb_top, mario_bb_right, mario_bb_bottom);
 	if (mario->isSpinning())
-		if ((bb_left <= mario_bb_right && bb_right >= mario_bb_left) || (bb_right >= mario_bb_left && bb_left <= mario_bb_right))
-			if ((bb_top <= mario_bb_bottom && bb_bottom >= mario_bb_top) || (bb_bottom >= mario_bb_top && bb_top <= mario_bb_bottom))
+		if (bb_left <= mario_bb_right + MARIO_LEAF_BBOX_TAIL_WIDTH && bb_right >= mario_bb_left - MARIO_LEAF_BBOX_TAIL_WIDTH)
+			if (bb_top <= mario_bb_bottom && bb_bottom >= mario_bb_top + (mario_bb_bottom - mario_bb_top) / 2)
+			{
 				SetState(GOOMBA_STATE_DIE);
+			}
 }
 
 void CGoomba::LevelDown()
@@ -256,17 +277,16 @@ void CGoomba::Reset()
 	CGame *game = CGame::GetInstance();
 	float bb_left, bb_top, bb_right, bb_bottom;
 	GetBoundingBox(bb_left, bb_top, bb_right, bb_bottom);
-	if (!isInCamera() && game->isInCamera(start_x, start_y, start_x + (bb_right - bb_left), start_y + (bb_bottom - bb_top)))
+	if (!isInCamera() && !game->isInCamera(start_x - EXTRA_RESET_SPACE, start_y, start_x + (bb_right - bb_left) + EXTRA_RESET_SPACE, start_y + (bb_bottom - bb_top))) //10 tiles away from mario then reset
 	{
 		DebugOut(L"Reset \n");
-		if (state == GOOMBA_STATE_DIE || enable == false || visable == false)
-		{
+		
 			enable = true;
 			visable = true;
 			SetPosition(start_x, start_y);
 			setLevel(start_level);
-			SetState(GOOMBA_STATE_WALKING);
-		}
+			SetState(KOOPAS_STATE_WALKING);
+		
 	}
 		
 }

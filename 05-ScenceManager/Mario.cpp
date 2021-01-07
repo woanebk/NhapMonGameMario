@@ -17,6 +17,8 @@
 #include "BreakableBrick.h"
 #include "QuestionBrick.h"
 #include "Leaf.h"
+#include "Mushroom.h"
+
 CMario::CMario(float x, float y) : CGameObject()
 {
 	level = MARIO_LEVEL_BIG;
@@ -125,21 +127,19 @@ void CMario::Update(DWORD dt, vector<LPGAMEOBJECT> *coObjects)
 				}
 				else if (e->nx != 0)
 				{
-					if (spinning) goomba->SetState(GOOMBA_STATE_DIE);
-					else
-						if (untouchable == 0)
+					if (untouchable == 0)
+					{
+						if (goomba->GetState() != GOOMBA_STATE_DIE)
 						{
-							if (goomba->GetState() != GOOMBA_STATE_DIE)
+							if (level > MARIO_LEVEL_SMALL)
 							{
-								if (level > MARIO_LEVEL_SMALL)
-								{
-									level = MARIO_LEVEL_SMALL;
-									StartUntouchable();
-								}
-								else
-									SetState(MARIO_STATE_DIE);
+								level = MARIO_LEVEL_SMALL;
+								StartUntouchable();
 							}
+							else
+								SetState(MARIO_STATE_DIE);
 						}
+					}
 				}
 			} // if Goomba
 			else if (dynamic_cast<CPortal *>(e->obj))
@@ -153,50 +153,49 @@ void CMario::Update(DWORD dt, vector<LPGAMEOBJECT> *coObjects)
 				float koopas_bb_left, koopas_bb_top, koopas_bb_right, koopas_bb_bottom;
 				e->obj->GetBoundingBox(koopas_bb_left, koopas_bb_top, koopas_bb_right, koopas_bb_bottom); //koopas bounding box
 
-				if (e->nx != 0)
+				if (e->nx != 0 || e->ny > 0)
 				{
-					if (spinning) koopas->SetState(KOOPAS_STATE_DIE); //spin tail
-					else
-						if (koopas->GetState() == KOOPAS_STATE_SHELL)
+					
+					if (koopas->GetState() == KOOPAS_STATE_SHELL)
+					{
+						if (speed_up == false)
 						{
-							if (speed_up == false)
+							if (this->nx > 0)
 							{
-								if (this->nx > 0)
-								{
-									Kick();
-									koopas->SetState(KOOPAS_STATE_SPIN_RIGHT);
-								}
-								else
-								{
-									Kick();
-									koopas->SetState(KOOPAS_STATE_SPIN_LEFT);//kick the shell
-								}
+								Kick();
+								koopas->SetState(KOOPAS_STATE_SPIN_RIGHT);
 							}
 							else
-							{//hold koopas
-								holding = true;
-								koopas->setHolded(true);
+							{
+								Kick();
+								koopas->SetState(KOOPAS_STATE_SPIN_LEFT);//kick the shell
 							}
-
-
 						}
 						else
-							if (untouchable == 0)
+						{//hold koopas
+							holding = true;
+							koopas->setHolded(true);
+						}
+
+
+					}
+					else
+						if (untouchable == 0)
+						{
+							if (koopas->GetState() != KOOPAS_STATE_DIE)
 							{
-								if (koopas->GetState() != KOOPAS_STATE_DIE)
+								if (level > MARIO_LEVEL_SMALL)
 								{
-									if (level > MARIO_LEVEL_SMALL)
-									{
-										level = MARIO_LEVEL_SMALL;
-										StartUntouchable();
-									}
-									else
-										SetState(MARIO_STATE_DIE);
+									level = MARIO_LEVEL_SMALL;
+									StartUntouchable();
 								}
+								else
+									SetState(MARIO_STATE_DIE);
 							}
+						}
 				}
 
-				if (e->ny != 0)
+				if (e->ny < 0)
 				{
 
 					if (koopas->GetState() != KOOPAS_STATE_DIE)
@@ -248,115 +247,135 @@ void CMario::Update(DWORD dt, vector<LPGAMEOBJECT> *coObjects)
 						x += dx;
 					}
 				}//if block
-				else
-					if (dynamic_cast<CCoin*>(e->obj))
+				else if (dynamic_cast<CCoin*>(e->obj))
+				{
+					CCoin *coin = dynamic_cast<CCoin*>(e->obj);
+					if (e->nx != 0) {
+						isonground = false; // fix double jump bug
+						coin->setEnable(false);
+						coin->setVisable(false);
+					}
+					if (e->ny != 0) {
+						isonground = false;
+						coin->setEnable(false);
+						coin->setVisable(false);
+					} //if Coin : ==== earn money =====
+				}
+				else if (dynamic_cast<CPine*>(e->obj))
+				{
+					CPine *pine = dynamic_cast<CPine*>(e->obj);
+					if (e->nx != 0) {
+						vx = 0;
+						break;
+					}
+					if (e->ny != 0) {
+						vy = 0;
+						y += min_ty * rdy + ny * 0.4f;
+						x += dx;
+					}
+				} //if Pine
+				else if (dynamic_cast<CBreakableBrick*>(e->obj))
+				{
+					CBreakableBrick *breakablebrick = dynamic_cast<CBreakableBrick*>(e->obj);
+					if (e->nx != 0)
 					{
-						CCoin *coin = dynamic_cast<CCoin*>(e->obj);
-						if (e->nx != 0) {
-							isonground = false; // fix double jump bug
-							coin->setEnable(false);
-							coin->setVisable(false);
-						}
-						if (e->ny != 0) {
-							isonground = false;
-							coin->setEnable(false);
-							coin->setVisable(false);
-						} //if Coin : ==== earn money =====
+						vx = 0;
+						break; //to stop interact walking when collide on y
+					}
+					if (e->ny != 0)
+					{
+						vy = 0;
+						x += dx;
+					}
+				} //if breakable brick
+				else if (dynamic_cast<CQuestionBrick*>(e->obj))
+				{
+					CQuestionBrick *questionbrick = dynamic_cast<CQuestionBrick*>(e->obj);
+					if (e->nx != 0)
+					{
+						vx = 0;
+						break; //to stop interact walking when collide on y
+					}
+
+					if (e->ny < 0)
+					{
+						vy = 0;
+						x += dx;
 					}
 					else
-						if (dynamic_cast<CPine*>(e->obj))
+					{
+						if (questionbrick->getType() == QUESTION_BREAK_TYPE_NORMAL)
 						{
-							CPine *pine = dynamic_cast<CPine*>(e->obj);
-							if (e->nx != 0) {
-								vx = 0;
-								break;
-							}
-							if (e->ny != 0) {
-								vy = 0;
-								y += min_ty * rdy + ny * 0.4f;
-								x += dx;
-							}
-						} //if Pine
-						else if (dynamic_cast<CBreakableBrick*>(e->obj))
+							if (questionbrick->hasItem() && level == MARIO_LEVEL_SMALL)
+								questionbrick->CreateItem(ITEM_MUSHROOM_RED);
+							else if (questionbrick->hasItem() && level <= MARIO_LEVEL_LEAF)
+								questionbrick->CreateItem(ITEM_LEAF);
+						}
+						else //1 UP
 						{
-							CBreakableBrick *breakablebrick = dynamic_cast<CBreakableBrick*>(e->obj);
-							if (e->nx != 0)
-							{
-								if (spinning) { breakablebrick->Break(); }
-								vx = 0;
-								break; //to stop interact walking when collide on y
-							}
-							if (e->ny != 0)
-							{
-								vy = 0;
-								x += dx;
-							}
-						} //if breakable brick
-						else if (dynamic_cast<CQuestionBrick*>(e->obj))
-						{
-							CQuestionBrick *questionbrick = dynamic_cast<CQuestionBrick*>(e->obj);
-							if (e->nx != 0)
-							{
-								vx = 0;
-								break; //to stop interact walking when collide on y
-							}
+							if (questionbrick->hasItem())
+								questionbrick->CreateItem(ITEM_MUSHROOM_GREEN);
+						}
 
-							if (e->ny < 0)
-							{
-								vy = 0;
-								x += dx;
-							}
+						if (!questionbrick->isEmpty())
+							questionbrick->Jump();
+						questionbrick->getUsed();//coin and item set to 0
+						vy = MARIO_GRAVITY; //push mario down a bit
+						isfalling = true;
+					}
+				} //if breakable brick
+				else if (dynamic_cast<CBrick*>(e->obj))
+				{
+					CBrick *brick = dynamic_cast<CBrick*>(e->obj);
+					if (e->nx != 0)
+					{
+						x += min_tx * rdx + nx * 0.4f;
+						if (brick->canBounce()) {
+							vx = 0;
+							break; //to stop interact walking when collide on y
+						}
+					}
+					if (e->ny != 0)
+					{
+						if (brick->getType() == BRICK_TYPE_CLOUD) //gach may
+						{
+							if (e->ny > 0)
+								y += dy;
 							else
 							{
-								if(questionbrick->hasItem() && level <= MARIO_LEVEL_LEAF)
-									questionbrick->CreateItem(ITEM_LEAF);
-								questionbrick->getUsed();
-								vy = MARIO_GRAVITY;
-								isfalling = true;
+								vy = 0;
+								x += dx;
 							}
-						} //if breakable brick
-						else if (dynamic_cast<CBrick*>(e->obj))
-						{
-							CBrick *brick = dynamic_cast<CBrick*>(e->obj);
 							if (e->nx != 0)
 							{
-								x += min_tx * rdx + nx * 0.4f;
-								if (brick->canBounce()) {
-									vx = 0;
-									break; //to stop interact walking when collide on y
-								}
+								x += dx;
+								y += dy;
 							}
-							if (e->ny != 0)
-							{
-								if (brick->getType() == BRICK_TYPE_CLOUD) //gach may
-								{
-									if (e->ny > 0)
-										y += dy;
-									else
-									{
-										vy = 0;
-										x += dx;
-									}
-									if (e->nx != 0)
-									{
-										x += dx;
-										y += dy;
-									}
-								}
-								else
-								{// gach thuong
-									vy = 0;
-									x += dx;//loi di xuyen dach
-								}
-							}
-						} //if brick
-						else if (dynamic_cast<CLeaf*>(e->obj))
-						{
-							CLeaf *leaf = dynamic_cast<CLeaf*>(e->obj);
-							LevelUp();
-							leaf->setVisable(false);
-							leaf->setEnable(false);
-						} //if Leaf
+						}
+						else
+						{// gach thuong
+							vy = 0;
+							x += dx;//loi di xuyen dach
+						}
+					}
+				} //if brick
+				else if (dynamic_cast<CLeaf*>(e->obj))
+				{
+					CLeaf *leaf = dynamic_cast<CLeaf*>(e->obj);
+					LevelUp();
+					leaf->setVisable(false);
+					leaf->setEnable(false);
+				} //if Leaf
+				else if (dynamic_cast<CMushroom*>(e->obj))
+				{
+					CMushroom *mushroom = dynamic_cast<CMushroom*>(e->obj);
+					if (mushroom->getType() == MUSHROOM_TYPE_RED)
+						LevelUp();
+					else //type green
+						LifeUp();
+					mushroom->setVisable(false);
+					mushroom->setEnable(false);
+				} //if Mushroom
 		}
 	}
 
@@ -712,8 +731,21 @@ void CMario::SetLevel(int l)
 
 void CMario::LevelUp()
 {
+	if (level == MARIO_LEVEL_SMALL)
+	{
+		SetLevel(MARIO_LEVEL_BIG);
+		return;
+	}
 	if (level < MARIO_LEVEL_LEAF)
 		SetLevel(MARIO_LEVEL_LEAF);
+}
+
+void CMario::LevelDown()
+{
+}
+
+void CMario::LifeUp()
+{
 }
 
 void CMario::GetBoundingBox(float &left, float &top, float &right, float &bottom)
@@ -746,16 +778,16 @@ void CMario::GetBoundingBox(float &left, float &top, float &right, float &bottom
 			{
 				if (nx < 0)
 				{
-					left = x - MARIO_LEAF_BBOX_TAIL_WIDTH;// tail long
-					top = y + MARIO_LEAF_ISSPINNING_BBOX_HEIGHT;
-					right = x + MARIO_LEAF_BBOX_WIDTH + MARIO_LEAF_BBOX_TAIL_WIDTH;
+					left = x ;
+					top = y;
+					right = x + MARIO_LEAF_BBOX_WIDTH;
 					bottom = y + MARIO_LEAF_BBOX_HEIGHT;
 				}
 				else
 				{
-					left = x + MARIO_LEAF_BBOX_TAILDOWN_WIDTH - MARIO_LEAF_BBOX_TAIL_WIDTH;
-					right = x + MARIO_LEAF_BBOX_TAILDOWN_WIDTH + MARIO_LEAF_BBOX_WIDTH + MARIO_LEAF_BBOX_TAIL_WIDTH;
-					top = y + MARIO_LEAF_ISSPINNING_BBOX_HEIGHT;
+					left = x + MARIO_LEAF_BBOX_TAILDOWN_WIDTH;
+					right = left + MARIO_LEAF_BBOX_WIDTH;
+					top = y;
 					bottom = y + MARIO_LEAF_BBOX_HEIGHT;
 				}
 			}

@@ -7,6 +7,7 @@
 40	textures\map1-1_bank.png	255	255	255
 50	textures\enemies-3.png	0	128	128
 60	textures\misc-2.png	176	224	248
+70	textures\enemies-4.png	68	145	190
 
 # id	left	top	right	bottom	texture_id
 [SPRITES]
@@ -208,11 +209,17 @@ idle right
 30002	25	14	41	29	10
 #die
 30003	45	21	61	29	10
-#flygoomba
+#=========flygoomba==========
 30004	393	79	413	103	30
 30005	414	79	434	103	30
 30006	435	84	455	103	30
 30007	456	84	476	103	30
+#fly goomba walking (level down - RED)
+30008	88	32	104	48	70
+30009	104	32	120	48	70
+#fly goomba die (RED)
+30010	120	39	136	48	70
+
 #KOOPAS(50000->....)
 #walk left
 50001	205	191	221	217	30
@@ -246,11 +253,17 @@ idle right
 70002	527	20	543	36	20
 70003	475	20	490	35	20
 
-#LEAF_REWARD(70100++)
+#LEAF_REWARD(70100 -> 70199)
 #go left
 70100	300	208	316	222	20
 #go right
 70101	323	208	339	222	60
+
+#MUSHROOM (70200 ++)
+#RED
+70200	300	189	316	205	20
+#GREEN
+70201	318	189	334	205	20
 
 # ani_id	sprite1_id	time1	sprite2_id	time2	...
 [ANIMATIONS]
@@ -432,8 +445,12 @@ idle right
 701	30001	100	30002	100
 # die
 702	30003	100
-#fly goomba walk
+#fly goomba fly
 703	30004	100	30005	100	30006	100	30007	100
+#fly goomba walk
+704	30008	100	30009	100
+#fly goomba die
+705	30010	100
 
 # ==== KOOPAS  =========
 #walk left
@@ -457,12 +474,17 @@ idle right
 1000	70000	50	70001	50
 1001	70002	100	70003	100
 
-# ===== SPECIAL REWARD ==========
+# ===== SPECIAL REWARD ==========////
 # ===== LEAF =====(1030++)
 #go left
 1030	70100	100
 #go right
 1031	70101	100
+#MUSHROOM
+#red
+1032	70200	100
+#green
+1033	70201	100
 
 # id	ani1	ani2	ani3
 #
@@ -472,7 +494,7 @@ idle right
 # BRICK (wood, question, ground1, ground 2, cloud, brickable)
 2	601	602	603	604	605	650	606
 # GOOMBA
-3	701	702	703
+3	701	702	703	704	705
 # KOOPAS
 4	801	802	803	804	805	806	807
 # COIN
@@ -480,17 +502,12 @@ idle right
 # FIREBALL
 6	1000	1001
 #ITEM (LEAF)
-7	1030	1031
+7	1030	1031	1032	1033
 [OBJECTS]
 # type	x	y	ani_set_id	extra_settings per object type
-# type: 0 = Mario , 1 = Brick, 2 = Goomba, 3 = Koopas, Block = 4, Coin = 5, Pine = 6, FireBall = 7, Brickable Brick= 8, Question Brick = 9, Leaf = 10
+# type: 0 = Mario , 1 = Brick, 2 = Goomba, 3 = Koopas, Block = 4, Coin = 5, Pine = 6, FireBall = 7, Brickable Brick= 8, Question Brick = 9, Leaf = 10, Mushroom = 11 
 # MARIO
 0	17	350	1
-# KOOPAS
-3	560	383	4	2
-3	650	370	4	1
-3	750	370	4	1
-3	1440	200	4	1
 # BRICK 
 #type	l	t	aniset_id	animation	bounce
 #BRICK(GROUND)					
@@ -762,31 +779,42 @@ idle right
 8	2112	400	2	1	0
 
 #Question Brick: 
-#type	l	t	aniset_id	bounce	Reward
-9	176	352	2	1	0
-9	192	352	2	1	0
+#type	l	t	aniset_id	type	bounce	Reward
+9	176	352	2	1	1	0
+9	192	352	2	1	1	0
 
-9	224	304	2	1	0
-9	240	304	2	1	1
+9	224	304	2	1	1	0
+9	240	304	2	1	1	1
 
-9	416	320	2	1	0
+9	416	320	2	1	1	0
 
-9	656	384	2	1	1
+9	656	384	2	1	1	1
 
-9	704	352	2	1	0
+9	704	352	2	1	1	0
 
-9	1472	368	2	1	1
+9	1472	368	2	1	1	1
+
+#Quetion brick look like breakable on the sky
+9	1440	128	2	2	1	1
 
 # GOOMBA (type	left	top	aniset_id	level) normal_lvl = 1, fly_lvl =2
-2	192	391	3	2
-2	512	391	3	2
-2	1424	400	3	1
-2	1376	400	3	1
+2	192	391	3	1
+2	512	391	3	1
+2	912	383	3	1
+2	976	383	3	1
+2	1040	383	3	2
+
+# KOOPAS (tpye	x	y	ani_set_id	level)
+3	560	383	4	1
+3	1440	300	4	2
+3	1392	300	4	2
+3	1344	300	4	2
+3	1472	399	4	1
 
 # BLOCK
 #type	l	t	ani_set_id	r	b
 4	240	368	0	288	416
-4	272	336	0	320	416
+4	272	337	0	320	416
 
 4	405	368	0	480	416
 4	464	336	0	528	416

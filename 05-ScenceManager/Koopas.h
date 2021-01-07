@@ -6,6 +6,7 @@
 class CKoopas : public CGameObject
 {
 	int level;
+	int start_level;
 	virtual void GetBoundingBox(float &left, float &top, float &right, float &bottom);
 	virtual void Update(DWORD dt, vector<LPGAMEOBJECT> *coObjects);
 	virtual void Render();
@@ -26,4 +27,5 @@ public:
 	}
 	int getLevel() { return level; }
 	void LevelDown();
+	void Reset();
 };

@@ -74,8 +74,8 @@ void CBreakableBrick::HitByTail()
 	CMario* mario = scence->GetPlayer();
 	mario->GetBoundingBox(mario_bb_left, mario_bb_top, mario_bb_right, mario_bb_bottom);
 	if (mario->isSpinning())
-		if ((bb_left <= mario_bb_right && bb_right >= mario_bb_left) || (bb_right >= mario_bb_left && bb_left <= mario_bb_right))
-			if ((bb_top <= mario_bb_bottom && bb_bottom >= mario_bb_top) || (bb_bottom >= mario_bb_top && bb_top <= mario_bb_bottom))
+		if (bb_left <= mario_bb_right + MARIO_LEAF_BBOX_TAIL_WIDTH && bb_right >= mario_bb_left - MARIO_LEAF_BBOX_TAIL_WIDTH) 
+			if (bb_top <= mario_bb_bottom && bb_bottom >= mario_bb_top + (mario_bb_bottom - mario_bb_top)/2)
 			{
 				enable = false;
 				visable = false;

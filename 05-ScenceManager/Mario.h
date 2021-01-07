@@ -47,6 +47,8 @@ public:
 	void SetState(int state);
 	void SetLevel(int l);
 	void LevelUp();
+	void LevelDown();
+	void LifeUp();
 	int getLevel() { return level; }
 
 	void StartUntouchable() { untouchable = 1; untouchable_start = GetTickCount(); }
@@ -59,7 +61,7 @@ public:
 	
 	//spinning tail
 	DWORD getStartSpinning() { return spin_start; }
-	void StartSpinning() { spin_start = GetTickCount(); spinning = true; }
+	void StartSpinning() { spin_start = GetTickCount(); spinning = true; } 
 	bool isSpinning() { return spinning; }
 
 	//flapping tail

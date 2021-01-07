@@ -5,15 +5,18 @@
 class CQuestionBrick :public CGameObject
 {
 	int bounce = 0;
+	int type = 1;
 	int Coin = 0;
 	int Item = 0;
+	DWORD jumptime = 0;
 public:
-	CQuestionBrick(int hasitem, int b) {
+	CQuestionBrick(int t, int b, int hasitem) {
 		x = y = 0;
 		vx = vy = 0;
 		nx = 1;
 		Item = hasitem;
 		bounce = b;
+		type = t;
 		if (Item == 0)
 			Coin = 1;
 	}
@@ -36,6 +39,8 @@ public:
 
 	void getUsed();
 	void CreateItem(int item);
+	void Jump();
+	int getType() { return type; }
 	~CQuestionBrick();
 };
 

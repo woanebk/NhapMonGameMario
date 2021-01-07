@@ -13,6 +13,7 @@
 #include "BreakableBrick.h"
 #include "QuestionBrick.h"
 #include "Leaf.h"
+#include "Mushroom.h"
 
 using namespace std;
 
@@ -206,14 +207,21 @@ void CPlayScene::_ParseSection_OBJECTS(string line)
 	break;
 	case OBJECT_TYPE_QUESTION_BRICK:
 	{
-		int b = atof(tokens[4].c_str());
-		int r = atof(tokens[5].c_str());
-		obj = new CQuestionBrick(r, b);
+		int t = atof(tokens[4].c_str());
+		int b = atof(tokens[5].c_str());
+		int r = atof(tokens[6].c_str());
+		obj = new CQuestionBrick(t, b, r);
 	}
 	break;
 	case OBJECT_TYPE_LEAF:
 	{
 		obj = new CLeaf();
+	}
+	break;
+	case OBJECT_TYPE_MUSHROOM:
+	{
+		int t = atof(tokens[4].c_str());
+		obj = new CMushroom(t);
 	}
 	break;
 	default:

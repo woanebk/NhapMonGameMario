@@ -11,6 +11,7 @@
 CKoopas::CKoopas(int lvl)
 {
 	level = lvl;
+	start_level = lvl;
 	SetState(KOOPAS_STATE_WALKING);
 }
 
@@ -39,6 +40,8 @@ void CKoopas::GetBoundingBox(float &left, float &top, float &right, float &botto
 
 void CKoopas::Update(DWORD dt, vector<LPGAMEOBJECT> *coObjects)
 {
+	if (!enable)
+		return;
 	CGameObject::Update(dt, coObjects);
 
 	//
@@ -51,7 +54,7 @@ void CKoopas::Update(DWORD dt, vector<LPGAMEOBJECT> *coObjects)
 	vector<LPCOLLISIONEVENT> coEventsResult;
 
 	coEvents.clear();
-
+	Reset();
 	if (state != KOOPAS_STATE_DIE)
 		CalcPotentialCollisions(coObjects, coEvents);
 
@@ -155,12 +158,20 @@ void CKoopas::Update(DWORD dt, vector<LPGAMEOBJECT> *coObjects)
 			}//if Breakable brick
 			else if (dynamic_cast<CQuestionBrick*> (e->obj))
 			{
+				CPlayScene* scence = (CPlayScene*)CGame::GetInstance()->GetCurrentScene();
+				CMario* mario = scence->GetPlayer();
 				CQuestionBrick *questionbrick = dynamic_cast<CQuestionBrick*>(e->obj);
 				if (e->nx != 0)
 				{
 					if (state == KOOPAS_STATE_SPIN_LEFT || state == KOOPAS_STATE_SPIN_RIGHT)
 					{
 						vx = -vx;
+						if (questionbrick->hasItem() && mario->getLevel() == MARIO_LEVEL_SMALL)
+							questionbrick->CreateItem(ITEM_MUSHROOM_RED);
+						else if (questionbrick->hasItem() && mario->getLevel() <= MARIO_LEVEL_LEAF)
+							questionbrick->CreateItem(ITEM_LEAF);
+						if (!questionbrick->isEmpty())
+							questionbrick->Jump();
 						questionbrick->getUsed();
 						break;
 						//add get reward from brick here...
@@ -185,12 +196,14 @@ void CKoopas::Update(DWORD dt, vector<LPGAMEOBJECT> *coObjects)
 
 					if (brick->canBounce() == 1)
 						vx = -vx;
+					break;
 				}
 				if (e->ny != 0)
 				{
 					if (level == KOOPAS_LEVEL_FLY && e->ny < 0)
 					{
 						x += dx;
+						y += dy;
 						vy = -KOOPAS_FLY_SPEED;
 					}
 					else
@@ -317,9 +330,11 @@ void CKoopas::HitByTail()
 	CMario* mario = scence->GetPlayer();
 	mario->GetBoundingBox(mario_bb_left, mario_bb_top, mario_bb_right, mario_bb_bottom);
 	if (mario->isSpinning())
-		if ((bb_left <= mario_bb_right && bb_right >= mario_bb_left) || (bb_right >= mario_bb_left && bb_left <= mario_bb_right))
-			if ((bb_top <= mario_bb_bottom && bb_bottom >= mario_bb_top) || (bb_bottom >= mario_bb_top && bb_top <= mario_bb_bottom))
+		if (bb_left <= mario_bb_right + MARIO_LEAF_BBOX_TAIL_WIDTH && bb_right >= mario_bb_left - MARIO_LEAF_BBOX_TAIL_WIDTH)
+			if (bb_top <= mario_bb_bottom && bb_bottom >= mario_bb_top + (mario_bb_bottom - mario_bb_top) / 2)
+			{
 				SetState(KOOPAS_STATE_DIE);
+			}
 }
 
 void CKoopas::getKicked()
@@ -347,4 +362,23 @@ void CKoopas::LevelDown()
 {
 	if (level == KOOPAS_LEVEL_FLY)
 		level = KOOPAS_LEVEL_NORMAL;
+}
+
+void CKoopas::Reset()
+{
+	CGame *game = CGame::GetInstance();
+	float bb_left, bb_top, bb_right, bb_bottom;
+	GetBoundingBox(bb_left, bb_top, bb_right, bb_bottom);
+	if (!isInCamera() && !game->isInCamera(start_x - EXTRA_RESET_SPACE, start_y, start_x + (bb_right - bb_left) + EXTRA_RESET_SPACE, start_y + (bb_bottom - bb_top))) //10 tiles away from mario then reset
+	{
+		DebugOut(L"Reset \n");
+
+		enable = true;
+		visable = true;
+		SetPosition(start_x, start_y);
+		setLevel(start_level);
+		SetState(KOOPAS_STATE_WALKING);
+
+	}
+
 }

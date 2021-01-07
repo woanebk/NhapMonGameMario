@@ -7,6 +7,7 @@ class CGoomba : public CGameObject
 {
 	int level;
 	int start_level;
+	int type; //color
 	virtual void GetBoundingBox(float &left, float &top, float &right, float &bottom);
 	virtual void Update(DWORD dt, vector<LPGAMEOBJECT> *coObjects);
 	virtual void Render();
@@ -18,6 +19,13 @@ public:
 		level = l;
 	}
 	int getLevel() { return level; }
+
+	void setType(int t)
+	{
+		type = t;
+	}
+	int getType() { return type; }
+
 	CGoomba(int lvl);
 	virtual void SetState(int state);
 	void HitByTail();

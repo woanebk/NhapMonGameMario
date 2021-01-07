@@ -33,7 +33,9 @@ void CLeaf::Update(DWORD dt, vector<LPGAMEOBJECT>* coObjects)
 
 	// Simple fall down
 	vy = LEAF_GRAVITY * dt;
-	DebugOut(L"%d \t,%d \n ", vx, vy);
+
+	ManageJumping();
+
 	if (GetTickCount64() - turn_around_time > LEAF_TURN_AROUND_TIME)
 	{
 		vx = -vx;
@@ -94,5 +96,26 @@ void CLeaf::HitMario()
 		mario->LevelUp();
 		enable = false;
 		visable = false;
+	}
+}
+
+void CLeaf::Jump()
+{
+	isjumping = true;
+	jumptime = GetTickCount64();
+}
+
+void CLeaf::ManageJumping()
+{
+	if (isjumping)
+	{
+		vy = -LEAF_JUMP_SPEED;
+		vx = 0;
+	}
+	if (isjumping && GetTickCount64() - jumptime > LEAF_JUMP_TIME)
+	{
+		isjumping = false;
+		jumptime = 0;
+		vx = -LEAF_SPEED_x;
 	}
 }

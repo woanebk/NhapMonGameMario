@@ -2,19 +2,17 @@
 #include "GameObject.h"
 #include "define.h"
 
-class CLeaf : public CGameObject
+class CMushroom: public CGameObject
 {
-	DWORD jumptime = 0;
-	bool isjumping = false;
+	int type = MUSHROOM_TYPE_RED;
 public:
-	CLeaf();
+	CMushroom(int t);
 	virtual void GetBoundingBox(float &left, float &top, float &right, float &bottom);
 	virtual void Update(DWORD dt, vector<LPGAMEOBJECT> *coObjects);
 	virtual void Render();
-	DWORD turn_around_time;
-	~CLeaf();
 	void HitMario();
-	void Jump();
-	void ManageJumping();
+	void ChooseDirection();
+	~CMushroom();
+	int getType() { return type; }
 };
 
