@@ -190,31 +190,46 @@ void CKoopas::Update(DWORD dt, vector<LPGAMEOBJECT> *coObjects)
 			else if (dynamic_cast<CBrick*>(e->obj))
 			{
 				CBrick *brick = dynamic_cast<CBrick*>(e->obj);
-				if (e->nx != 0)
+				
+				if (brick->getType() == BRICK_TYPE_INVISIBLE)
 				{
-					x += min_tx * rdx + nx * 0.4f;
-
-					if (brick->canBounce() == 1)
-						vx = -vx;
-					break;
-				}
-				if (e->ny != 0)
-				{
-					if (level == KOOPAS_LEVEL_FLY && e->ny < 0)
+					if (level == KOOPAS_LEVEL_NORMAL && state == KOOPAS_STATE_WALKING && e->nx != 0)
 					{
-						x += dx;
-						y += dy;
-						vy = -KOOPAS_FLY_SPEED;
+						vx = -vx;
+						break;
 					}
 					else
 					{
-						x += dx;
+						x += dx; y += dy;
 					}
-					//if (brick->canBounce() == 1)
-					//	if (state != KOOPAS_STATE_SPIN_LEFT && state != KOOPAS_STATE_SPIN_RIGHT)
-					//		vx = -vx; //turn around on edge
 				}
-			} // if Brick
+				else
+				{
+					if (e->nx != 0)
+					{
+						x += min_tx * rdx + nx * 0.4f;
+						if (brick->canBounce() == 1)
+							vx = -vx;
+						break;
+					}
+					if (e->ny != 0)
+					{
+						if (level == KOOPAS_LEVEL_FLY && e->ny < 0)
+						{
+							x += dx;
+							y += dy;
+							vy = -KOOPAS_FLY_SPEED;
+						}
+						else
+						{
+							x += dx;
+						}
+						//if (brick->canBounce() == 1)
+						//	if (state != KOOPAS_STATE_SPIN_LEFT && state != KOOPAS_STATE_SPIN_RIGHT)
+						//		vx = -vx; //turn around on edge
+					}
+				} // if Brick
+			}
 		}
 
 		//

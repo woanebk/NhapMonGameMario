@@ -91,3 +91,5 @@ void CBreakableBrick::Break()
 	enable = false;
 	//need to add break animation
 }
+
+

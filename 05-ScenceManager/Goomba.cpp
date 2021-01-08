@@ -158,34 +158,38 @@ void CGoomba::Update(DWORD dt, vector<LPGAMEOBJECT> *coObjects)
 				else if (dynamic_cast<CBrick*>(e->obj))
 				{
 					CBrick *brick = dynamic_cast<CBrick*>(e->obj);
-
-					if (e->ny != 0)
+					if (brick->getType() == BRICK_TYPE_INVISIBLE)
 					{
-						if (level == GOOMBA_LEVEL_NORMAL)
+						x += dx; y += dy;
+					}//====INVISIBLE
+					else
+					{
+						if (e->ny != 0)
 						{
-							vy = 0;
-							y += min_ty * rdy + ny * 0.4f;
-							x += dx;
+							if (level == GOOMBA_LEVEL_NORMAL)
+							{
+								vy = 0;
+								y += min_ty * rdy + ny * 0.4f;
+								x += dx;
+								if (brick->canBounce() == 1)
+									vx = -vx;
+							}
+							else
+							{
+								x += dx;
+								y += min_ty * rdy + ny * 0.4f;
+								if (brick->canBounce() == 1)
+									vx = -vx;
+							}
+
+						}
+						if (e->nx != 0)
+						{
+							x += min_tx * dx + nx * 0.4f;
 							if (brick->canBounce() == 1)
 								vx = -vx;
 						}
-						else
-						{
-							x += dx;
-							y += min_ty * rdy + ny * 0.4f;
-							if (brick->canBounce() == 1)
-								vx = -vx;
-						}
-
 					}
-					if (e->nx != 0)
-					{
-						x += min_tx * dx + nx * 0.4f;
-						if (brick->canBounce() == 1)
-							vx = -vx;
-					}
-
-
 				}// if brick
 				else if (dynamic_cast<CQuestionBrick*>(e->obj))
 				{
@@ -264,6 +268,10 @@ void CGoomba::HitByTail()
 			{
 				SetState(GOOMBA_STATE_DIE);
 			}
+	CAnimationSets * animation_sets = CAnimationSets::GetInstance();
+	LPANIMATION_SET ani_set = animation_sets->Get(MARIO_SET_ID);
+	ani_set->at(MARIO_ANI_TAIL_HIT_EFFECT)->Render(x, y);
+	
 }
 
 void CGoomba::LevelDown()

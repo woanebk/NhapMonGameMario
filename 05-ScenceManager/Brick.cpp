@@ -3,10 +3,10 @@
 
 void CBrick::Render()
 {
-	if(type == BRICK_TYPE_WOOD)
-	animation_set->at(BRICK_ANI_WOOD)->Render(x, y);
+	if (type == BRICK_TYPE_WOOD)
+		animation_set->at(BRICK_ANI_WOOD)->Render(x, y);
 	else
-		if(type == BRICK_TYPE_QUESTION)
+		if (type == BRICK_TYPE_QUESTION)
 			animation_set->at(BRICK_ANI_QUESTION)->Render(x, y);
 		else
 			if (type == BRICK_TYPE_GROUND_1)
@@ -17,8 +17,10 @@ void CBrick::Render()
 				else
 					if (type == BRICK_TYPE_CLOUD)
 						animation_set->at(BRICK_ANI_CLOUD)->Render(x, y);
+					else if (type == BRICK_TYPE_MONEYBUTTON)
+						animation_set->at(BRICK_ANI_MONEY_BUTTON)->Render(x, y);
 					
-	//RenderBoundingBox();
+	RenderBoundingBox();
 }
 
 void CBrick::GetBoundingBox(float &l, float &t, float &r, float &b)
@@ -28,4 +30,6 @@ void CBrick::GetBoundingBox(float &l, float &t, float &r, float &b)
 	r = x + BRICK_BBOX_WIDTH;
 	b = y + BRICK_BBOX_HEIGHT;
 }
+
+
 

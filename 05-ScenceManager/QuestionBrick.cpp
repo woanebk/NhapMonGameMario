@@ -21,13 +21,12 @@ void CQuestionBrick::CreateItem(int item)
 	if (item == ITEM_LEAF)
 	{
 		CLeaf *leaf = new CLeaf();
+		leaf->SetPosition(this->x, this->y);
+		leaf->SetStartPosition(this->x, this->y);
+
 		CAnimationSets * animation_sets = CAnimationSets::GetInstance();
 		LPANIMATION_SET ani_set = animation_sets->Get(ITEM_SET_ID);
 		leaf->SetAnimationSet(ani_set);
-
-		
-		leaf->SetPosition(this->x, this->y);
-		leaf->SetStartPosition(this->x, this->y);
 
 		CPlayScene *currenscence = (CPlayScene*)CGame::GetInstance()->GetCurrentScene();
 		currenscence->PushBackObject(leaf);
@@ -36,14 +35,12 @@ void CQuestionBrick::CreateItem(int item)
 	if (item == ITEM_MUSHROOM_RED)
 	{
 		CMushroom *red_mushroom = new CMushroom(MUSHROOM_TYPE_RED);
+		red_mushroom->SetPosition(this->x, this->y - MUSHROOM_BBOX_HEIGHT - 1);
+		red_mushroom->SetStartPosition(this->x, this->y - MUSHROOM_BBOX_HEIGHT - 1);
+		red_mushroom->ChooseDirection();
 		CAnimationSets * animation_sets = CAnimationSets::GetInstance();
 		LPANIMATION_SET ani_set = animation_sets->Get(ITEM_SET_ID);
 		red_mushroom->SetAnimationSet(ani_set);
-
-
-		red_mushroom->SetPosition(this->x, this->y - MUSHROOM_BBOX_HEIGHT);
-		red_mushroom->SetStartPosition(this->x, this->y - MUSHROOM_BBOX_HEIGHT);
-		red_mushroom->ChooseDirection();
 
 		CPlayScene *currenscence = (CPlayScene*)CGame::GetInstance()->GetCurrentScene();
 		currenscence->PushBackObject(red_mushroom);
@@ -51,17 +48,29 @@ void CQuestionBrick::CreateItem(int item)
 	if (item == ITEM_MUSHROOM_GREEN)
 	{
 		CMushroom *green_mushroom = new CMushroom(MUSHROOM_TYPE_GREEN);
+		green_mushroom->SetPosition(this->x, this->y - MUSHROOM_BBOX_HEIGHT - 1);
+		green_mushroom->SetStartPosition(this->x, this->y - MUSHROOM_BBOX_HEIGHT - 1);
+		green_mushroom->ChooseDirection();
+
 		CAnimationSets * animation_sets = CAnimationSets::GetInstance();
 		LPANIMATION_SET ani_set = animation_sets->Get(ITEM_SET_ID);
 		green_mushroom->SetAnimationSet(ani_set);
 
-
-		green_mushroom->SetPosition(this->x, this->y - MUSHROOM_BBOX_HEIGHT);
-		green_mushroom->SetStartPosition(this->x, this->y - MUSHROOM_BBOX_HEIGHT);
-		green_mushroom->ChooseDirection();
-
 		CPlayScene *currenscence = (CPlayScene*)CGame::GetInstance()->GetCurrentScene();
 		currenscence->PushBackObject(green_mushroom);
+	}
+	if (item == ITEM_MONEY_BUTTON)
+	{
+		CBrick *moneybutton = new CBrick(BRICK_TYPE_MONEYBUTTON, CANBOUNCE);
+		moneybutton->SetPosition(this->x, this->y - BRICK_BBOX_HEIGHT );
+		moneybutton->SetStartPosition(this->x, this->y - BRICK_BBOX_HEIGHT );
+
+		CAnimationSets * animation_sets = CAnimationSets::GetInstance();
+		LPANIMATION_SET ani_set = animation_sets->Get(BRICK_SET_ID);
+		moneybutton->SetAnimationSet(ani_set);
+
+		CPlayScene *currenscence = (CPlayScene*)CGame::GetInstance()->GetCurrentScene();
+		currenscence->PushBackObject(moneybutton);
 	}
 }
 
@@ -81,9 +90,11 @@ void CQuestionBrick::Render()
 		animation_set->at(BRICK_ANI_EMPTY_QUESTION)->Render(x, y);
 	else
 	{
-		if(type == QUESTION_BREAK_TYPE_NORMAL)
+		if(type == QUESTION_BRICK_TYPE_NORMAL)
 			animation_set->at(BRICK_ANI_QUESTION)->Render(x, y);
-		else if (type== QUESTION_BREAK_TYPE_ONSKY_BREAKABLE_ALIKE)
+		else if (type== QUESTION_BRICK_TYPE_ONSKY_BREAKABLE_ALIKE)
+			animation_set->at(BRICK_ANI_BREAKABLE)->Render(x, y);
+		else if(type == QUESTION_BRICK_TYPE_MONEY_BUTTON_CREATOR)
 			animation_set->at(BRICK_ANI_BREAKABLE)->Render(x, y);
 	}
 }
@@ -166,12 +177,20 @@ void CQuestionBrick::HitByTail()
 		if (bb_left <= mario_bb_right + MARIO_LEAF_BBOX_TAIL_WIDTH && bb_right >= mario_bb_left - MARIO_LEAF_BBOX_TAIL_WIDTH)
 			if (bb_top <= mario_bb_bottom && bb_bottom >= mario_bb_top + (mario_bb_bottom - mario_bb_top) / 2)
 			{
-				if (hasItem() && mario->getLevel() == MARIO_LEVEL_SMALL)
-					CreateItem(ITEM_MUSHROOM_RED);
-				else if (hasItem() && mario->getLevel() <= MARIO_LEVEL_LEAF)
-					CreateItem(ITEM_LEAF);
-				if (!isEmpty())
-					Jump();
+				if (type == QUESTION_BRICK_TYPE_MONEY_BUTTON_CREATOR)
+				{
+					if (hasItem())
+						CreateItem(ITEM_MONEY_BUTTON);
+				}
+				else
+				{
+					if (hasItem() && mario->getLevel() == MARIO_LEVEL_SMALL)
+						CreateItem(ITEM_MUSHROOM_RED);
+					else if (hasItem() && mario->getLevel() <= MARIO_LEVEL_LEAF)
+						CreateItem(ITEM_LEAF);
+					if (!isEmpty())
+						Jump();
+				}
 				getUsed();
 			}
 }

@@ -133,7 +133,7 @@ void CMario::Update(DWORD dt, vector<LPGAMEOBJECT> *coObjects)
 						{
 							if (level > MARIO_LEVEL_SMALL)
 							{
-								level = MARIO_LEVEL_SMALL;
+								LevelDown();
 								StartUntouchable();
 							}
 							else
@@ -186,7 +186,7 @@ void CMario::Update(DWORD dt, vector<LPGAMEOBJECT> *coObjects)
 							{
 								if (level > MARIO_LEVEL_SMALL)
 								{
-									level = MARIO_LEVEL_SMALL;
+									LevelDown();
 									StartUntouchable();
 								}
 								else
@@ -304,21 +304,31 @@ void CMario::Update(DWORD dt, vector<LPGAMEOBJECT> *coObjects)
 					}
 					else
 					{
-						if (questionbrick->getType() == QUESTION_BREAK_TYPE_NORMAL)
+						if (questionbrick->getType() == QUESTION_BRICK_TYPE_NORMAL)
 						{
 							if (questionbrick->hasItem() && level == MARIO_LEVEL_SMALL)
 								questionbrick->CreateItem(ITEM_MUSHROOM_RED);
 							else if (questionbrick->hasItem() && level <= MARIO_LEVEL_LEAF)
 								questionbrick->CreateItem(ITEM_LEAF);
 						}
-						else //1 UP
+						else if(questionbrick->getType() == QUESTION_BRICK_TYPE_ONSKY_BREAKABLE_ALIKE)//1 UP
 						{
 							if (questionbrick->hasItem())
 								questionbrick->CreateItem(ITEM_MUSHROOM_GREEN);
 						}
+						else if (questionbrick->getType() == QUESTION_BRICK_TYPE_MONEY_BUTTON_CREATOR)
+						{
+							if (questionbrick->hasItem())
+								questionbrick->CreateItem(ITEM_MONEY_BUTTON);
+							questionbrick->getUsed();//coin and item set to 0
+							vy = MARIO_GRAVITY; //push mario down a bit
+							isfalling = true;
+							return; //no brick jumping needed
+						}
 
 						if (!questionbrick->isEmpty())
 							questionbrick->Jump();
+
 						questionbrick->getUsed();//coin and item set to 0
 						vy = MARIO_GRAVITY; //push mario down a bit
 						isfalling = true;
@@ -327,35 +337,43 @@ void CMario::Update(DWORD dt, vector<LPGAMEOBJECT> *coObjects)
 				else if (dynamic_cast<CBrick*>(e->obj))
 				{
 					CBrick *brick = dynamic_cast<CBrick*>(e->obj);
-					if (e->nx != 0)
+					if (brick->getType() == BRICK_TYPE_INVISIBLE)
 					{
-						x += min_tx * rdx + nx * 0.4f;
-						if (brick->canBounce()) {
-							vx = 0;
-							break; //to stop interact walking when collide on y
-						}
-					}
-					if (e->ny != 0)
+						x += dx; y += dy;
+					} //////INVISIBLE
+					else
 					{
-						if (brick->getType() == BRICK_TYPE_CLOUD) //gach may
+						if (e->nx != 0)
 						{
-							if (e->ny > 0)
-								y += dy;
-							else
-							{
-								vy = 0;
-								x += dx;
-							}
-							if (e->nx != 0)
-							{
-								x += dx;
-								y += dy;
+							x += min_tx * rdx + nx * 0.4f;
+							if (brick->canBounce()) {
+								vx = 0;
+								break; //to stop interact walking when collide on y
 							}
 						}
 						else
-						{// gach thuong
-							vy = 0;
-							x += dx;//loi di xuyen dach
+						if (e->ny != 0)
+						{
+							if (brick->getType() == BRICK_TYPE_CLOUD) //gach may
+							{
+								if (e->ny > 0)
+									y += dy;
+								else if(e->ny < 0)
+								{
+									vy = 0;
+									x += dx;
+								}
+								if (e->nx != 0)
+								{
+									x += dx;
+									y += dy;
+								}
+							}
+							else // gach thuong
+							{
+								vy = 0;
+								x += dx;//loi di xuyen dach
+							}
 						}
 					}
 				} //if brick
@@ -392,6 +410,18 @@ void CMario::Update(DWORD dt, vector<LPGAMEOBJECT> *coObjects)
 void CMario::Render()
 {
 	int ani = -1;
+	if (istransformingtoBig)
+	{
+		if (nx < 0)
+			ani = MARIO_ANI_TRANSFORM_SMALL_TO_BIG_LEFT;
+		else
+			ani = MARIO_ANI_TRANSFORM_SMALL_TO_BIG_RIGHT;
+	}
+	else if (istransformingtoLeaf)
+	{
+		ani = MARIO_ANI_TRANSFORM_TO_LEAF;
+	}
+	else
 	if (state == MARIO_STATE_DIE)
 		ani = MARIO_ANI_DIE;
 	else if (level == MARIO_LEVEL_BIG) //============================================================ MARIO BIG ANIMATION
@@ -733,15 +763,36 @@ void CMario::LevelUp()
 {
 	if (level == MARIO_LEVEL_SMALL)
 	{
+		startTransformtoBig();
 		SetLevel(MARIO_LEVEL_BIG);
-		return;
 	}
-	if (level < MARIO_LEVEL_LEAF)
+	else
+	if (level == MARIO_LEVEL_BIG)
+	{
+		startTransFormtoLeaf();
 		SetLevel(MARIO_LEVEL_LEAF);
+	}
+	else
+	if (level == MARIO_LEVEL_LEAF)
+	{
+		startTransFormtoLeaf();
+		SetLevel(MARIO_LEVEL_FIRE);
+	}
 }
 
 void CMario::LevelDown()
 {
+	if (level == MARIO_LEVEL_BIG)
+	{
+		startTransformtoBig();
+		SetLevel(MARIO_LEVEL_SMALL);
+	}
+	else
+	if (level >= MARIO_LEVEL_LEAF)
+	{
+		startTransFormtoLeaf();
+		SetLevel(MARIO_LEVEL_BIG);
+	}
 }
 
 void CMario::LifeUp()
@@ -927,5 +978,19 @@ void CMario::TimingEvent() {
 		kick_start = 0; //reset timer
 		kicking = false;//no more kicking
 	}
+
+	if (GetTickCount64() - leaf_transform_start > TRANSFORM_TO_LEAF_MARIO_TIME && istransformingtoLeaf)
+	{
+		istransformingtoLeaf = false;
+		leaf_transform_start = 0;
+	}
+
+	if (GetTickCount64() - big_transform_start > TRANSFORM_TO_BIG_MARIO_TIME && istransformingtoBig)
+	{
+		istransformingtoBig = false;
+		big_transform_start = 0;
+	}
+
+	
 }
 

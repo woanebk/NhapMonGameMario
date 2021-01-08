@@ -126,21 +126,28 @@ void CMushroom::Update(DWORD dt, vector<LPGAMEOBJECT>* coObjects)
 			if (dynamic_cast<CBrick*>(e->obj))
 			{
 				CBrick *brick = dynamic_cast<CBrick*>(e->obj);
-				if (e->nx != 0 && brick->canBounce())
+				if (brick->getType() == BRICK_TYPE_INVISIBLE)
 				{
-					vx = -vx;
-					x += dx;
-					vy = 0;
-				}
-				if (e->nx != 0 && !brick->canBounce())
+					x += dx; y += dy;
+				}//====INVISIBLE
+				else
 				{
-					vy = 0;
-					x += dx;
-				}
-				if (e->ny < 0)
-				{
-					x += dx;
-					vy = 0;
+					if (e->nx != 0 && brick->canBounce())
+					{
+						vx = -vx;
+						x += dx;
+						vy = 0;
+					}
+					if (e->nx != 0 && !brick->canBounce())
+					{
+						vy = 0;
+						x += dx;
+					}
+					if (e->ny < 0)
+					{
+						x += dx;
+						vy = 0;
+					}
 				}
 			}
 			if (dynamic_cast<CKoopas*>(e->obj))

@@ -34,6 +34,11 @@ class CMario : public CGameObject
 	DWORD kick_start;
 	//is changing direction when brake
 	bool ischangingdirection = false;
+	//transformation
+	bool istransformingtoBig = false;
+	bool istransformingtoLeaf = false;
+	DWORD big_transform_start;
+	DWORD leaf_transform_start;
 
 	float start_x;			// initial position of Mario at scene
 	float start_y; 
@@ -81,6 +86,10 @@ public:
 	//holding
 	void setHolding(bool h) { holding = h; }
 	bool isHolding() { return holding; }
+
+	//transform
+	void startTransformtoBig() { istransformingtoBig = true; big_transform_start = GetTickCount64(); }
+	void startTransFormtoLeaf() { istransformingtoLeaf = true; leaf_transform_start = GetTickCount64(); }
 	
 	void ManageAccelerationAndSpeed();
 
