@@ -27,9 +27,11 @@ void CBrick::Render()
 						else
 							animation_set->at(BRICK_ANI_MONEY_BUTTON_PRESSED)->Render(x, y);
 					}
+					else if(type == BRICK_TYPE_BASEMENT)
+						animation_set->at(BRICK_ANI_BASEMENT)->Render(x, y);
 						
 					
-	//RenderBoundingBox();
+	RenderBoundingBox();
 }
 
 void CBrick::Update(DWORD dt, vector<LPGAMEOBJECT> *coObjects)

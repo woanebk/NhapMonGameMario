@@ -33,8 +33,13 @@
 #define WORLD_1_1_TILESET L"map1-1_bank.png"
 #define WORLD_1_1_MATRIX_TXT L"map1-1.txt"
 
+#define WORLD_1_1_SECRECT_TILESET			L"secrectmap_1-1_bank.png"
+#define WORLD_1_1_SECRECT_MATRIX_TXT		L"secrect_map1-1_matrix.txt"
+
 #define WORLD_1_1_TILESET_ID	1
 #define WORLD_1_1_MATRIX_ID		1
+#define WORLD_1_1_SECRECT_TILESET_ID	2
+#define WORLD_1_1_SECRECT_MATRIX_ID		2
 
 //GENERAL
 #define EXTRA_RESET_SPACE		320
@@ -267,6 +272,7 @@
 #define BRICK_TYPE_CLOUD 5
 #define BRICK_TYPE_INVISIBLE	6
 #define BRICK_TYPE_MONEYBUTTON	7
+#define BRICK_TYPE_BASEMENT		8
 
 #define BRICK_ANI_WOOD					0
 #define BRICK_ANI_QUESTION				1
@@ -277,6 +283,8 @@
 #define BRICK_ANI_EMPTY_QUESTION		6
 #define BRICK_ANI_MONEY_BUTTON			7
 #define BRICK_ANI_MONEY_BUTTON_PRESSED	8
+#define BRICK_ANI_BASEMENT				9
+
 
 #define CANBOUNCE		1
 #define CANNOTBOUNCE	0

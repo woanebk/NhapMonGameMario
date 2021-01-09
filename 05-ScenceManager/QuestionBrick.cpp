@@ -176,7 +176,10 @@ void CQuestionBrick::HitByTail()
 				if (type == QUESTION_BRICK_TYPE_MONEY_BUTTON_CREATOR)
 				{
 					if (hasItem())
+					{
 						CreateItem(ITEM_MONEY_BUTTON);
+						Render_Tail_Hit();
+					}
 				}
 				else
 				{

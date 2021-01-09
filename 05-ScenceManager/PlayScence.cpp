@@ -246,8 +246,13 @@ void CPlayScene::_ParseSection_MAP_BACKGROUND(string line)
 
 	if(tile_set == WORLD_1_1_TILESET_ID)
 		mapbackground->SetTileSet(WORLD_1_1_TILESET, D3DCOLOR_XRGB(255, 255, 255));
+	else if(tile_set == WORLD_1_1_SECRECT_TILESET_ID)
+		mapbackground->SetTileSet(WORLD_1_1_SECRECT_TILESET, D3DCOLOR_XRGB(255, 255, 255));
+	//load matrix:
 	if(matrix == WORLD_1_1_MATRIX_ID)
 		mapbackground->LoadMatrix(WORLD_1_1_MATRIX_TXT);
+	else if (matrix == WORLD_1_1_SECRECT_MATRIX_ID)
+		mapbackground->LoadMatrix(WORLD_1_1_SECRECT_MATRIX_TXT);
 }
 
 void CPlayScene::Load()
@@ -406,6 +411,10 @@ void CPlayScenceKeyHandler::OnKeyDown(int KeyCode)
 				mario->StartSpinning();
 			}
 		}
+		break;
+	case DIK_P: //reset
+		CGame *game = CGame::GetInstance();
+		game->SwitchScene(2);
 		break;
 	}
 }

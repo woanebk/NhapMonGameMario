@@ -70,4 +70,5 @@ public:
 
 
 	static CAnimationSets * GetInstance();
+	void Clear();
 };
