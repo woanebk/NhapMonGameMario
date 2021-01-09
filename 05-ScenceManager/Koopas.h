@@ -11,7 +11,7 @@ class CKoopas : public CGameObject
 	virtual void Update(DWORD dt, vector<LPGAMEOBJECT> *coObjects);
 	virtual void Render();
 	bool holded = false;
-
+	bool Resetable = false;
 public:
 	CKoopas(int lvl);
 	virtual void SetState(int state);

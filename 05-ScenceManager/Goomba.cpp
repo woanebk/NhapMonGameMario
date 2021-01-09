@@ -60,7 +60,7 @@ void CGoomba::Update(DWORD dt, vector<LPGAMEOBJECT> *coObjects)
 	vector<LPCOLLISIONEVENT> coEventsResult;
 
 	coEvents.clear();
-	Reset();
+	//Reset();
 	CalcPotentialCollisions(coObjects, coEvents);
 	if (level == GOOMBA_LEVEL_FLY)
 	{
@@ -153,6 +153,10 @@ void CGoomba::Update(DWORD dt, vector<LPGAMEOBJECT> *coObjects)
 						x += min_tx * rdx + nx * 0.4f;
 						vx = -vx;
 					}
+					if (e->ny != 0)
+					{
+						x += dx;
+					}
 
 				}// if Goomba
 				else if (dynamic_cast<CBrick*>(e->obj))
@@ -176,10 +180,11 @@ void CGoomba::Update(DWORD dt, vector<LPGAMEOBJECT> *coObjects)
 							}
 							else
 							{
-								x += dx;
-								y += min_ty * rdy + ny * 0.4f;
 								if (brick->canBounce() == 1)
 									vx = -vx;
+								x += dx;
+								y += min_ty * rdy + ny * 0.4f;
+								
 							}
 
 						}
@@ -268,9 +273,9 @@ void CGoomba::HitByTail()
 			{
 				SetState(GOOMBA_STATE_DIE);
 			}
-	CAnimationSets * animation_sets = CAnimationSets::GetInstance();
-	LPANIMATION_SET ani_set = animation_sets->Get(MARIO_SET_ID);
-	ani_set->at(MARIO_ANI_TAIL_HIT_EFFECT)->Render(x, y);
+	/*CAnimationSets * animation_sets = CAnimationSets::GetInstance();
+	LPANIMATION_SET ani_set = animation_sets->Get(EFFECT_SET_ID);
+	ani_set->at(ANI_HIT_TAIL)->Render(x, y);*/
 	
 }
 
@@ -285,16 +290,25 @@ void CGoomba::Reset()
 	CGame *game = CGame::GetInstance();
 	float bb_left, bb_top, bb_right, bb_bottom;
 	GetBoundingBox(bb_left, bb_top, bb_right, bb_bottom);
-	if (!isInCamera() && !game->isInCamera(start_x - EXTRA_RESET_SPACE, start_y, start_x + (bb_right - bb_left) + EXTRA_RESET_SPACE, start_y + (bb_bottom - bb_top))) //10 tiles away from mario then reset
+	if (!Resetable)
 	{
-		DebugOut(L"Reset \n");
-		
+		if (!isInCamera() && !game->isInCamera(start_x - EXTRA_RESET_SPACE, start_y, start_x + (bb_right - bb_left) + EXTRA_RESET_SPACE, start_y + (bb_bottom - bb_top))) //10 tiles away from mario then reset
+		{
+			Resetable = true;
+		}
+	}
+	else
+	{
+		if (game->isInCamera(start_x, start_y, start_x + (bb_right - bb_left), start_y + (bb_bottom - bb_top)))
+		{
 			enable = true;
 			visable = true;
 			SetPosition(start_x, start_y);
 			setLevel(start_level);
 			SetState(KOOPAS_STATE_WALKING);
-		
+			Resetable = false;
+		}
 	}
+	
 		
 }

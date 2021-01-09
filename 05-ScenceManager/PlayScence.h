@@ -24,6 +24,7 @@ protected:
 	void _ParseSection_ANIMATIONS(string line);
 	void _ParseSection_ANIMATION_SETS(string line);
 	void _ParseSection_OBJECTS(string line);
+	void _ParseSection_MAP_BACKGROUND(string line);
 
 	
 public: 
@@ -34,6 +35,7 @@ public:
 	virtual void Render();
 	virtual void Unload();
 	void PushBackObject(CGameObject *gameobject) { objects.push_back(gameobject); }
+	vector<LPGAMEOBJECT> GetObjectList() { return objects; }
 	CMario * GetPlayer() { return player; } 
 
 	//friend class CPlayScenceKeyHandler;

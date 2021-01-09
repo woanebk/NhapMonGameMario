@@ -28,16 +28,6 @@ CPlayScene::CPlayScene(int id, LPCWSTR filePath):
 	See scene1.txt, scene2.txt for detail format specification
 */
 
-#define SCENE_SECTION_UNKNOWN -1
-#define SCENE_SECTION_TEXTURES 2
-#define SCENE_SECTION_SPRITES 3
-#define SCENE_SECTION_ANIMATIONS 4
-#define SCENE_SECTION_ANIMATION_SETS	5
-#define SCENE_SECTION_OBJECTS	6
-
-
-
-#define MAX_SCENE_LINE 1024
 
 
 void CPlayScene::_ParseSection_TEXTURES(string line)
@@ -201,8 +191,7 @@ void CPlayScene::_ParseSection_OBJECTS(string line)
 	case OBJECT_TYPE_BREAKABLE_BRICK:
 	{
 		int b = atof(tokens[4].c_str());
-		int s = atof(tokens[5].c_str());
-		obj = new CBreakableBrick(b,s);
+		obj = new CBreakableBrick(b);
 	}
 	break;
 	case OBJECT_TYPE_QUESTION_BRICK:
@@ -239,12 +228,36 @@ void CPlayScene::_ParseSection_OBJECTS(string line)
 	objects.push_back(obj);
 }
 
+void CPlayScene::_ParseSection_MAP_BACKGROUND(string line)
+{
+	vector<string> tokens = split(line);
+
+	if (tokens.size() < 7) return; // skip invalid lines - an animation set must at least id and one animation id
+
+	int tile_set = atoi(tokens[0].c_str());
+	int matrix = atoi(tokens[1].c_str());
+	int map_columns_count = atoi(tokens[2].c_str());
+	int map_rows_count = atoi(tokens[3].c_str());
+	float tile_width = atof(tokens[4].c_str());
+	float tile_height = atof(tokens[5].c_str());
+	int tile_set_rows_count = atoi(tokens[6].c_str());
+	int tile_set_columns_count = atoi(tokens[7].c_str());
+	//LOAD BACKGROUND:
+	
+	mapbackground = new MapBackground(map_columns_count, map_rows_count, TILE_HEIGHT, TILE_WIDTH, tile_set_rows_count, tile_set_columns_count);
+
+	if(tile_set == WORLD_1_1_TILESET_ID)
+		mapbackground->SetTileSet(WORLD_1_1_TILESET, D3DCOLOR_XRGB(255, 255, 255));
+	if(matrix == WORLD_1_1_MATRIX_ID)
+		mapbackground->LoadMatrix(WORLD_1_1_MATRIX_TXT);
+}
+
 void CPlayScene::Load()
 {
 	//Load background
-	mapbackground = new MapBackground(WORLD_1_1_TILE_COLUMNS, WORLD_1_1_TILE_ROWS, TILE_WIDTH, TILE_HEIGHT, WORLD_1_1_MAP_TILESET_ROWS, WORLD_1_1_MAP_TILESET_COLUMNS);
+	/*mapbackground = new MapBackground(WORLD_1_1_TILE_COLUMNS, WORLD_1_1_TILE_ROWS, TILE_WIDTH, TILE_HEIGHT, WORLD_1_1_MAP_TILESET_ROWS, WORLD_1_1_MAP_TILESET_COLUMNS);
 	mapbackground->SetTileSet(WORLD_1_1_TILESET, D3DCOLOR_XRGB(255, 255, 255));
-	mapbackground->LoadMatrix(WORLD_1_1_MATRIX_TXT);
+	mapbackground->LoadMatrix(WORLD_1_1_MATRIX_TXT);*/
 	//
 	DebugOut(L"[INFO] Start loading scene resources from : %s \n", sceneFilePath);
 
@@ -261,6 +274,7 @@ void CPlayScene::Load()
 
 		if (line[0] == '#') continue;	// skip comment lines	
 
+		if (line == "[MAP_BACKGROUND]") { section = SCENE_SECTION_MAP_BACKGROUND; continue; }
 		if (line == "[TEXTURES]") { section = SCENE_SECTION_TEXTURES; continue; }
 		if (line == "[SPRITES]") { 
 			section = SCENE_SECTION_SPRITES; continue; }
@@ -271,17 +285,20 @@ void CPlayScene::Load()
 		if (line == "[OBJECTS]") { 
 			section = SCENE_SECTION_OBJECTS; continue; }
 		if (line[0] == '[') { section = SCENE_SECTION_UNKNOWN; continue; }	
+		
 
 		//
 		// data section
 		//
 		switch (section)
 		{ 
+			case SCENE_SECTION_MAP_BACKGROUND: _ParseSection_MAP_BACKGROUND(line); break;
 			case SCENE_SECTION_TEXTURES: _ParseSection_TEXTURES(line); break;
 			case SCENE_SECTION_SPRITES: _ParseSection_SPRITES(line); break;
 			case SCENE_SECTION_ANIMATIONS: _ParseSection_ANIMATIONS(line); break;
 			case SCENE_SECTION_ANIMATION_SETS: _ParseSection_ANIMATION_SETS(line); break;
 			case SCENE_SECTION_OBJECTS: _ParseSection_OBJECTS(line); break;
+			
 		}
 	}
 
@@ -336,7 +353,7 @@ void CPlayScene::Render()
 	
 	for (int i = 0; i < objects.size(); i++)
 	{
-		if (objects[i]->isVisabled())
+		if (objects[i]->isVisabled() && objects[i]->isInCamera())
 			objects[i]->Render();
 	}
 		

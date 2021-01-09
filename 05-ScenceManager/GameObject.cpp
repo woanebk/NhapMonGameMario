@@ -166,7 +166,7 @@ bool CGameObject::isInCamera()
 	left = x;
 	right = x + (bb_right - bb_left);
 	top = y;
-	bottom = (bb_bottom - bb_top);
+	bottom = y + (bb_bottom - bb_top);
 	if (right > cam_left && left < cam_right && top < cam_bottom && bottom > cam_top)
 		return true;
 	return false;

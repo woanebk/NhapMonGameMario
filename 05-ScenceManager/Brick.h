@@ -8,6 +8,7 @@ class CBrick : public CGameObject
 {
 	int bounce = 0;
 	int type = BRICK_TYPE_WOOD;
+	bool Pressed = false;
 public:
 	CBrick(int t,int b) {
 		x = y = 0;
@@ -17,7 +18,9 @@ public:
 		bounce = b;
 	}
 	virtual void Render();
+	void Update(DWORD dt, vector<LPGAMEOBJECT>* coObjects);
 	virtual void GetBoundingBox(float &l, float &t, float &r, float &b);
+	void ChangeBreakableBricktoCoin();
 	int canBounce() { return bounce; }
 	void setBounce(int b) { bounce = b; }
 

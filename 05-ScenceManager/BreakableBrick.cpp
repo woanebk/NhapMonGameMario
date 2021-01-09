@@ -1,15 +1,15 @@
 #include "BreakableBrick.h"
 #include "PlayScence.h"
 #include "Mario.h"
+#include "BrokenBrickPiece.h"
 
 
-CBreakableBrick::CBreakableBrick(int b, int s)
+CBreakableBrick::CBreakableBrick(int b)
 {
 	x = y = 0;
 	vx = vy = 0;
 	nx = 1;
 	bounce = b;
-	Special = s;
 }
 
 void CBreakableBrick::Update(DWORD dt, vector<LPGAMEOBJECT> *coObjects)
@@ -79,6 +79,28 @@ void CBreakableBrick::HitByTail()
 			{
 				enable = false;
 				visable = false;
+				Broken = true;
+				//broken pieces:
+				CBrokenBrickPiece *piece_top_left = new CBrokenBrickPiece(-1, -1);
+				piece_top_left->SetPosition(this->x + BRICK_BBOX_WIDTH/2 , this->y + BRICK_BBOX_HEIGHT/2);
+				piece_top_left->SetStartPosition(this->x + BRICK_BBOX_WIDTH / 2, this->y + BRICK_BBOX_HEIGHT / 2);
+				scence->PushBackObject(piece_top_left);
+
+				CBrokenBrickPiece *piece_top_right = new CBrokenBrickPiece(1, -1);
+				piece_top_right->SetPosition(this->x + BRICK_BBOX_WIDTH / 2, this->y + BRICK_BBOX_HEIGHT / 2);
+				piece_top_right->SetStartPosition(this->x + BRICK_BBOX_WIDTH / 2, this->y + BRICK_BBOX_HEIGHT / 2);
+				scence->PushBackObject(piece_top_right);
+
+				CBrokenBrickPiece *piece_bottom_left = new CBrokenBrickPiece(-1, 1);
+				piece_bottom_left->SetPosition(this->x + BRICK_BBOX_WIDTH / 2, this->y + BRICK_BBOX_HEIGHT / 2);
+				piece_bottom_left->SetStartPosition(this->x + BRICK_BBOX_WIDTH / 2, this->y + BRICK_BBOX_HEIGHT / 2);
+				scence->PushBackObject(piece_bottom_left);
+
+				CBrokenBrickPiece *piece_bottom_right = new CBrokenBrickPiece(1, 1);
+				piece_bottom_right->SetPosition(this->x + BRICK_BBOX_WIDTH / 2, this->y + BRICK_BBOX_HEIGHT / 2);
+				piece_bottom_right->SetStartPosition(this->x + BRICK_BBOX_WIDTH / 2, this->y + BRICK_BBOX_HEIGHT / 2);
+				scence->PushBackObject(piece_bottom_right);
+
 			}
 }
 
@@ -89,6 +111,7 @@ void CBreakableBrick::Break()
 {
 	visable = false;
 	enable = false;
+	Broken = true;
 	//need to add break animation
 }
 

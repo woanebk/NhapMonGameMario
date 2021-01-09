@@ -250,16 +250,9 @@ void CMario::Update(DWORD dt, vector<LPGAMEOBJECT> *coObjects)
 				else if (dynamic_cast<CCoin*>(e->obj))
 				{
 					CCoin *coin = dynamic_cast<CCoin*>(e->obj);
-					if (e->nx != 0) {
-						isonground = false; // fix double jump bug
-						coin->setEnable(false);
-						coin->setVisable(false);
-					}
-					if (e->ny != 0) {
-						isonground = false;
-						coin->setEnable(false);
-						coin->setVisable(false);
-					} //if Coin : ==== earn money =====
+					isonground = false; // fix double jump bug
+					coin->setEnable(false);
+					coin->setVisable(false);
 				}
 				else if (dynamic_cast<CPine*>(e->obj))
 				{
@@ -341,12 +334,33 @@ void CMario::Update(DWORD dt, vector<LPGAMEOBJECT> *coObjects)
 					{
 						x += dx; y += dy;
 					} //////INVISIBLE
-					else
+					else if(brick->getType() == BRICK_TYPE_MONEYBUTTON)
 					{
+						x += dx; y += dy;
+					} //////MONEY BUTTON
+					else if (brick->getType() == BRICK_TYPE_CLOUD) //gach may
+					{
+						if (e->ny < 0)
+						{
+							vy = 0;
+							x += dx;
+							break;
+						}
+						else if (e->ny > 0)
+							y += dy;
+						else if (e->nx != 0)
+						{
+							x += dx;
+							y += dy;
+						}
+						
+					}
+					else 
+					{ //gach thuong
 						if (e->nx != 0)
 						{
 							x += min_tx * rdx + nx * 0.4f;
-							if (brick->canBounce()) {
+							if (brick->canBounce()) {//fix stop on walking bug
 								vx = 0;
 								break; //to stop interact walking when collide on y
 							}
@@ -354,26 +368,9 @@ void CMario::Update(DWORD dt, vector<LPGAMEOBJECT> *coObjects)
 						else
 						if (e->ny != 0)
 						{
-							if (brick->getType() == BRICK_TYPE_CLOUD) //gach may
-							{
-								if (e->ny > 0)
-									y += dy;
-								else if(e->ny < 0)
-								{
-									vy = 0;
-									x += dx;
-								}
-								if (e->nx != 0)
-								{
-									x += dx;
-									y += dy;
-								}
-							}
-							else // gach thuong
-							{
-								vy = 0;
-								x += dx;//loi di xuyen dach
-							}
+							vy = 0;
+							x += dx;//loi di xuyen dach	
+							
 						}
 					}
 				} //if brick
@@ -692,16 +689,16 @@ void CMario::SetState(int state)
 	switch (state)
 	{
 	case MARIO_STATE_WALKING_RIGHT:
-		if (ax < 0 && vy > 0)
+		/*if (ax < 0 && vy > 0)
 		{
 			ischangingdirection = true;
-		}
+		}*/
 		ax = MARIO_ACCELERATION;
 		nx = 1;
 		break;
 	case MARIO_STATE_WALKING_LEFT:
-		if (ax > 0 && vy > 0)
-			ischangingdirection = true;
+		/*if (ax > 0 && vy > 0)
+			ischangingdirection = true;*/
 		ax = -MARIO_ACCELERATION;
 		nx = -1;
 		break;

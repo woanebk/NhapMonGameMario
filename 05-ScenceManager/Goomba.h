@@ -13,6 +13,7 @@ class CGoomba : public CGameObject
 	virtual void Render();
 	int jumpCount = 0;
 	DWORD fly_goomba_start_walking;
+	bool Resetable = false;
 public:
 	void setLevel(int l)
 	{

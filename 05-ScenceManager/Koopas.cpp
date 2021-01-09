@@ -8,6 +8,7 @@
 #include "Playscence.h"
 #include "BreakableBrick.h"
 #include "QuestionBrick.h"
+#include "Coin.h"
 CKoopas::CKoopas(int lvl)
 {
 	level = lvl;
@@ -54,7 +55,7 @@ void CKoopas::Update(DWORD dt, vector<LPGAMEOBJECT> *coObjects)
 	vector<LPCOLLISIONEVENT> coEventsResult;
 
 	coEvents.clear();
-	Reset();
+	//Reset();
 	if (state != KOOPAS_STATE_DIE)
 		CalcPotentialCollisions(coObjects, coEvents);
 
@@ -94,6 +95,7 @@ void CKoopas::Update(DWORD dt, vector<LPGAMEOBJECT> *coObjects)
 		for (UINT i = 0; i < coEventsResult.size(); i++)
 		{
 			LPCOLLISIONEVENT e = coEventsResult[i];
+			
 			if (dynamic_cast<CBlock*> (e->obj))
 			{
 				CBlock *block = dynamic_cast<CBlock*>(e->obj);
@@ -223,6 +225,7 @@ void CKoopas::Update(DWORD dt, vector<LPGAMEOBJECT> *coObjects)
 						else
 						{
 							x += dx;
+							break;
 						}
 						//if (brick->canBounce() == 1)
 						//	if (state != KOOPAS_STATE_SPIN_LEFT && state != KOOPAS_STATE_SPIN_RIGHT)
@@ -230,6 +233,10 @@ void CKoopas::Update(DWORD dt, vector<LPGAMEOBJECT> *coObjects)
 					}
 				} // if Brick
 			}
+			else if (dynamic_cast<CCoin*> (e->obj))
+				{
+				x += dx; y += dy;
+				}//if Coin
 		}
 
 		//
@@ -384,16 +391,23 @@ void CKoopas::Reset()
 	CGame *game = CGame::GetInstance();
 	float bb_left, bb_top, bb_right, bb_bottom;
 	GetBoundingBox(bb_left, bb_top, bb_right, bb_bottom);
-	if (!isInCamera() && !game->isInCamera(start_x - EXTRA_RESET_SPACE, start_y, start_x + (bb_right - bb_left) + EXTRA_RESET_SPACE, start_y + (bb_bottom - bb_top))) //10 tiles away from mario then reset
+	if (!Resetable)
 	{
-		DebugOut(L"Reset \n");
-
-		enable = true;
-		visable = true;
-		SetPosition(start_x, start_y);
-		setLevel(start_level);
-		SetState(KOOPAS_STATE_WALKING);
-
+		if (!isInCamera() && !game->isInCamera(start_x - EXTRA_RESET_SPACE, start_y, start_x + (bb_right - bb_left) + EXTRA_RESET_SPACE, start_y + (bb_bottom - bb_top))) //10 tiles away from mario then reset
+		{
+			Resetable = true;
+		}
 	}
-
+	else
+	{
+		if (game->isInCamera(start_x, start_y, start_x + (bb_right - bb_left), start_y + (bb_bottom - bb_top)))
+		{
+			enable = true;
+			visable = true;
+			SetPosition(start_x, start_y);
+			setLevel(start_level);
+			SetState(KOOPAS_STATE_WALKING);
+			Resetable = false;
+		}
+	}
 }
