@@ -377,6 +377,7 @@ void CMario::Update(DWORD dt, vector<LPGAMEOBJECT> *coObjects)
 				else if (dynamic_cast<CLeaf*>(e->obj))
 				{
 					CLeaf *leaf = dynamic_cast<CLeaf*>(e->obj);
+					if(level < MARIO_LEVEL_LEAF)
 					LevelUp();
 					leaf->setVisable(false);
 					leaf->setEnable(false);

@@ -19,6 +19,7 @@ public:
 	bool isHolded() { return holded; }
 	void getHoldedbyMario();
 	void HitByTail();
+	void Render_Tail_Hit();
 	void getKicked();
 
 	void setLevel(int l)

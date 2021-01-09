@@ -26,6 +26,8 @@ public:
 
 	void HitByTail();
 
+	void Render_Tail_Hit();
+
 	int canBounce() { return bounce; }
 	void setBounce(int b) { bounce = b; }
 

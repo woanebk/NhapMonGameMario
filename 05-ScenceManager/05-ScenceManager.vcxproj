@@ -131,6 +131,7 @@
     <ClCompile Include="Brick.cpp" />
     <ClCompile Include="BrokenBrickPiece.cpp" />
     <ClCompile Include="Coin.cpp" />
+    <ClCompile Include="Effect.cpp" />
     <ClCompile Include="Fireball.cpp" />
     <ClCompile Include="Koopas.cpp" />
     <ClCompile Include="Leaf.cpp" />
@@ -158,6 +159,7 @@
     <ClInclude Include="BrokenBrickPiece.h" />
     <ClInclude Include="Coin.h" />
     <ClInclude Include="define.h" />
+    <ClInclude Include="Effect.h" />
     <ClInclude Include="Fireball.h" />
     <ClInclude Include="Koopas.h" />
     <ClInclude Include="Leaf.h" />

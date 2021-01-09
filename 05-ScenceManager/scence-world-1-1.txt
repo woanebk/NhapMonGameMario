@@ -1,6 +1,6 @@
-#	tile_set_id	tile_set_matrix_id	map_cloumns_count	map_rows_count	tile_width	tile_height	tile_set_rows_count	tile_set_columns_count
+#	tile_set_id	tile_set_matrix_id	map_cloumns_count	map_rows_count	tile_set_rows_count	tile_set_columns_count	(tile height and width dèault 16x16)
 [MAP_BACKGROUND]
-1	1	176	27	16	16	12	11
+1	1	176	27	12	11
 # id	file_path	transparent_color_r	g	b
 [TEXTURES]
 0	textures\mario.png	255	255	255

@@ -9,6 +9,7 @@
 #include "BreakableBrick.h"
 #include "QuestionBrick.h"
 #include "Coin.h"
+#include "Effect.h"
 CKoopas::CKoopas(int lvl)
 {
 	level = lvl;
@@ -356,7 +357,22 @@ void CKoopas::HitByTail()
 			if (bb_top <= mario_bb_bottom && bb_bottom >= mario_bb_top + (mario_bb_bottom - mario_bb_top) / 2)
 			{
 				SetState(KOOPAS_STATE_DIE);
+				Render_Tail_Hit();
 			}
+}
+
+void CKoopas::Render_Tail_Hit()
+{
+	CEffect *tailhiteffect = new CEffect(EFFECT_TYPE_TAIL_HIT);
+	tailhiteffect->SetPosition(this->x, this->y - KOOPAS_BBOX_HEIGHT / 2);
+	tailhiteffect->SetStartPosition(this->x, this->y - KOOPAS_BBOX_HEIGHT / 2);
+
+	CAnimationSets * animation_sets = CAnimationSets::GetInstance();
+	LPANIMATION_SET ani_set = animation_sets->Get(EFFECT_SET_ID);
+	tailhiteffect->SetAnimationSet(ani_set);
+
+	CPlayScene *currenscence = (CPlayScene*)CGame::GetInstance()->GetCurrentScene();
+	currenscence->PushBackObject(tailhiteffect);
 }
 
 void CKoopas::getKicked()

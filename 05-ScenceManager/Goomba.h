@@ -35,6 +35,8 @@ public:
 
 	void Reset();
 
+	void Render_Tail_Hit();
+
 	void FlyGoombaStartWalking()
 	{
 		fly_goomba_start_walking = GetTickCount64();

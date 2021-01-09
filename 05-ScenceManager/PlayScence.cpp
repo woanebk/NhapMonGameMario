@@ -232,16 +232,14 @@ void CPlayScene::_ParseSection_MAP_BACKGROUND(string line)
 {
 	vector<string> tokens = split(line);
 
-	if (tokens.size() < 7) return; // skip invalid lines - an animation set must at least id and one animation id
+	if (tokens.size() < 5) return; // skip invalid lines - an animation set must at least id and one animation id
 
 	int tile_set = atoi(tokens[0].c_str());
 	int matrix = atoi(tokens[1].c_str());
 	int map_columns_count = atoi(tokens[2].c_str());
 	int map_rows_count = atoi(tokens[3].c_str());
-	float tile_width = atof(tokens[4].c_str());
-	float tile_height = atof(tokens[5].c_str());
-	int tile_set_rows_count = atoi(tokens[6].c_str());
-	int tile_set_columns_count = atoi(tokens[7].c_str());
+	int tile_set_rows_count = atoi(tokens[4].c_str());
+	int tile_set_columns_count = atoi(tokens[5].c_str());
 	//LOAD BACKGROUND:
 	
 	mapbackground = new MapBackground(map_columns_count, map_rows_count, TILE_HEIGHT, TILE_WIDTH, tile_set_rows_count, tile_set_columns_count);

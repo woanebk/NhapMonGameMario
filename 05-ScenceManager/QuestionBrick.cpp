@@ -3,6 +3,7 @@
 #include "PlayScence.h"
 #include "Leaf.h"
 #include "Mushroom.h"
+#include "Effect.h"
 
 bool CQuestionBrick::isEmpty()
 {
@@ -184,8 +185,25 @@ void CQuestionBrick::HitByTail()
 					else if (hasItem() && mario->getLevel() <= MARIO_LEVEL_LEAF)
 						CreateItem(ITEM_LEAF);
 					if (!isEmpty())
+					{
 						Jump();
+						Render_Tail_Hit();
+					}
 				}
 				getUsed();
 			}
+}
+
+void CQuestionBrick::Render_Tail_Hit()
+{
+	CEffect *tailhiteffect = new CEffect(EFFECT_TYPE_TAIL_HIT);
+	tailhiteffect->SetPosition(this->x, this->y - BRICK_BBOX_HEIGHT / 2);
+	tailhiteffect->SetStartPosition(this->x, this->y - BRICK_BBOX_HEIGHT / 2);
+
+	CAnimationSets * animation_sets = CAnimationSets::GetInstance();
+	LPANIMATION_SET ani_set = animation_sets->Get(EFFECT_SET_ID);
+	tailhiteffect->SetAnimationSet(ani_set);
+
+	CPlayScene *currenscence = (CPlayScene*)CGame::GetInstance()->GetCurrentScene();
+	currenscence->PushBackObject(tailhiteffect);
 }

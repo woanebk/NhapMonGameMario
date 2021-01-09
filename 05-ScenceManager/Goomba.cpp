@@ -9,6 +9,7 @@
 #include "Utils.h"
 #include "QuestionBrick.h"
 #include "Game.h"
+#include "Effect.h"
 
 CGoomba::CGoomba(int lvl)
 {
@@ -272,7 +273,9 @@ void CGoomba::HitByTail()
 			if (bb_top <= mario_bb_bottom && bb_bottom >= mario_bb_top + (mario_bb_bottom - mario_bb_top) / 2)
 			{
 				SetState(GOOMBA_STATE_DIE);
+				Render_Tail_Hit();
 			}
+	
 	/*CAnimationSets * animation_sets = CAnimationSets::GetInstance();
 	LPANIMATION_SET ani_set = animation_sets->Get(EFFECT_SET_ID);
 	ani_set->at(ANI_HIT_TAIL)->Render(x, y);*/
@@ -311,4 +314,18 @@ void CGoomba::Reset()
 	}
 	
 		
+}
+
+void CGoomba::Render_Tail_Hit() 
+{
+	CEffect *tailhiteffect = new CEffect( EFFECT_TYPE_TAIL_HIT);
+	tailhiteffect->SetPosition(this->x, this->y - GOOMBA_BBOX_HEIGHT/2);
+	tailhiteffect->SetStartPosition(this->x, this->y - GOOMBA_BBOX_HEIGHT / 2);
+
+	CAnimationSets * animation_sets = CAnimationSets::GetInstance();
+	LPANIMATION_SET ani_set = animation_sets->Get(EFFECT_SET_ID);
+	tailhiteffect->SetAnimationSet(ani_set);
+
+	CPlayScene *currenscence = (CPlayScene*)CGame::GetInstance()->GetCurrentScene();
+	currenscence->PushBackObject(tailhiteffect);
 }
