@@ -9,7 +9,7 @@ class CMario : public CGameObject
 	int level;
 	int untouchable;
 	DWORD untouchable_start;
-	
+	float ay = 0; //acceleration for jump
 	//jump
 	bool isonground = false;
 	bool jumpable = false;
@@ -76,6 +76,8 @@ public:
 	//can jump or not
 	void setOnGround(bool jump) { isonground = jump; }
 	bool isOnGround() { return isonground; }
+	bool isJumpable() { return jumpable; }
+	void setJumpable(bool j) { jumpable = j; }
 	//jumping
 	void setIsJumping(bool j) { isjumping = j; }
 	bool isJumping() { return isjumping; }

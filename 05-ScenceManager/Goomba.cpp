@@ -37,7 +37,10 @@ void CGoomba::GetBoundingBox(float &left, float &top, float &right, float &botto
 	right = x + GOOMBA_BBOX_WIDTH;
 
 	if (state == GOOMBA_STATE_DIE)
-		bottom = y + GOOMBA_BBOX_HEIGHT_DIE;
+	{
+		//y -= (GOOMBA_BBOX_HEIGHT - GOOMBA_BBOX_HEIGHT_DIE); //push up a bit
+		bottom = y +  GOOMBA_BBOX_HEIGHT_DIE;
+	}
 	else
 	{
 		if (level == GOOMBA_LEVEL_FLY)
@@ -61,6 +64,12 @@ void CGoomba::Update(DWORD dt, vector<LPGAMEOBJECT> *coObjects)
 	vector<LPCOLLISIONEVENT> coEventsResult;
 
 	coEvents.clear();
+	if (isrenderdie && GetTickCount64() - renderdie_start > GOOMBA_DIE_TIME)
+	{
+		isrenderdie = false;
+		renderdie_start = 0;
+		visable = false;
+	}
 	//Reset();
 	CalcPotentialCollisions(coObjects, coEvents);
 	if (level == GOOMBA_LEVEL_FLY)
@@ -104,7 +113,7 @@ void CGoomba::Update(DWORD dt, vector<LPGAMEOBJECT> *coObjects)
 		for (UINT i = 0; i < coEventsResult.size(); i++)
 		{
 			LPCOLLISIONEVENT e = coEventsResult[i];
-			if (dynamic_cast<CKoopas*>(e->obj))
+			if (dynamic_cast<CKoopas*>(e->obj) && e->obj->isEnabled())
 			{
 				CKoopas *koopas = dynamic_cast<CKoopas *>(e->obj);
 				if (e->nx != 0)
@@ -230,7 +239,7 @@ void CGoomba::Render()
 
 	animation_set->at(ani)->Render(x, y);
 
-	//RenderBoundingBox();
+	RenderBoundingBox();
 }
 
 void CGoomba::SetState(int state)
@@ -241,9 +250,9 @@ void CGoomba::SetState(int state)
 	case GOOMBA_STATE_DIE:
 		y += GOOMBA_BBOX_HEIGHT - GOOMBA_BBOX_HEIGHT_DIE + 1;
 		enable = false;
-		visable = false;
 		vx = 0;
 		vy = 0;
+		StartRenderDie();
 		break;
 	case GOOMBA_STATE_WALKING:
 		if (level == GOOMBA_LEVEL_NORMAL)
@@ -274,12 +283,7 @@ void CGoomba::HitByTail()
 			{
 				SetState(GOOMBA_STATE_DIE);
 				Render_Tail_Hit();
-			}
-	
-	/*CAnimationSets * animation_sets = CAnimationSets::GetInstance();
-	LPANIMATION_SET ani_set = animation_sets->Get(EFFECT_SET_ID);
-	ani_set->at(ANI_HIT_TAIL)->Render(x, y);*/
-	
+			}	
 }
 
 void CGoomba::LevelDown()
@@ -328,4 +332,10 @@ void CGoomba::Render_Tail_Hit()
 
 	CPlayScene *currenscence = (CPlayScene*)CGame::GetInstance()->GetCurrentScene();
 	currenscence->PushBackObject(tailhiteffect);
+}
+
+void CGoomba::StartRenderDie()
+{
+	isrenderdie = true;
+	renderdie_start = GetTickCount64();
 }

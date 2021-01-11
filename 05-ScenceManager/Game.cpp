@@ -404,3 +404,54 @@ void CGame::SwitchScene(int scene_id)
 	CGame::GetInstance()->SetKeyHandler(s->GetKeyEventHandler());
 	s->Load();	
 }
+
+void CGame::SwitchSceneEx(int scene_id, float mario_x, float mario_y)
+{
+	DebugOut(L"[INFO] Switching to scene %d\n", scene_id);
+	//get old mario :
+	CPlayScene *is_currently_running_scence = (CPlayScene*)CGame::GetInstance()->GetCurrentScene();
+	CMario *post_mario = is_currently_running_scence->GetPlayer();
+
+	post_scence = current_scene;
+
+	//no unload or clear textures, sprties, anis, anisets, objs of post scence to get it later 
+
+	current_scene = scene_id;
+	LPSCENE s = scenes[scene_id];
+
+	CGame::GetInstance()->SetKeyHandler(s->GetKeyEventHandler());
+
+	post_mario->SetPosition(mario_x, mario_y);
+	post_mario->SetState(MARIO_STATE_IDLE);
+	post_mario->SetSpeed(0, 0);
+	post_mario->setSpeedUp(false);
+	
+	//((CPlayScene*)s)->SetPlayer(post_mario);
+	//((CPlayScene*)s)->PushBackObject(post_mario);
+
+	s->Load();// add textures, sprties, anis, anisets, objs
+
+	((CPlayScene*)s)->ReplaceMarioObjectWith(post_mario);
+	((CPlayScene*)s)->SetPlayer(post_mario);
+}
+
+void CGame::SwitchBackScence(int scene_id, float mario_x, float mario_y)
+{//pass parameter scence_id match with post_scene, mario_x, mario_y is the pine's position
+	if (post_scence == NULL)
+		return;
+	DebugOut(L"[INFO] Switching back to scene %d\n", scene_id);
+	//get old mario :
+	CPlayScene *is_currently_running_scence = (CPlayScene*)CGame::GetInstance()->GetCurrentScene();
+	CMario *post_mario = is_currently_running_scence->GetPlayer();
+
+	post_scence = current_scene;
+	current_scene = scene_id;
+
+	LPSCENE s = scenes[scene_id];
+
+	CGame::GetInstance()->SetKeyHandler(s->GetKeyEventHandler());
+
+	post_mario->SetPosition(mario_x, mario_y);
+	((CPlayScene*)s)->ReplaceMarioObjectWith(post_mario);
+
+}

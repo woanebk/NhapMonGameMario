@@ -309,6 +309,8 @@ void CPlayScene::Load()
 
 	CTextures::GetInstance()->Add(ID_TEX_BBOX, L"textures\\bbox.png", D3DCOLOR_XRGB(255, 255, 255));
 
+	hud = new Hud();
+
 	DebugOut(L"[INFO] Done loading scene resources %s\n", sceneFilePath);
 }
 
@@ -344,8 +346,8 @@ void CPlayScene::Update(DWORD dt)
 	cx = mapbackground->GetMapWidth() - game->GetScreenWidth();
 	if (cy < 0)
 		cy = 0;
-	if (cy > mapbackground->GetMapHeight() - game->GetScreenHeight())
-		cy = mapbackground->GetMapHeight() - game->GetScreenHeight();
+	if (cy > mapbackground->GetMapHeight() - game->GetScreenHeight() + HUD_HEIGHT)
+		cy = mapbackground->GetMapHeight() - game->GetScreenHeight() + HUD_HEIGHT;
 	CGame::GetInstance()->SetCamPos((int)cx, (int)cy);
 }
 
@@ -359,7 +361,7 @@ void CPlayScene::Render()
 		if (objects[i]->isVisabled() && objects[i]->isInCamera())
 			objects[i]->Render();
 	}
-		
+	hud->Render();
 }
 
 /*
@@ -381,6 +383,7 @@ void CPlayScenceKeyHandler::OnKeyDown(int KeyCode)
 	//DebugOut(L"[INFO] KeyDown: %d\n", KeyCode);
 
 	CMario *mario = ((CPlayScene*)scence)->GetPlayer();
+	CGame *game = CGame::GetInstance();
 	switch (KeyCode)
 	{
 	case DIK_Z: //small jump
@@ -413,8 +416,12 @@ void CPlayScenceKeyHandler::OnKeyDown(int KeyCode)
 		}
 		break;
 	case DIK_P: //reset
-		CGame *game = CGame::GetInstance();
-		game->SwitchScene(2);
+		game->SwitchSceneEx(WORLD_1_1_SECRECT_SCENCE_ID, WORLD_1_1_SECRECT_START_X, WORLD_1_1_SECRECT_START_Y);
+		mario->SetState(MARIO_STATE_IDLE);
+		break;
+	case DIK_O: //reset
+		game->SwitchBackScence(WORLD_1_1_SCENCE_ID, WORLD_1_1_SWITCHBACK_START_X, WORLD_1_1_SWITCHBACK_START_Y);
+		mario->SetState(MARIO_STATE_IDLE);
 		break;
 	}
 }
@@ -432,7 +439,9 @@ void CPlayScenceKeyHandler::OnKeyUp(int KeyCode)
 		//kick koopas shell
 		mario->setHolding(false);
 		break;
-		
+	case DIK_SPACE:
+		mario->setJumpable(false);
+		break;
 	}
 }
 
@@ -458,7 +467,10 @@ void CPlayScenceKeyHandler::KeyState(BYTE *states)
 		mario->SetState(MARIO_STATE_SIT);
 	else if (game->IsKeyDown(DIK_SPACE))
 	{
-		mario->SetState(MARIO_STATE_JUMP);
+		if (mario->isJumpable()) 
+		{
+			mario->SetState(MARIO_STATE_JUMP);
+		}
 
 	}
 	else if (game->IsKeyDown(DIK_RIGHT))

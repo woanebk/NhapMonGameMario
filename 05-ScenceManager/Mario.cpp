@@ -30,6 +30,7 @@ CMario::CMario(float x, float y) : CGameObject()
 	this->x = x;
 	this->y = y;
 	ax = 0;
+	ay = MARIO_GRAVITY;
 	Stack = 0;
 }
 
@@ -39,8 +40,8 @@ void CMario::Update(DWORD dt, vector<LPGAMEOBJECT> *coObjects)
 	CGameObject::Update(dt);
 
 	// Simple fall down
-	vy += MARIO_GRAVITY * dt;
-
+	vy += ay * dt;
+	ay = MARIO_GRAVITY;
 	//acceleration
 	vx += ax * dt + Stack * ax;
 
@@ -59,12 +60,18 @@ void CMario::Update(DWORD dt, vector<LPGAMEOBJECT> *coObjects)
 	//calculate action flag:
 
 	if (vy < 0 && isonground == false) { //IS JUMPING
-		isjumping = true;/* DebugOut(L"Jumping \n");*/
+		isjumping = true;
+		/* DebugOut(L"Jumping \n");*/
 	}
 	else isjumping = false;
 
-	if (vy > 0 && isonground == false) { isfalling = true; /*DebugOut(L"Falling \n"); */ } //IS FALLING
+	if (vy > 0 && isonground == false) {
+		isfalling = true; 
+	/*DebugOut(L"Falling \n"); */ } //IS FALLING
 	else isfalling = false;
+
+	if (isonground)
+		jumpable = true; //1 way
 
 	ManageAccelerationAndSpeed();
 	TimingEvent();
@@ -104,7 +111,7 @@ void CMario::Update(DWORD dt, vector<LPGAMEOBJECT> *coObjects)
 		for (UINT i = 0; i < coEventsResult.size(); i++)
 		{
 			LPCOLLISIONEVENT e = coEventsResult[i];
-			if (dynamic_cast<CGoomba *>(e->obj)) // if e->obj is Goomba 
+			if (dynamic_cast<CGoomba *>(e->obj) && e->obj->isEnabled()) // if e->obj is Goomba 
 			{
 				CGoomba *goomba = dynamic_cast<CGoomba *>(e->obj);
 
@@ -234,7 +241,6 @@ void CMario::Update(DWORD dt, vector<LPGAMEOBJECT> *coObjects)
 					if (e->ny < 0) {
 						vy = 0;
 						x += dx;
-						y += min_ty * rdy + ny * 0.4f;
 					}
 					else
 						if (e->ny > 0)
@@ -263,7 +269,6 @@ void CMario::Update(DWORD dt, vector<LPGAMEOBJECT> *coObjects)
 					}
 					if (e->ny != 0) {
 						vy = 0;
-						y += min_ty * rdy + ny * 0.4f;
 						x += dx;
 					}
 				} //if Pine
@@ -316,6 +321,7 @@ void CMario::Update(DWORD dt, vector<LPGAMEOBJECT> *coObjects)
 							questionbrick->getUsed();//coin and item set to 0
 							vy = MARIO_GRAVITY; //push mario down a bit
 							isfalling = true;
+							jumpable = false;
 							return; //no brick jumping needed
 						}
 
@@ -359,10 +365,9 @@ void CMario::Update(DWORD dt, vector<LPGAMEOBJECT> *coObjects)
 					{ //gach thuong
 						if (e->nx != 0)
 						{
-							x += min_tx * rdx + nx * 0.4f;
 							if (brick->canBounce()) {//fix stop on walking bug
 								vx = 0;
-								break; //to stop interact walking when collide on y
+								vy = 0; //to stop interact walking when collide on y
 							}
 						}
 						else
@@ -705,19 +710,11 @@ void CMario::SetState(int state)
 		break;
 	case MARIO_STATE_JUMP:
 		// TODO: need to check if Mario is *current* on a platform before allowing to jump again
-		if (!isfalling)
-		{
-			vy = -MARIO_JUMP_SPEED_Y;
-		}
+		if (vy == 0)
+			vy = -MARIO_JUMP_SPEED_Y_MIN;
+		ay = -MARIO_GRAVITY;
 
-		/*if (true)
-		{
-			jumpable = false;
-			vy = -MARIO_JUMP_SPEED_Y;
-		}
-		else
-		if (isjumping == true)
-				vy -= 0.005f;*/
+		
 		break;
 	case MARIO_STATE_IDLE:
 		if (vx > 0)
@@ -880,7 +877,16 @@ void CMario::ManageAccelerationAndSpeed()
 {
 	//All the limit put here instead of setstae to avoid laggy bug
 	//limit mario jump speed:
+	/*if ( vy == -MARIO_JUMP_SPEED_Y_MAX)
+		ay = MARIO_GRAVITY;*/
+	if (vy < -MARIO_JUMP_SPEED_Y_MAX)
+	{
+		vy = -MARIO_JUMP_SPEED_Y_MAX;
+		ay = MARIO_GRAVITY;
+		jumpable = false;
+	}
 
+	
 
 	//limit mario walk speed
 	if (abs(vx) > MARIO_MAX_WALK_SPEED && !speed_up)
@@ -952,6 +958,9 @@ void CMario::RenderSpecialAnimation(int ani) {
 }
 
 void CMario::TimingEvent() {
+	//when transforming stop
+	if (istransformingtoLeaf || istransformingtoBig) { vx = 0; vy = 0; }
+
 	// reset untouchable timer if untouchable time has passed
 	if (GetTickCount() - untouchable_start > MARIO_UNTOUCHABLE_TIME)
 	{

@@ -14,6 +14,8 @@ class CGoomba : public CGameObject
 	int jumpCount = 0;
 	DWORD fly_goomba_start_walking;
 	bool Resetable = false;
+	DWORD renderdie_start;
+	bool isrenderdie = false;
 public:
 	void setLevel(int l)
 	{
@@ -41,4 +43,5 @@ public:
 	{
 		fly_goomba_start_walking = GetTickCount64();
 	}
+	void StartRenderDie();
 };

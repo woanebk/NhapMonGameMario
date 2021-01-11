@@ -8,7 +8,7 @@
 #include "Goomba.h"
 #include "Koopas.h"
 #include "MapBackground.h"
-
+#include "Hud.h"
 
 class CPlayScene: public CScene
 {
@@ -18,6 +18,7 @@ protected:
 	LPMAPBACKGROUND mapbackground;	//Add a map background
 
 	vector<LPGAMEOBJECT> objects;
+	Hud* hud = NULL;
 
 	void _ParseSection_TEXTURES(string line);
 	void _ParseSection_SPRITES(string line);
@@ -35,8 +36,11 @@ public:
 	virtual void Render();
 	virtual void Unload();
 	void PushBackObject(CGameObject *gameobject) { objects.push_back(gameobject); }
+	
 	vector<LPGAMEOBJECT> GetObjectList() { return objects; }
 	CMario * GetPlayer() { return player; } 
+	void SetPlayer(CMario* p) { player = p; }
+	void ReplaceMarioObjectWith(CMario* m) { objects[0] = m; }
 
 	//friend class CPlayScenceKeyHandler;
 };

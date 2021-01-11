@@ -34,8 +34,8 @@ void CMushroom::GetBoundingBox(float & left, float & top, float & right, float &
 
 void CMushroom::Update(DWORD dt, vector<LPGAMEOBJECT>* coObjects)
 {
-	if (!enable)
-		return;
+	/*if (!enable)
+		return;*/
 	CGameObject::Update(dt, coObjects);
 
 	// Simple fall down
@@ -71,7 +71,9 @@ void CMushroom::Update(DWORD dt, vector<LPGAMEOBJECT>* coObjects)
 				{
 					vy = 0;
 					vx = -vx;
+					break;
 				}
+				else
 				if (e->ny < 0)
 				{
 					x += dx;
@@ -171,6 +173,7 @@ void CMushroom::Render()
 		animation_set->at(MUSHROOM_ANI_RED)->Render(x, y);
 	if(type == MUSHROOM_TYPE_GREEN)
 		animation_set->at(MUSHROOM_ANI_GREEN)->Render(x, y);
+	RenderBoundingBox();
 }
 
 void CMushroom::HitMario()

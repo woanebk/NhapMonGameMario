@@ -130,6 +130,7 @@
     <ClCompile Include="BreakableBrick.cpp" />
     <ClCompile Include="Brick.cpp" />
     <ClCompile Include="BrokenBrickPiece.cpp" />
+    <ClCompile Include="Hud.cpp" />
     <ClCompile Include="Coin.cpp" />
     <ClCompile Include="Effect.cpp" />
     <ClCompile Include="Fireball.cpp" />
@@ -157,6 +158,7 @@
     <ClInclude Include="BreakableBrick.h" />
     <ClInclude Include="Brick.h" />
     <ClInclude Include="BrokenBrickPiece.h" />
+    <ClInclude Include="Hud.h" />
     <ClInclude Include="Coin.h" />
     <ClInclude Include="define.h" />
     <ClInclude Include="Effect.h" />

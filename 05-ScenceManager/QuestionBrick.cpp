@@ -36,8 +36,8 @@ void CQuestionBrick::CreateItem(int item)
 	if (item == ITEM_MUSHROOM_RED)
 	{
 		CMushroom *red_mushroom = new CMushroom(MUSHROOM_TYPE_RED);
-		red_mushroom->SetPosition(this->x, this->y - MUSHROOM_BBOX_HEIGHT - 1);
-		red_mushroom->SetStartPosition(this->x, this->y - MUSHROOM_BBOX_HEIGHT - 1);
+		red_mushroom->SetPosition(this->x, this->y - MUSHROOM_BBOX_HEIGHT*2 - 1 + 8);
+		red_mushroom->SetStartPosition(this->x, this->y - MUSHROOM_BBOX_HEIGHT*2 - 1 +8);
 		red_mushroom->ChooseDirection();
 		CAnimationSets * animation_sets = CAnimationSets::GetInstance();
 		LPANIMATION_SET ani_set = animation_sets->Get(ITEM_SET_ID);

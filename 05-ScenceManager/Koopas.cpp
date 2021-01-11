@@ -97,7 +97,7 @@ void CKoopas::Update(DWORD dt, vector<LPGAMEOBJECT> *coObjects)
 		{
 			LPCOLLISIONEVENT e = coEventsResult[i];
 			
-			if (dynamic_cast<CBlock*> (e->obj))
+			if (dynamic_cast<CBlock*> (e->obj) && e->obj->isEnabled())
 			{
 				CBlock *block = dynamic_cast<CBlock*>(e->obj);
 				if (e->ny < 0)

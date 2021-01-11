@@ -43,6 +43,7 @@ class CGame
 
 	unordered_map<int, LPSCENE> scenes;
 	int current_scene; 
+	int post_scence;
 
 	void _ParseSection_SETTINGS(string line);
 	void _ParseSection_SCENES(string line);
@@ -59,6 +60,9 @@ public:
 	void Load(LPCWSTR gameFile);
 	LPSCENE GetCurrentScene() { return scenes[current_scene]; }
 	void SwitchScene(int scene_id);
+
+	void SwitchSceneEx(int scene_id, float mario_x, float mario_y);
+	void SwitchBackScence(int scene_id, float mario_x, float mario_y);
 
 	int GetScreenWidth() { return screen_width; }
 	int GetScreenHeight() { return screen_height; }

@@ -14,6 +14,7 @@
 60	textures\misc-2.png	176	224	248
 70	textures\enemies-4.png	68	145	190
 80	textures\mario-2.png	68	145	190
+90	textures\HUD-only.png	100	100	100
 
 # id	left	top	right	bottom	texture_id
 [SPRITES]
@@ -291,6 +292,9 @@ idle right
 13007	397	1	413	17	80
 #BROKEN PIECE BRICK
 13008	1089	103	1093	108	22
+
+# ======= HUD
+14000	0	0	310	41	90
 
 # ani_id	sprite1_id	time1	sprite2_id	time2	...
 [ANIMATIONS]
