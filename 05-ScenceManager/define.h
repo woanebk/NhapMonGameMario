@@ -53,6 +53,8 @@
 //GENERAL
 #define EXTRA_RESET_SPACE		320
 //MARIO
+#define MARIO_START_LIFE			4
+
 #define MARIO_WALKING_SPEED		0.1f 
 #define MARIO_LEAF_FLAPPING_SPEED	0.05f
 //0.1f
@@ -390,3 +392,4 @@
 //HUD
 #define HUD_HEIGHT				40
 #define HUD_WIDTH				310
+#define GAME_LIMIT_TIME			300

@@ -140,6 +140,7 @@ void CKoopas::Update(DWORD dt, vector<LPGAMEOBJECT> *coObjects)
 				{
 					if (state != KOOPAS_STATE_SPIN_LEFT && state != KOOPAS_STATE_SPIN_RIGHT)
 						vx = -vx;
+					y += vy;
 				}
 			}//if Goomba
 			else if (dynamic_cast<CKoopas*> (e->obj))
@@ -289,7 +290,7 @@ void CKoopas::Render()
 
 	animation_set->at(ani)->Render(x, y);
 
-	RenderBoundingBox();
+	//RenderBoundingBox();
 }
 
 void CKoopas::SetState(int state)

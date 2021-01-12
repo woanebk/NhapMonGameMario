@@ -10,6 +10,11 @@ class CMario : public CGameObject
 	int untouchable;
 	DWORD untouchable_start;
 	float ay = 0; //acceleration for jump
+
+	//status
+	int Life;
+	int Money;
+	int Score;
 	//jump
 	bool isonground = false;
 	bool jumpable = false;
@@ -58,6 +63,10 @@ public:
 
 	void StartUntouchable() { untouchable = 1; untouchable_start = GetTickCount(); }
 	
+	int getStack() { return Stack; }
+	int getLife() { return Life; }
+	int getMoney() { return Money; }
+	int getScore() { return Score; }
 	// hold to speed up
 	void setSpeedUp(bool s) { speed_up = s; }
 	bool isSpeedUp() { return speed_up; }

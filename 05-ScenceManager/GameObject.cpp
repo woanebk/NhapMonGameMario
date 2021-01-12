@@ -159,6 +159,7 @@ bool CGameObject::isInCamera()
 	float bb_left, bb_top, bb_right, bb_bottom;
 	float left, top, right, bottom;
 	CGame* game = CGame::GetInstance();
+
 	game->GetCamPos(cam_left, cam_top);
 	float cam_right = cam_left + SCREEN_WIDTH;
 	float cam_bottom = cam_top + SCREEN_HEIGHT;

@@ -32,6 +32,9 @@ CMario::CMario(float x, float y) : CGameObject()
 	ax = 0;
 	ay = MARIO_GRAVITY;
 	Stack = 0;
+	Life = MARIO_START_LIFE;
+	Money = 0;
+	Score = 96068;
 }
 
 void CMario::Update(DWORD dt, vector<LPGAMEOBJECT> *coObjects)
@@ -336,6 +339,10 @@ void CMario::Update(DWORD dt, vector<LPGAMEOBJECT> *coObjects)
 				else if (dynamic_cast<CBrick*>(e->obj))
 				{
 					CBrick *brick = dynamic_cast<CBrick*>(e->obj);
+
+					float brick_bb_left, brick_bb_top, brick_bb_right, brick_bb_bottom;
+					brick->GetBoundingBox(brick_bb_left, brick_bb_top, brick_bb_right, brick_bb_bottom);
+
 					if (brick->getType() == BRICK_TYPE_INVISIBLE)
 					{
 						x += dx; y += dy;
@@ -371,7 +378,7 @@ void CMario::Update(DWORD dt, vector<LPGAMEOBJECT> *coObjects)
 							}
 						}
 						else
-						if (e->ny != 0)
+						if (e->ny != 0 )
 						{
 							vy = 0;
 							x += dx;//loi di xuyen dach	
@@ -685,7 +692,7 @@ void CMario::Render()
 		if (firebullets[i]->isVisabled())
 			firebullets[i]->Render();
 	} //render shooting
-	RenderBoundingBox();
+	//RenderBoundingBox();
 }
 
 void CMario::SetState(int state)
@@ -901,7 +908,7 @@ void CMario::ManageAccelerationAndSpeed()
 		Stack = MARIO_WALKING_STACK_MAX;
 	}
 
-	if (speed_up && GetTickCount() - speedup_start > MARIO_STACKUP_TIME)
+	if (speed_up && GetTickCount() - speedup_start > MARIO_STACKUP_TIME && vx != 0)
 	{
 		Stack++;
 		speedup_start = GetTickCount();

@@ -349,6 +349,8 @@ void CPlayScene::Update(DWORD dt)
 	if (cy > mapbackground->GetMapHeight() - game->GetScreenHeight() + HUD_HEIGHT)
 		cy = mapbackground->GetMapHeight() - game->GetScreenHeight() + HUD_HEIGHT;
 	CGame::GetInstance()->SetCamPos((int)cx, (int)cy);
+
+	hud->Update(dt);
 }
 
 void CPlayScene::Render()

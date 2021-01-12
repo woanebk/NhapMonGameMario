@@ -59,10 +59,10 @@ void MapBackground::Render(LPDIRECT3DTEXTURE9 tileset)
 	CGame *game = CGame::GetInstance();
 	float camX, camY;
 	game->GetCamPos(camX, camY);
-	int rendered_start_column = (int)camX / TILE_WIDTH;
+	int rendered_start_column = (int)camX / TILE_WIDTH ;
 	int rendered_end_column = rendered_start_column + (int)SCREEN_WIDTH / TILE_WIDTH;
-	int rendered_start_row = (int)camY / TILE_HEIGHT;
-	int rendered_end_row = rendered_start_row + (int)SCREEN_HEIGHT / TILE_HEIGHT;
+	int rendered_start_row = (int)camY / TILE_HEIGHT ;
+	int rendered_end_row = rendered_start_row + (int)SCREEN_HEIGHT / TILE_HEIGHT ;
 	for (int i = 0; i < MapRows; i++)
 	{
 		for (int j = 0; j < MapColumns; j++)
