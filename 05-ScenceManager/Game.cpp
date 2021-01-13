@@ -391,7 +391,6 @@ void CGame::Load(LPCWSTR gameFile)
 void CGame::SwitchScene(int scene_id)
 {
 	DebugOut(L"[INFO] Switching to scene %d\n", scene_id);
-
 	scenes[current_scene]->Unload();;
 
 	CTextures::GetInstance()->Clear();
@@ -405,12 +404,13 @@ void CGame::SwitchScene(int scene_id)
 	s->Load();	
 }
 
-void CGame::SwitchSceneEx(int scene_id, float mario_x, float mario_y)
+void CGame::SwitchSceneEx(int scene_id, float mario_x, float mario_y) //save old scence to call later
 {
 	DebugOut(L"[INFO] Switching to scene %d\n", scene_id);
 	//get old mario :
 	CPlayScene *is_currently_running_scence = (CPlayScene*)CGame::GetInstance()->GetCurrentScene();
 	CMario *post_mario = is_currently_running_scence->GetPlayer();
+	Hud* post_hud = is_currently_running_scence->getHud();
 
 	post_scence = current_scene;
 
@@ -422,17 +422,20 @@ void CGame::SwitchSceneEx(int scene_id, float mario_x, float mario_y)
 	CGame::GetInstance()->SetKeyHandler(s->GetKeyEventHandler());
 
 	post_mario->SetPosition(mario_x, mario_y);
-	post_mario->SetState(MARIO_STATE_IDLE);
+	if (scene_id == WORLDMAP_1_SCENCE_ID)
+		post_mario->SetState(MARIO_STATE_ICON);
+	else
+		post_mario->SetState(MARIO_STATE_IDLE);
 	post_mario->SetSpeed(0, 0);
 	post_mario->setSpeedUp(false);
-	
-	//((CPlayScene*)s)->SetPlayer(post_mario);
-	//((CPlayScene*)s)->PushBackObject(post_mario);
+	if (scene_id != WORLDMAP_1_SCENCE_ID)
+		post_mario->setIsIcon(false);
 
 	s->Load();// add textures, sprties, anis, anisets, objs
 
 	((CPlayScene*)s)->ReplaceMarioObjectWith(post_mario);
 	((CPlayScene*)s)->SetPlayer(post_mario);
+	((CPlayScene*)s)->setHud(post_hud);
 }
 
 void CGame::SwitchBackScence(int scene_id, float mario_x, float mario_y)
@@ -443,6 +446,7 @@ void CGame::SwitchBackScence(int scene_id, float mario_x, float mario_y)
 	//get old mario :
 	CPlayScene *is_currently_running_scence = (CPlayScene*)CGame::GetInstance()->GetCurrentScene();
 	CMario *post_mario = is_currently_running_scence->GetPlayer();
+	Hud* post_hud = is_currently_running_scence->getHud();
 
 	post_scence = current_scene;
 	current_scene = scene_id;
@@ -452,6 +456,8 @@ void CGame::SwitchBackScence(int scene_id, float mario_x, float mario_y)
 	CGame::GetInstance()->SetKeyHandler(s->GetKeyEventHandler());
 
 	post_mario->SetPosition(mario_x, mario_y);
+	if (scene_id != WORLDMAP_1_SCENCE_ID)
+		post_mario->setIsIcon(false);
 	((CPlayScene*)s)->ReplaceMarioObjectWith(post_mario);
-
+	((CPlayScene*)s)->setHud(post_hud);
 }

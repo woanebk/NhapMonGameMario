@@ -23,7 +23,14 @@ CMario::CMario(float x, float y) : CGameObject()
 {
 	level = MARIO_LEVEL_BIG;
 	untouchable = 0;
-	SetState(MARIO_STATE_IDLE);
+	CPlayScene* scence = (CPlayScene*)CGame::GetInstance()->GetCurrentScene();
+	if (scence->getScenceID() == WORLDMAP_1_SCENCE_ID)
+	{
+		SetState(MARIO_STATE_ICON);
+		is_icon = true;
+	}
+	else
+		SetState(MARIO_STATE_IDLE);
 
 	start_x = x;
 	start_y = y;
@@ -34,14 +41,19 @@ CMario::CMario(float x, float y) : CGameObject()
 	Stack = 0;
 	Life = MARIO_START_LIFE;
 	Money = 0;
-	Score = 96068;
+	Score = 0;
 }
 
 void CMario::Update(DWORD dt, vector<LPGAMEOBJECT> *coObjects)
 {
 	// Calculate dx, dy 
 	CGameObject::Update(dt);
-
+	if (is_icon)
+	{
+		x += dx;
+		y += dy;
+		return;
+	}
 	// Simple fall down
 	vy += ay * dt;
 	ay = MARIO_GRAVITY;
@@ -126,11 +138,16 @@ void CMario::Update(DWORD dt, vector<LPGAMEOBJECT> *coObjects)
 						if (goomba->getLevel() == GOOMBA_LEVEL_FLY)
 						{
 							goomba->LevelDown();
+							GainScore(SCORE_400);
 							vy = -MARIO_JUMP_DEFLECT_SPEED;
 						}
 						else
 						{
 							goomba->SetState(GOOMBA_STATE_DIE);
+							if (goomba->getType() == GOOMBA_TYPE_NORMAL)
+								GainScore(SCORE_100);
+							else
+								GainScore(SCORE_800);
 							vy = -MARIO_JUMP_DEFLECT_SPEED;
 						}
 					}
@@ -215,11 +232,13 @@ void CMario::Update(DWORD dt, vector<LPGAMEOBJECT> *coObjects)
 							if (koopas->getLevel() == KOOPAS_LEVEL_FLY)
 							{
 								koopas->LevelDown();
+								GainScore(SCORE_100);
 								vy = -MARIO_JUMP_DEFLECT_SPEED;
 							}
 							else
 							{
 								koopas->SetState(KOOPAS_STATE_SHELL);
+								GainScore(SCORE_100);
 								vy = -MARIO_JUMP_DEFLECT_SPEED;
 							}
 						}
@@ -260,6 +279,7 @@ void CMario::Update(DWORD dt, vector<LPGAMEOBJECT> *coObjects)
 				{
 					CCoin *coin = dynamic_cast<CCoin*>(e->obj);
 					isonground = false; // fix double jump bug
+					GainMoney();
 					coin->setEnable(false);
 					coin->setVisable(false);
 				}
@@ -283,6 +303,7 @@ void CMario::Update(DWORD dt, vector<LPGAMEOBJECT> *coObjects)
 						vx = 0;
 						break; //to stop interact walking when collide on y
 					}
+					else
 					if (e->ny != 0)
 					{
 						vy = 0;
@@ -297,7 +318,6 @@ void CMario::Update(DWORD dt, vector<LPGAMEOBJECT> *coObjects)
 						vx = 0;
 						break; //to stop interact walking when collide on y
 					}
-
 					if (e->ny < 0)
 					{
 						vy = 0;
@@ -330,10 +350,12 @@ void CMario::Update(DWORD dt, vector<LPGAMEOBJECT> *coObjects)
 
 						if (!questionbrick->isEmpty())
 							questionbrick->Jump();
-
+						if(questionbrick->hasCoin())
+							GainMoney();
 						questionbrick->getUsed();//coin and item set to 0
 						vy = MARIO_GRAVITY; //push mario down a bit
 						isfalling = true;
+						jumpable = false;
 					}
 				} //if breakable brick
 				else if (dynamic_cast<CBrick*>(e->obj))
@@ -370,12 +392,11 @@ void CMario::Update(DWORD dt, vector<LPGAMEOBJECT> *coObjects)
 					}
 					else 
 					{ //gach thuong
-						if (e->nx != 0)
+						if (e->nx != 0 && brick->canBounce())
 						{
-							if (brick->canBounce()) {//fix stop on walking bug
-								vx = 0;
-								vy = 0; //to stop interact walking when collide on y
-							}
+							vx = 0;
+							vy = 0; //to stop interact walking when collide on y
+							break;
 						}
 						else
 						if (e->ny != 0 )
@@ -390,7 +411,9 @@ void CMario::Update(DWORD dt, vector<LPGAMEOBJECT> *coObjects)
 				{
 					CLeaf *leaf = dynamic_cast<CLeaf*>(e->obj);
 					if(level < MARIO_LEVEL_LEAF)
-					LevelUp();
+						LevelUp();
+					else
+						GainScore(SCORE_1000);
 					leaf->setVisable(false);
 					leaf->setEnable(false);
 				} //if Leaf
@@ -418,8 +441,11 @@ void CMario::Update(DWORD dt, vector<LPGAMEOBJECT> *coObjects)
 }
 
 void CMario::Render()
-{
+{ 
 	int ani = -1;
+	if (state == MARIO_STATE_ICON)
+		ani = MARIO_ANI_ICON;
+	else
 	if (istransformingtoBig)
 	{
 		if (nx < 0)
@@ -742,6 +768,12 @@ void CMario::SetState(int state)
 	case MARIO_STATE_SIT:
 		vx = 0;
 		break;
+	case MARIO_STATE_ICON:
+		vx = 0;
+		vy = 0;
+		ax = 0;
+		ay = 0;
+		break;
 	case MARIO_STATE_DIE:
 		vy = -MARIO_DIE_DEFLECT_SPEED;
 		break;
@@ -799,6 +831,7 @@ void CMario::LevelDown()
 
 void CMario::LifeUp()
 {
+	Life++;
 }
 
 void CMario::GetBoundingBox(float &left, float &top, float &right, float &bottom)
@@ -1008,3 +1041,11 @@ void CMario::TimingEvent() {
 	
 }
 
+void CMario::GainMoney()
+{
+	Money++;
+}
+void CMario::GainScore(int score) 
+{
+	Score += score;
+}

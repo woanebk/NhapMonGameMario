@@ -11,6 +11,7 @@ class CMario : public CGameObject
 	DWORD untouchable_start;
 	float ay = 0; //acceleration for jump
 
+	bool is_icon = false;
 	//status
 	int Life;
 	int Money;
@@ -67,6 +68,9 @@ public:
 	int getLife() { return Life; }
 	int getMoney() { return Money; }
 	int getScore() { return Score; }
+
+	bool isIcon() { return is_icon; }
+	void setIsIcon(bool i) { is_icon = i; }
 	// hold to speed up
 	void setSpeedUp(bool s) { speed_up = s; }
 	bool isSpeedUp() { return speed_up; }
@@ -115,6 +119,10 @@ public:
 	void RenderSpecialAnimation(int ani);
 
 	void TimingEvent();
+
+	void GainMoney();
+
+	void GainScore(int point);
 
 	virtual void GetBoundingBox(float &left, float &top, float &right, float &bottom);
 };

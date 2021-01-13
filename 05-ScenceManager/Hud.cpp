@@ -7,47 +7,7 @@
 #include <iostream>
 #include <fstream>
 
-#define	HUD_SPRITE_ID	14000
-#define A_SPRITE_ID		14100
-#define B_SPRITE_ID		14101
-#define C_SPRITE_ID		14102
-#define D_SPRITE_ID		14103
-#define E_SPRITE_ID		14104
-#define F_SPRITE_ID		14105
-#define G_SPRITE_ID		14106
-#define H_SPRITE_ID		14107
-#define I_SPRITE_ID		14108
-#define J_SPRITE_ID		14109
-#define K_SPRITE_ID		14110
-#define L_SPRITE_ID		14111
-#define M_SPRITE_ID		14112
-#define N_SPRITE_ID		14113
-#define O_SPRITE_ID		14114
-#define P_SPRITE_ID		14115
-#define Q_SPRITE_ID		14116
-#define R_SPRITE_ID		14117
-#define S_SPRITE_ID		14118
-#define T_SPRITE_ID		14119
-#define U_SPRITE_ID		14120
-#define V_SPRITE_ID		14121
-#define W_SPRITE_ID		14122
-#define X_SPRITE_ID		14123
-#define Y_SPRITE_ID		14124
-#define Z_SPRITE_ID		14125
 
-#define NUMBER_0_SPRITE_ID	14200
-#define NUMBER_1_SPRITE_ID	14201
-#define NUMBER_2_SPRITE_ID	14202
-#define NUMBER_3_SPRITE_ID	14203
-#define NUMBER_4_SPRITE_ID	14204
-#define NUMBER_5_SPRITE_ID	14205
-#define NUMBER_6_SPRITE_ID	14206
-#define NUMBER_7_SPRITE_ID	14207
-#define NUMBER_8_SPRITE_ID	14208
-#define NUMBER_9_SPRITE_ID	14209
-
-#define STACK_ARROW_SPRITE_ID	14220
-#define P_MAX_STACK_SPRITE		14221
 
 using namespace std;
 
@@ -58,7 +18,7 @@ Hud::Hud()
 	LPSPRITE Pmaxstack = (CSprite*)CSprites::GetInstance()->Get(P_MAX_STACK_SPRITE);
 	countdowntime = GetTickCount64();
 	//add sprite for stack
-	for (int i = 0; i < 6; i++)
+	for (int i = 0; i < MARIO_RUNNING_STACK_MAX - 1; i++)
 		stackSprite.push_back(arrow);
 	stackSprite.push_back(Pmaxstack);
 }
@@ -87,9 +47,9 @@ void Hud::Update(DWORD dt)
 
 	string scores_str = to_string(score);
 	string preset = "0";
-	while (scores_str.length() < 7) scores_str = preset + scores_str; //string be like : 0000xxx;
+	while (scores_str.length() < MARIO_SCORE_NUMBERS) scores_str = preset + scores_str; //string be like : 0000xxx;
 	vector<LPSPRITE> s;
-	for (int i = 0; i < 7; i++)
+	for (int i = 0; i < MARIO_SCORE_NUMBERS; i++)
 	{
 		string score_th(1, scores_str.at(i));
 		int i_scoresprite = stoi(score_th);
@@ -110,10 +70,10 @@ void Hud::Render()
 	// ======== render Speed Stack:
 	if (stack > 0)
 	{
-		stackSprite[0]->Draw(hud_x + 87, hud_y + 13);
+		stackSprite[0]->Draw(hud_x + STACK_SPRITE_0_X, hud_y + STACK_SPRITE_0_Y);
 		for (int i = 1; i < stack; i++)
 		{
-			stackSprite[i]->Draw(hud_x + 87 + i * 8, hud_y + 13 );
+			stackSprite[i]->Draw(hud_x + STACK_SPRITE_0_X + i * STACK_SPRITE_WIDTH, hud_y + STACK_SPRITE_0_Y);
 		}
 	}
 
@@ -124,9 +84,9 @@ void Hud::Render()
 	int life_tens = life / 10;
 
 	if (life_units >= 0)
-		getNumberSprite(life_units)->Draw(hud_x + 73, hud_y + 21);
+		getNumberSprite(life_units)->Draw(hud_x + LIFE_SPRITE_UNITS_NUMBER_X, hud_y + LIFE_SPRITE_UNITS_NUMBER_Y);
 	if (life_tens > 0)
-		getNumberSprite(life_tens)->Draw(hud_x + 65, hud_y + 21);
+		getNumberSprite(life_tens)->Draw(hud_x + LIFE_SPRITE_TENS_NUMBER_X, hud_y + LIFE_SPRITE_TENS_NUMBER_Y);
 
 	// ====== render Money:
 	//hang donvi:
@@ -135,9 +95,9 @@ void Hud::Render()
 	int money_tens = money / 10;
 
 	if (money_units >= 0)
-		getNumberSprite(money_units)->Draw(hud_x + 176, hud_y + 13);
+		getNumberSprite(money_units)->Draw(hud_x + MONEY_SPRITE_UNITS_NUMBER_X, hud_y + MONEY_SPRITE_UNITS_NUMBER_Y);
 	if (money_tens > 0)
-		getNumberSprite(money_tens)->Draw(hud_x + 167, hud_y + 13);
+		getNumberSprite(money_tens)->Draw(hud_x + MONEY_SPRITE_TENS_NUMBER_X, hud_y + MONEY_SPRITE_TENS_NUMBER_Y);
 
 	// ====== render Remaining Time
 	//hang don vi:
@@ -149,22 +109,22 @@ void Hud::Render()
 
 	if (remaining_time_units >= 0)
 	{
-		getNumberSprite(remaining_time_units)->Draw(hud_x + 176, hud_y + 21);
+		getNumberSprite(remaining_time_units)->Draw(hud_x + TIME_SPRITE_UNITS_NUMBER_X, hud_y + TIME_SPRITE_UNITS_NUMBER_Y);
 		
 	}
 	if (remaining_time_hundreds > 0)
-		getNumberSprite(remaining_time_hundreds)->Draw(hud_x + 160, hud_y + 21);
+		getNumberSprite(remaining_time_hundreds)->Draw(hud_x + TIME_SPRITE_HUNDREDS_NUMBER_X, hud_y + TIME_SPRITE_HUNDREDS_NUMBER_Y);
 
 	if (remaining_time_hundreds != 0 && remaining_time_tens >= 0)
 	{
-		getNumberSprite(remaining_time_tens)->Draw(hud_x + 168, hud_y + 21);
+		getNumberSprite(remaining_time_tens)->Draw(hud_x + TIME_SPRITE_TENS_NUMBER_X, hud_y + TIME_SPRITE_TENS_NUMBER_Y);
 	}
 	else if (remaining_time_tens > 0)
-		getNumberSprite(remaining_time_tens)->Draw(hud_x + 168, hud_y + 21);
+		getNumberSprite(remaining_time_tens)->Draw(hud_x + TIME_SPRITE_TENS_NUMBER_X, hud_y + TIME_SPRITE_TENS_NUMBER_Y);
 
 	// ====== Render score:
 	for (int i = 0; i < 7; i++)
-			scoreSprite[i]->Draw(hud_x + 88 + i * 8, hud_y + 21);
+			scoreSprite[i]->Draw(hud_x + SCORE_SPRITE_0_X + i * SCORE_SPRITE_WIDTH, hud_y + SCORE_SPRITE_0_Y);
 	
 }
 

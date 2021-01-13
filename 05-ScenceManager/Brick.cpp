@@ -29,6 +29,8 @@ void CBrick::Render()
 					}
 					else if(type == BRICK_TYPE_BASEMENT)
 						animation_set->at(BRICK_ANI_BASEMENT)->Render(x, y);
+					else if (type == BRICK_TYPE_TREE_ICON)
+						animation_set->at(BRICK_ANI_TREE_ICON)->Render(x, y);
 						
 					
 	RenderBoundingBox();
@@ -88,10 +90,15 @@ void CBrick::Update(DWORD dt, vector<LPGAMEOBJECT> *coObjects)
 
 void CBrick::GetBoundingBox(float &l, float &t, float &r, float &b)
 {
-	l = x;
-	t = y;
-	r = x + BRICK_BBOX_WIDTH;
-	b = y + BRICK_BBOX_HEIGHT;
+	if (type == BRICK_TYPE_TREE_ICON)
+		l = t = r = b = 0;
+	else
+	{
+		l = x;
+		t = y;
+		r = x + BRICK_BBOX_WIDTH;
+		b = y + BRICK_BBOX_HEIGHT;
+	}
 }
 
 

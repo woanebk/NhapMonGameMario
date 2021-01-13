@@ -36,7 +36,9 @@ public:
 	virtual void Render();
 	virtual void Unload();
 	void PushBackObject(CGameObject *gameobject) { objects.push_back(gameobject); }
-	
+	int getScenceID() { return id; }
+	Hud* getHud() { return hud; }
+	void setHud(Hud* h) { hud = h; }
 	vector<LPGAMEOBJECT> GetObjectList() { return objects; }
 	CMario * GetPlayer() { return player; } 
 	void SetPlayer(CMario* p) { player = p; }

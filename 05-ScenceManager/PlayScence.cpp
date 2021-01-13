@@ -248,11 +248,15 @@ void CPlayScene::_ParseSection_MAP_BACKGROUND(string line)
 		mapbackground->SetTileSet(WORLD_1_1_TILESET, D3DCOLOR_XRGB(255, 255, 255));
 	else if(tile_set == WORLD_1_1_SECRECT_TILESET_ID)
 		mapbackground->SetTileSet(WORLD_1_1_SECRECT_TILESET, D3DCOLOR_XRGB(255, 255, 255));
+	else if(tile_set == WORLDMAP_1_TILESET_ID)
+		mapbackground->SetTileSet(WORLDMAP_1_TILESET, D3DCOLOR_XRGB(255, 255, 255));
 	//load matrix:
 	if(matrix == WORLD_1_1_MATRIX_ID)
 		mapbackground->LoadMatrix(WORLD_1_1_MATRIX_TXT);
 	else if (matrix == WORLD_1_1_SECRECT_MATRIX_ID)
 		mapbackground->LoadMatrix(WORLD_1_1_SECRECT_MATRIX_TXT);
+	else if (matrix == WORLDMAP_1_MATRIX_ID)
+		mapbackground->LoadMatrix(WORLDMAP_1_MATRIX_TXT);
 }
 
 void CPlayScene::Load()
@@ -336,19 +340,26 @@ void CPlayScene::Update(DWORD dt)
 	// Update camera to follow mario
 	float cx, cy;
 	player->GetPosition(cx, cy);
-
 	CGame *game = CGame::GetInstance();
-	cx -= game->GetScreenWidth() / 2;
-	cy -= game->GetScreenHeight() / 2;
-	if (cx < 0)
-		cx = 0;
-	if (cx > mapbackground->GetMapWidth() - game->GetScreenWidth())
-	cx = mapbackground->GetMapWidth() - game->GetScreenWidth();
-	if (cy < 0)
-		cy = 0;
-	if (cy > mapbackground->GetMapHeight() - game->GetScreenHeight() + HUD_HEIGHT)
-		cy = mapbackground->GetMapHeight() - game->GetScreenHeight() + HUD_HEIGHT;
-	CGame::GetInstance()->SetCamPos((int)cx, (int)cy);
+
+	if (id == WORLDMAP_1_SCENCE_ID)
+	{
+		CGame::GetInstance()->SetCamPos(-(SCREEN_WIDTH -WORLDMAP_1_WIDTH)/2 + 8,0);
+	}
+	else
+	{
+		cx -= game->GetScreenWidth() / 2;
+		cy -= game->GetScreenHeight() / 2;
+		if (cx < 0)
+			cx = 0;
+		if (cx > mapbackground->GetMapWidth() - game->GetScreenWidth())
+			cx = mapbackground->GetMapWidth() - game->GetScreenWidth();
+		if (cy < 0)
+			cy = 0;
+		if (cy > mapbackground->GetMapHeight() - game->GetScreenHeight() + HUD_HEIGHT)
+			cy = mapbackground->GetMapHeight() - game->GetScreenHeight() + HUD_HEIGHT;
+		CGame::GetInstance()->SetCamPos((int)cx, (int)cy);
+	}
 
 	hud->Update(dt);
 }
@@ -361,8 +372,14 @@ void CPlayScene::Render()
 	for (int i = 0; i < objects.size(); i++)
 	{
 		if (objects[i]->isVisabled() && objects[i]->isInCamera())
+		{
+			if (dynamic_cast<CMario*>(objects[i]))
+				continue;
+			else
 			objects[i]->Render();
+		}
 	}
+	objects[0]->Render(); //mario is the last to be rendered
 	hud->Render();
 }
 
@@ -386,65 +403,93 @@ void CPlayScenceKeyHandler::OnKeyDown(int KeyCode)
 
 	CMario *mario = ((CPlayScene*)scence)->GetPlayer();
 	CGame *game = CGame::GetInstance();
-	switch (KeyCode)
+	if (mario->isIcon())
 	{
-	case DIK_Z: //small jump
-		if (mario->isOnGround())
-			mario->SetState(MARIO_STATE_JUMP);
-		mario->setOnGround(false);
-		break;
-	case DIK_2: //tranform to leaf mario
-		mario->SetLevel(MARIO_LEVEL_LEAF);
-		mario->SetPosition(mario->x, mario->y - (MARIO_LEAF_BBOX_HEIGHT - MARIO_SMALL_BBOX_HEIGHT)); //push mario up a bit
-		break;
-	case DIK_3: //tranform to leaf mario
-		mario->SetLevel(MARIO_LEVEL_FIRE);
-		mario->SetPosition(mario->x, mario->y - (MARIO_FIRE_BBOX_HEIGHT - MARIO_SMALL_BBOX_HEIGHT)); //push mario up a bit
-		break;
-	case DIK_1: //reset
-		mario->Reset();
-		break;
-	case DIK_S:
-		if (!mario->isHolding()) 
-		{
-			if (mario->getLevel() == MARIO_LEVEL_FIRE)
-			{
-				mario->Shot();
-			}
-			else if (mario->getLevel() == MARIO_LEVEL_LEAF /*&& mario->isOnGround()*/)
-			{
-				mario->StartSpinning();
-			}
-		}
-		break;
-	case DIK_P: //reset
-		game->SwitchSceneEx(WORLD_1_1_SECRECT_SCENCE_ID, WORLD_1_1_SECRECT_START_X, WORLD_1_1_SECRECT_START_Y);
-		mario->SetState(MARIO_STATE_IDLE);
-		break;
-	case DIK_O: //reset
-		game->SwitchBackScence(WORLD_1_1_SCENCE_ID, WORLD_1_1_SWITCHBACK_START_X, WORLD_1_1_SWITCHBACK_START_Y);
-		mario->SetState(MARIO_STATE_IDLE);
-		break;
 	}
+	else
+	{
+		switch (KeyCode)
+		{
+		case DIK_Z: //small jump
+			if (mario->isOnGround())
+				mario->SetState(MARIO_STATE_JUMP);
+			mario->setOnGround(false);
+			break;
+		case DIK_2: //tranform to leaf mario
+			mario->SetLevel(MARIO_LEVEL_LEAF);
+			mario->SetPosition(mario->x, mario->y - (MARIO_LEAF_BBOX_HEIGHT - MARIO_SMALL_BBOX_HEIGHT)); //push mario up a bit
+			break;
+		case DIK_3: //tranform to leaf mario
+			mario->SetLevel(MARIO_LEVEL_FIRE);
+			mario->SetPosition(mario->x, mario->y - (MARIO_FIRE_BBOX_HEIGHT - MARIO_SMALL_BBOX_HEIGHT)); //push mario up a bit
+			break;
+		case DIK_1: //reset
+			mario->Reset();
+			break;
+		case DIK_S:
+			if (!mario->isHolding())
+			{
+				if (mario->getLevel() == MARIO_LEVEL_FIRE)
+				{
+					mario->Shot();
+				}
+				else if (mario->getLevel() == MARIO_LEVEL_LEAF /*&& mario->isOnGround()*/)
+				{
+					mario->StartSpinning();
+				}
+			}
+			break;
+		case DIK_O: //reset
+			game->SwitchSceneEx(WORLD_1_1_SECRECT_SCENCE_ID, WORLD_1_1_SECRECT_START_X, WORLD_1_1_SECRECT_START_Y);
+			mario->SetState(MARIO_STATE_IDLE);
+			break;
+		case DIK_P: //
+			game->SwitchBackScence(WORLD_1_1_SCENCE_ID, WORLD_1_1_SWITCHBACK_START_X, WORLD_1_1_SWITCHBACK_START_Y);
+			mario->SetState(MARIO_STATE_IDLE);
+			break;
+		case DIK_I: //reset
+			//mario->SetState(MARIO_STATE_ICON);
+			game->SwitchSceneEx(WORLD_1_1_SCENCE_ID, WORLD_1_1_SWITCHBACK_START_X, WORLD_1_1_SWITCHBACK_START_Y);
+			//game->SwitchSceneEx(WORLDMAP_1_SCENCE_ID,100,100);
+			break;
+		case DIK_M: //
+			game->SwitchSceneEx(WORLDMAP_1_SCENCE_ID, 100, 0);
+			mario->SetState(MARIO_STATE_ICON);
+			mario->setIsIcon(true);
+			break;
+		case DIK_N: //
+			mario->SetState(MARIO_STATE_ICON);
+			mario->setIsIcon(true);
+			break;
+		}
+	}
+	
 }
 
 void CPlayScenceKeyHandler::OnKeyUp(int KeyCode)
 {
 	CMario *mario = ((CPlayScene*)scence)->GetPlayer();
-	switch (KeyCode)
+	if (mario->isIcon())
 	{
-	case DIK_DOWN:
-		mario->SetPosition(mario->x, mario->y - (MARIO_BIG_BBOX_HEIGHT - MARIO_BBOX_SIT_HEIGHT) -1 );
-		break;//push mario up a bit after stand up
-	case DIK_A:
-		mario->StopRunning();
-		//kick koopas shell
-		mario->setHolding(false);
-		break;
-	case DIK_SPACE:
-		mario->setJumpable(false);
-		break;
 	}
+	else
+	{
+		switch (KeyCode)
+		{
+		case DIK_DOWN:
+			mario->SetPosition(mario->x, mario->y - (MARIO_BIG_BBOX_HEIGHT - MARIO_BBOX_SIT_HEIGHT) - 1);
+			break;//push mario up a bit after stand up
+		case DIK_A:
+			mario->StopRunning();
+			//kick koopas shell
+			mario->setHolding(false);
+			break;
+		case DIK_SPACE:
+			mario->setJumpable(false);
+			break;
+		}
+	}
+	
 }
 
 
@@ -455,34 +500,47 @@ void CPlayScenceKeyHandler::KeyState(BYTE *states)
 
 	// disable control key when Mario die 
 	if (mario->GetState() == MARIO_STATE_DIE) return;
+	if (mario->isIcon())
+	{
 
-	if (game->IsKeyDown(DIK_A))
-		if(!mario->isSpeedUp())
-		mario->StartRunning();
-
-	if (game->IsKeyDown(DIK_X))
-	{
-		if (mario->isFalling() && mario->getLevel() == MARIO_LEVEL_LEAF)
-			mario->StartFlapping();
-	}
-	else if (game->IsKeyDown(DIK_DOWN))
-		mario->SetState(MARIO_STATE_SIT);
-	else if (game->IsKeyDown(DIK_SPACE))
-	{
-		if (mario->isJumpable()) 
-		{
-			mario->SetState(MARIO_STATE_JUMP);
-		}
-
-	}
-	else if (game->IsKeyDown(DIK_RIGHT))
-	{
-		mario->SetState(MARIO_STATE_WALKING_RIGHT);
-	}
-	else if (game->IsKeyDown(DIK_LEFT))
-	{
-		mario->SetState(MARIO_STATE_WALKING_LEFT);
 	}
 	else
-		mario->SetState(MARIO_STATE_IDLE);
+	{
+		if (game->IsKeyDown(DIK_A))
+			if (!mario->isSpeedUp())
+				mario->StartRunning();
+
+		if (game->IsKeyDown(DIK_X))
+		{
+			if (mario->isFalling() && mario->getLevel() == MARIO_LEVEL_LEAF)
+				mario->StartFlapping();
+		}
+		else if (game->IsKeyDown(DIK_DOWN))
+			mario->SetState(MARIO_STATE_SIT);
+		else if (game->IsKeyDown(DIK_SPACE))
+		{
+			if (mario->isJumpable())
+			{
+				mario->SetState(MARIO_STATE_JUMP);
+			}
+
+		}
+		else if (game->IsKeyDown(DIK_RIGHT))
+		{
+			mario->SetState(MARIO_STATE_WALKING_RIGHT);
+		}
+		else if (game->IsKeyDown(DIK_LEFT))
+		{
+			mario->SetState(MARIO_STATE_WALKING_LEFT);
+		}
+		else
+		{
+			if (mario->isIcon())
+				mario->SetState(MARIO_STATE_ICON);
+			else
+				mario->SetState(MARIO_STATE_IDLE);
+		}
+	}
+
+	
 }
