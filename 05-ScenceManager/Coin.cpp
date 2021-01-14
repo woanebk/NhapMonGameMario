@@ -1,6 +1,7 @@
 #include "Coin.h"
 #include "PlayScence.h"
 #include "Mario.h"
+#include "Effect.h"
 #include "BreakableBrick.h"
 
 void CCoin::Render()
@@ -24,6 +25,12 @@ void CCoin::GetBoundingBox(float & l, float & t, float & r, float & b)
 	b = y + COIN_BBOX_HEIGHT;
 }
 
+void CCoin::Jump()
+{
+	jumptime = GetTickCount64();
+	isjumping = true;
+}
+
 void CCoin::Update(DWORD dt, vector<LPGAMEOBJECT> *coObjects)
 {
 	if (!enable)
@@ -31,7 +38,7 @@ void CCoin::Update(DWORD dt, vector<LPGAMEOBJECT> *coObjects)
 	CGameObject::Update(dt, coObjects);
 	vector<LPCOLLISIONEVENT> coEvents;
 	vector<LPCOLLISIONEVENT> coEventsResult;
-
+	y += dy;
 	coEvents.clear();
 	CalcPotentialCollisions(coObjects, coEvents);
 	//
@@ -55,6 +62,31 @@ void CCoin::Update(DWORD dt, vector<LPGAMEOBJECT> *coObjects)
 		CPlayScene *currenscence = (CPlayScene*)CGame::GetInstance()->GetCurrentScene();
 		currenscence->PushBackObject(breakablebrick);
 	}
+
+	if (isjumping)
+		vy = -COIN_JUMP_SPEED_Y;
+
+	// jump and go back to old position======
+	if (isjumping && GetTickCount64() - jumptime > COIN_JUMP_TIME)
+	{
+		isjumping = false;
+		jumptime = 0;
+		vy = COIN_JUMP_SPEED_Y;
+		
+
+	}
+	if (y > start_y)
+	{
+		y = start_y;
+		vy = 0;
+		RenderPoint(EFFECT_TYPE_100_POINT);
+		CPlayScene *currenscence = (CPlayScene*)CGame::GetInstance()->GetCurrentScene();
+		CMario *mario = currenscence->GetPlayer();
+		mario->GainScore(SCORE_100);
+		visable = false;
+		enable = false;
+	}
+	//==========================================
 
 	if (coEvents.size() == 0)
 	{
@@ -92,4 +124,18 @@ void CCoin::Update(DWORD dt, vector<LPGAMEOBJECT> *coObjects)
 	}
 	// clean up collision events
 	for (UINT i = 0; i < coEvents.size(); i++) delete coEvents[i];
+}
+
+void CCoin::RenderPoint(int type)
+{
+	CEffect *point_effect = new CEffect(type);
+	point_effect->SetPosition(this->x, this->y - BRICK_BBOX_HEIGHT);
+	point_effect->SetStartPosition(this->x, this->y - BRICK_BBOX_HEIGHT);
+
+	CAnimationSets * animation_sets = CAnimationSets::GetInstance();
+	LPANIMATION_SET ani_set = animation_sets->Get(EFFECT_SET_ID);
+	point_effect->SetAnimationSet(ani_set);
+
+	CPlayScene *currenscence = (CPlayScene*)CGame::GetInstance()->GetCurrentScene();
+	currenscence->PushBackObject(point_effect);
 }

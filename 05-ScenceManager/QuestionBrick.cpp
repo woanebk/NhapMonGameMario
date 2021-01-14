@@ -3,6 +3,7 @@
 #include "PlayScence.h"
 #include "Leaf.h"
 #include "Mushroom.h"
+#include "Coin.h"
 #include "Effect.h"
 
 bool CQuestionBrick::isEmpty()
@@ -72,6 +73,21 @@ void CQuestionBrick::CreateItem(int item)
 
 		CPlayScene *currenscence = (CPlayScene*)CGame::GetInstance()->GetCurrentScene();
 		currenscence->PushBackObject(moneybutton);
+	}
+	if (item == ITEM_MONEY)
+	{
+		CCoin *coin = new CCoin();
+		coin->SetPosition(this->x, this->y - BRICK_BBOX_HEIGHT);
+		coin->SetStartPosition(this->x, this->y - BRICK_BBOX_HEIGHT);
+
+		CAnimationSets * animation_sets = CAnimationSets::GetInstance();
+		LPANIMATION_SET ani_set = animation_sets->Get(COIN_SET_ID);
+		coin->SetAnimationSet(ani_set);
+
+		coin->Jump();
+
+		CPlayScene *currenscence = (CPlayScene*)CGame::GetInstance()->GetCurrentScene();
+		currenscence->PushBackObject(coin);
 	}
 }
 

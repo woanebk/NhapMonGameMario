@@ -426,6 +426,8 @@ void CMario::Update(DWORD dt, vector<LPGAMEOBJECT> *coObjects)
 								questionbrick->CreateItem(ITEM_MUSHROOM_RED);
 							else if (questionbrick->hasItem() && level <= MARIO_LEVEL_LEAF)
 								questionbrick->CreateItem(ITEM_LEAF);
+							else if (questionbrick->hasCoin())
+								questionbrick->CreateItem(ITEM_MONEY);
 						}
 						else if(questionbrick->getType() == QUESTION_BRICK_TYPE_ONSKY_BREAKABLE_ALIKE)//1 UP
 						{

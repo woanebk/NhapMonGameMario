@@ -317,6 +317,10 @@
 #define COIN_BBOX_WIDTH 10
 #define COIN_BBOX_HEIGHT 16
 
+#define COIN_JUMP_SPEED_Y	0.3f
+#define COIN_JUMP_TIME		150
+#define COIN_JUMP_HEIGHT	20
+
 
 //PINE
 #define PINE_ANI_TO_SECRECT				0
@@ -382,6 +386,7 @@
 #define ITEM_MUSHROOM_GREEN		2
 #define ITEM_LEAF				3
 #define ITEM_MONEY_BUTTON		4
+#define ITEM_MONEY				5
 
 
 //MUSHROOM
@@ -414,7 +419,7 @@
 #define ANI_1_UP				10
 
 #define EFFECT_HIT_TAIL_TIME	200
-#define EFFECT_POINT_TIME		800
+#define EFFECT_POINT_TIME		600
 
 //CEffect TYPE:
 #define EFFECT_TYPE_TAIL_HIT	1
