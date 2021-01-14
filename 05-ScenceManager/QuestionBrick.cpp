@@ -181,12 +181,21 @@ void CQuestionBrick::HitByTail()
 						Render_Tail_Hit();
 					}
 				}
+				else if (type == QUESTION_BRICK_TYPE_ONSKY_BREAKABLE_ALIKE)
+				{
+					if (hasItem())
+					{
+						CreateItem(ITEM_MUSHROOM_GREEN);
+						Render_Tail_Hit();
+					}
+				}
 				else
 				{
 					if (hasItem() && mario->getLevel() == MARIO_LEVEL_SMALL)
 						CreateItem(ITEM_MUSHROOM_RED);
 					else if (hasItem() && mario->getLevel() <= MARIO_LEVEL_LEAF)
 						CreateItem(ITEM_LEAF);
+
 					if (!isEmpty())
 					{
 						Jump();

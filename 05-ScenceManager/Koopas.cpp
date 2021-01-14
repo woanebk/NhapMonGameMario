@@ -351,6 +351,7 @@ void CKoopas::HitByTail()
 			{
 				SetState(KOOPAS_STATE_DIE);
 				Render_Tail_Hit();
+				
 			}
 }
 

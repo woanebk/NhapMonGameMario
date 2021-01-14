@@ -179,6 +179,8 @@ public:
 
 	bool isEqual(float x, float y);
 
+	void RenderPoint(int point);
+
 
 	virtual void GetBoundingBox(float &left, float &top, float &right, float &bottom);
 };

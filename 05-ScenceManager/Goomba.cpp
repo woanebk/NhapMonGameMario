@@ -293,6 +293,8 @@ void CGoomba::HitByTail()
 				Render_Tail_Hit();
 				SetState(GOOMBA_STATE_DIE_KNOCKUP);
 				y += dy;
+				mario->GainScore(SCORE_100);
+				mario->RenderPoint(EFFECT_TYPE_100_POINT);
 			}	
 	
 }

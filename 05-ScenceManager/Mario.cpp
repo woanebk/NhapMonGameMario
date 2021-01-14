@@ -18,6 +18,7 @@
 #include "QuestionBrick.h"
 #include "Leaf.h"
 #include "Mushroom.h"
+#include "Effect.h"
 
 CMario::CMario(float x, float y) : CGameObject()
 {
@@ -204,15 +205,22 @@ void CMario::Update(DWORD dt, vector<LPGAMEOBJECT> *coObjects)
 						{
 							goomba->LevelDown();
 							GainScore(SCORE_400);
+							RenderPoint(EFFECT_TYPE_100_POINT);
 							vy = -MARIO_JUMP_DEFLECT_SPEED;
 						}
 						else
 						{
 							goomba->SetState(GOOMBA_STATE_DIE);
 							if (goomba->getType() == GOOMBA_TYPE_NORMAL)
+							{
 								GainScore(SCORE_100);
+								RenderPoint(EFFECT_TYPE_100_POINT);
+							}
 							else
+							{
 								GainScore(SCORE_800);
+								RenderPoint(EFFECT_TYPE_800_POINT);
+							}
 							//deflect
 							if (level != MARIO_LEVEL_LEAF)
 								vy = -MARIO_JUMP_DEFLECT_SPEED;
@@ -259,11 +267,15 @@ void CMario::Update(DWORD dt, vector<LPGAMEOBJECT> *coObjects)
 							if (this->nx > 0)
 							{
 								Kick();
+								GainScore(SCORE_100);
+								RenderPoint(EFFECT_TYPE_100_POINT);
 								koopas->SetState(KOOPAS_STATE_SPIN_RIGHT);
 							}
 							else
 							{
 								Kick();
+								GainScore(SCORE_100);
+								RenderPoint(EFFECT_TYPE_100_POINT);
 								koopas->SetState(KOOPAS_STATE_SPIN_LEFT);//kick the shell
 							}
 						}
@@ -302,6 +314,7 @@ void CMario::Update(DWORD dt, vector<LPGAMEOBJECT> *coObjects)
 							{
 								koopas->LevelDown();
 								GainScore(SCORE_100);
+								RenderPoint(EFFECT_TYPE_100_POINT);
 								if(level != MARIO_LEVEL_LEAF)
 									vy = -MARIO_JUMP_DEFLECT_SPEED;
 								else
@@ -311,6 +324,7 @@ void CMario::Update(DWORD dt, vector<LPGAMEOBJECT> *coObjects)
 							{
 								koopas->SetState(KOOPAS_STATE_SHELL);
 								GainScore(SCORE_100);
+								RenderPoint(EFFECT_TYPE_100_POINT);
 								if (level != MARIO_LEVEL_LEAF)
 									vy = -MARIO_JUMP_DEFLECT_SPEED;
 								else
@@ -431,7 +445,7 @@ void CMario::Update(DWORD dt, vector<LPGAMEOBJECT> *coObjects)
 
 						if (!questionbrick->isEmpty())
 							questionbrick->Jump();
-						if(questionbrick->hasCoin())
+						if (questionbrick->hasCoin())
 							GainMoney();
 						questionbrick->getUsed();//coin and item set to 0
 						vy = MARIO_GRAVITY; //push mario down a bit
@@ -494,7 +508,10 @@ void CMario::Update(DWORD dt, vector<LPGAMEOBJECT> *coObjects)
 					if(level < MARIO_LEVEL_LEAF)
 						LevelUp();
 					else
+					{
 						GainScore(SCORE_1000);
+						RenderPoint(EFFECT_TYPE_1000_POINT);
+					}
 					leaf->setVisable(false);
 					leaf->setEnable(false);
 				} //if Leaf
@@ -502,9 +519,16 @@ void CMario::Update(DWORD dt, vector<LPGAMEOBJECT> *coObjects)
 				{
 					CMushroom *mushroom = dynamic_cast<CMushroom*>(e->obj);
 					if (mushroom->getType() == MUSHROOM_TYPE_RED)
+					{
 						LevelUp();
+						GainScore(SCORE_1000);
+						RenderPoint(EFFECT_TYPE_1000_POINT);
+					}
 					else //type green
+					{
 						LifeUp();
+						RenderPoint(EFFECT_TYPE_1_UP);
+					}
 					mushroom->setVisable(false);
 					mushroom->setEnable(false);
 				} //if Mushroom
@@ -938,12 +962,6 @@ void CMario::LevelUp()
 		startTransFormtoLeaf();
 		SetLevel(MARIO_LEVEL_LEAF);
 	}
-	else
-	if (level == MARIO_LEVEL_LEAF)
-	{
-		startTransFormtoLeaf();
-		SetLevel(MARIO_LEVEL_FIRE);
-	}
 }
 
 void CMario::LevelDown()
@@ -1090,7 +1108,7 @@ void CMario::ManageAccelerationAndSpeed()
 		Stack = MARIO_WALKING_STACK_MAX;
 	}
 
-	if (speed_up && GetTickCount() - speedup_start > MARIO_STACKUP_TIME && vx != 0)
+	if (isonground && speed_up && GetTickCount() - speedup_start > MARIO_STACKUP_TIME && vx != 0)
 	{
 		Stack++;
 		speedup_start = GetTickCount();
@@ -1225,4 +1243,18 @@ bool CMario::isEqual(float x, float y)
 	if(abs(x-y) < 5)
 		return true; //they are same
 	return false; //they are not same
+}
+
+void CMario::RenderPoint(int type)
+{
+	CEffect *point_effect = new CEffect(type);
+	point_effect->SetPosition(this->x, this->y - MARIO_BIG_BBOX_HEIGHT);
+	point_effect->SetStartPosition(this->x, this->y - MARIO_BIG_BBOX_HEIGHT);
+
+	CAnimationSets * animation_sets = CAnimationSets::GetInstance();
+	LPANIMATION_SET ani_set = animation_sets->Get(EFFECT_SET_ID);
+	point_effect->SetAnimationSet(ani_set);
+
+	CPlayScene *currenscence = (CPlayScene*)CGame::GetInstance()->GetCurrentScene();
+	currenscence->PushBackObject(point_effect);
 }
