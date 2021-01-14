@@ -402,6 +402,15 @@ void CGame::SwitchScene(int scene_id)
 	LPSCENE s = scenes[scene_id];
 	CGame::GetInstance()->SetKeyHandler(s->GetKeyEventHandler());
 	s->Load();	
+	//
+	if (scene_id == WORLDMAP_1_SCENCE_ID)
+	{
+		CPlayScene *scence = (CPlayScene*)CGame::GetInstance()->GetCurrentScene();
+		Hud* no_timing_hud = scence->getHud();
+		no_timing_hud->setNoTiming(true);
+		scence->setHud(no_timing_hud);
+	}
+	//
 }
 
 void CGame::SwitchSceneEx(int scene_id, float mario_x, float mario_y) //save old scence to call later
@@ -426,8 +435,6 @@ void CGame::SwitchSceneEx(int scene_id, float mario_x, float mario_y) //save old
 		post_mario->SetState(MARIO_STATE_ICON);
 	else
 		post_mario->SetState(MARIO_STATE_IDLE);
-	post_mario->SetSpeed(0, 0);
-	post_mario->setSpeedUp(false);
 	if (scene_id != WORLDMAP_1_SCENCE_ID)
 		post_mario->setIsIcon(false);
 
@@ -435,6 +442,10 @@ void CGame::SwitchSceneEx(int scene_id, float mario_x, float mario_y) //save old
 
 	((CPlayScene*)s)->ReplaceMarioObjectWith(post_mario);
 	((CPlayScene*)s)->SetPlayer(post_mario);
+	if (scene_id == WORLDMAP_1_SCENCE_ID)
+		post_hud->setNoTiming(true);
+	else
+		post_hud->setNoTiming(false);
 	((CPlayScene*)s)->setHud(post_hud);
 }
 
@@ -456,8 +467,14 @@ void CGame::SwitchBackScence(int scene_id, float mario_x, float mario_y)
 	CGame::GetInstance()->SetKeyHandler(s->GetKeyEventHandler());
 
 	post_mario->SetPosition(mario_x, mario_y);
+	/*if (scene_id == WORLD_1_1_SCENCE_ID)
+		post_mario->SetState(MARIO_STATE_PINEUP);*/
 	if (scene_id != WORLDMAP_1_SCENCE_ID)
+	{
 		post_mario->setIsIcon(false);
+	}
+	else
+		post_mario->setIsIcon(true);
 	((CPlayScene*)s)->ReplaceMarioObjectWith(post_mario);
 	((CPlayScene*)s)->setHud(post_hud);
 }

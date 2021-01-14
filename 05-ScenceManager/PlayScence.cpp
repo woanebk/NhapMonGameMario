@@ -185,7 +185,8 @@ void CPlayScene::_ParseSection_OBJECTS(string line)
 	{
 		float r = atof(tokens[4].c_str());
 		float b = atof(tokens[5].c_str());
-		obj = new CPine(x, y, r, b);
+		float s= atof(tokens[6].c_str());
+		obj = new CPine(x, y, r, b, s);
 	}
 	break;
 	case OBJECT_TYPE_BREAKABLE_BRICK:
@@ -375,13 +376,13 @@ void CPlayScene::Render()
 	{
 		if (objects[i]->isVisabled() && objects[i]->isInCamera())
 		{
-			if (dynamic_cast<CMario*>(objects[i]))
+			/*if (dynamic_cast<CMario*>(objects[i]))
 				continue;
-			else
+			else*/
 			objects[i]->Render();
 		}
 	}
-	objects[0]->Render(); //mario is the last to be rendered
+	//objects[0]->Render(); //mario is the last to be rendered
 	hud->Render();
 }
 
@@ -432,7 +433,7 @@ void CPlayScenceKeyHandler::OnKeyDown(int KeyCode)
 			break;
 		}
 	}
-	else
+	else if(!mario->isLostControl())
 	{
 		switch (KeyCode)
 		{
@@ -504,7 +505,7 @@ void CPlayScenceKeyHandler::OnKeyUp(int KeyCode)
 	if (mario->isIcon())
 	{
 	}
-	else
+	else if(!mario->isLostControl())
 	{
 		switch (KeyCode)
 		{
@@ -537,7 +538,7 @@ void CPlayScenceKeyHandler::KeyState(BYTE *states)
 	{
 
 	}
-	else
+	else if(!mario->isLostControl())
 	{
 		if (game->IsKeyDown(DIK_A))
 			if (!mario->isSpeedUp())

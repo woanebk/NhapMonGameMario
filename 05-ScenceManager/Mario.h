@@ -48,6 +48,14 @@ class CMario : public CGameObject
 	DWORD big_transform_start;
 	DWORD leaf_transform_start;
 
+	//pine down
+	bool is_pine_down = false;
+	DWORD start_pine_down;
+
+	//pine up
+	bool is_pine_up = false;
+	DWORD start_pine_up;
+
 	//icon movement on map:
 	bool can_go_left = false;
 	bool can_go_right = false;
@@ -134,6 +142,12 @@ public:
 	void startTransformtoBig() { istransformingtoBig = true; big_transform_start = GetTickCount64(); }
 	void startTransFormtoLeaf() { istransformingtoLeaf = true; leaf_transform_start = GetTickCount64(); }
 	bool isTransForming() { if (istransformingtoBig || istransformingtoLeaf) return true; return false; }
+
+	// pine down
+	void StartPineDown() { is_pine_down = true; start_pine_down = GetTickCount64(); }
+
+	// pine up
+	void StartPineUp() { is_pine_up = true; start_pine_up = GetTickCount64(); }
 
 	//icon movement 
 	bool canGoLeft() { return can_go_left; }

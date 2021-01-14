@@ -10,6 +10,7 @@ class Hud:public CGameObject
 	int stack;
 	int money;
 
+	bool no_timing = false;
 	vector<LPSPRITE> scoreSprite;
 	vector<LPSPRITE> stackSprite;
 
@@ -20,6 +21,7 @@ public:
 	virtual void Update(DWORD dt);
 	virtual void Render();
 	~Hud();
+	void setNoTiming(bool t) { no_timing = t; }
 
 	LPSPRITE getNumberSprite(int num);
 };

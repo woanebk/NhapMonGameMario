@@ -50,7 +50,6 @@ void CMario::Update(DWORD dt, vector<LPGAMEOBJECT> *coObjects)
 	CGameObject::Update(dt);
 	if (is_icon) // ==================== logic for ICON MARIO ON WORLD MAP
 	{
-		
 		// stop when reach certain pint on map
 		if (is_going_left)
 		{
@@ -214,7 +213,11 @@ void CMario::Update(DWORD dt, vector<LPGAMEOBJECT> *coObjects)
 								GainScore(SCORE_100);
 							else
 								GainScore(SCORE_800);
-							vy = -MARIO_JUMP_DEFLECT_SPEED;
+							//deflect
+							if (level != MARIO_LEVEL_LEAF)
+								vy = -MARIO_JUMP_DEFLECT_SPEED;
+							else
+								vy = -MARIO_LEAF_JUMP_DEFLECT_SPEED;
 						}
 					}
 				}
@@ -235,11 +238,11 @@ void CMario::Update(DWORD dt, vector<LPGAMEOBJECT> *coObjects)
 					}
 				}
 			} // if Goomba
-			else if (dynamic_cast<CPortal *>(e->obj))
-			{
-				CPortal *p = dynamic_cast<CPortal *>(e->obj);
-				CGame::GetInstance()->SwitchScene(p->GetSceneId());
-			} //if Portal
+			//else if (dynamic_cast<CPortal *>(e->obj))
+			//{
+			//	CPortal *p = dynamic_cast<CPortal *>(e->obj);
+			//	CGame::GetInstance()->SwitchScene(p->GetSceneId());
+			//} //if Portal
 			else if (dynamic_cast<CKoopas *>(e->obj))
 			{
 				CKoopas *koopas = dynamic_cast<CKoopas *>(e->obj);
@@ -299,13 +302,19 @@ void CMario::Update(DWORD dt, vector<LPGAMEOBJECT> *coObjects)
 							{
 								koopas->LevelDown();
 								GainScore(SCORE_100);
-								vy = -MARIO_JUMP_DEFLECT_SPEED;
+								if(level != MARIO_LEVEL_LEAF)
+									vy = -MARIO_JUMP_DEFLECT_SPEED;
+								else
+									vy = -MARIO_LEAF_JUMP_DEFLECT_SPEED;
 							}
 							else
 							{
 								koopas->SetState(KOOPAS_STATE_SHELL);
 								GainScore(SCORE_100);
-								vy = -MARIO_JUMP_DEFLECT_SPEED;
+								if (level != MARIO_LEVEL_LEAF)
+									vy = -MARIO_JUMP_DEFLECT_SPEED;
+								else
+									vy = -MARIO_LEAF_JUMP_DEFLECT_SPEED;
 							}
 						}
 						else
@@ -359,6 +368,12 @@ void CMario::Update(DWORD dt, vector<LPGAMEOBJECT> *coObjects)
 					if (e->ny != 0) {
 						vy = 0;
 						x += dx;
+						if (e->ny < 0 && pine->canSwitchScence() && state == MARIO_STATE_SIT)
+						{
+							SetState(MARIO_STATE_PINEDOWN);
+						}
+						else if (e->ny > 0 && pine->canSwitchScence())
+							SetState(MARIO_STATE_PINEUP);
 					}
 				} //if Pine
 				else if (dynamic_cast<CBreakableBrick*>(e->obj))
@@ -640,6 +655,9 @@ void CMario::Render()
 	else
 		if (level == MARIO_LEVEL_LEAF)//===================================================== MARIO LEAF ANIMATION ==========================
 		{
+			if (state == MARIO_STATE_PINEDOWN || state == MARIO_STATE_PINEDOWN)
+				ani = MARIO_ANI_LEAF_PINEDOWN;
+			else
 			if (state == MARIO_STATE_SIT) //mario sit
 			{
 				if (nx > 0)
@@ -840,6 +858,16 @@ void CMario::SetState(int state)
 	case MARIO_STATE_SIT:
 		vx = 0;
 		break;
+	case MARIO_STATE_PINEDOWN:
+		vy = 0;
+		is_lost_control = true;
+		StartPineDown();
+		break;
+	case MARIO_STATE_PINEUP:
+		vy = 0;
+		is_lost_control = true;
+		StartPineUp();
+		break;
 	case MARIO_STATE_ICON:
 		vx = 0;
 		vy = 0;
@@ -878,7 +906,6 @@ void CMario::SetState(int state)
 		is_lost_control = true;
 		//y += MARIO_ICON_SPEED_DX;
 		break;
-		
 	case MARIO_STATE_DIE:
 		vy = -MARIO_DIE_DEFLECT_SPEED;
 		break;
@@ -1016,6 +1043,11 @@ void CMario::GetBoundingBox(float &left, float &top, float &right, float &bottom
 		right = x + MARIO_SMALL_BBOX_WIDTH;
 		bottom = y + MARIO_SMALL_BBOX_HEIGHT;
 	}//small mario
+
+
+	//special:
+	if (state == MARIO_STATE_PINEDOWN || state == MARIO_STATE_PINEUP)
+		left = top = right = bottom = 0;
 }
 
 void CMario::ManageAccelerationAndSpeed()
@@ -1117,6 +1149,8 @@ void CMario::RenderSpecialAnimation(int ani) {
 void CMario::TimingEvent() {
 	//when transforming stop
 	if (istransformingtoLeaf || istransformingtoBig) { vx = 0; vy = 0; }
+	if (is_pine_down) { vx = 0; vy = MARIO_PINE_DOWN_SPEED; }
+	if (is_pine_up) { vx = 0; vy = -MARIO_PINE_UP_SPEED; }
 
 	// reset untouchable timer if untouchable time has passed
 	if (GetTickCount() - untouchable_start > MARIO_UNTOUCHABLE_TIME)
@@ -1154,7 +1188,25 @@ void CMario::TimingEvent() {
 		istransformingtoBig = false;
 		big_transform_start = 0;
 	}
+	if (is_pine_down && GetTickCount64() - start_pine_down > MARIO_PINEDOWN_TIME)
+	{
+		is_lost_control = false;
+		is_pine_down = false;
+		start_pine_down = 0;
+		CGame *game = CGame::GetInstance();
+		
+			game->SwitchSceneEx(WORLD_1_1_SECRECT_SCENCE_ID, WORLD_1_1_SECRECT_START_X, WORLD_1_1_SECRECT_START_Y);
+		
+	}
 
+	if (is_pine_up && GetTickCount64() - start_pine_up > MARIO_PINEUP_TIME)
+	{
+		is_lost_control = false;
+		is_pine_up = false;
+		start_pine_up = 0;
+		CGame *game = CGame::GetInstance();
+		game->SwitchBackScence(WORLD_1_1_SCENCE_ID, WORLD_1_1_SWITCHBACK_START_X, WORLD_1_1_SWITCHBACK_START_Y);
+	}
 	
 }
 

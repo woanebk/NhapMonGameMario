@@ -120,7 +120,10 @@ void CGoomba::Update(DWORD dt, vector<LPGAMEOBJECT> *coObjects)
 				if (e->nx != 0)
 				{
 					if (koopas->GetState() == KOOPAS_STATE_SPIN_LEFT || koopas->GetState() == KOOPAS_STATE_SPIN_RIGHT)
+					{
 						SetState(GOOMBA_STATE_DIE); //die if get hit by a spinning koopas
+						Render_Tail_Hit();
+					}
 					else
 						vx = -vx; //turn if meet an alive koopas
 				}

@@ -32,7 +32,7 @@ void Hud::Update(DWORD dt)
 	CPlayScene* scence = (CPlayScene*)CGame::GetInstance()->GetCurrentScene();
 	CMario* mario = scence->GetPlayer();
 	
-	if (GetTickCount64() - countdowntime > 1000 && RemainingTime > 0)
+	if (!no_timing && GetTickCount64() - countdowntime > 1000 && RemainingTime > 0)
 	{
 		RemainingTime -= 1;
 		countdowntime = GetTickCount64();
