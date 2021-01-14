@@ -20,6 +20,8 @@ class CMario : public CGameObject
 	bool isonground = false;
 	bool jumpable = false;
 	bool isjumping = false;
+	bool flying = false;
+	
 	//fall
 	bool isfalling = false;
 	//shoot
@@ -45,6 +47,28 @@ class CMario : public CGameObject
 	bool istransformingtoLeaf = false;
 	DWORD big_transform_start;
 	DWORD leaf_transform_start;
+
+	//icon movement on map:
+	bool can_go_left = false;
+	bool can_go_right = false;
+	bool can_go_up = false;
+	bool can_go_down = false;
+
+	bool is_going_left = false;
+	bool is_going_up = false;
+	bool is_going_right = false;
+	bool is_going_down = false;
+
+	float icon_old_x;
+	float icon_old_y;
+	float icon_new_x;
+	float icon_new_y;
+
+	bool is_lost_control = false;
+	void setLostControl(bool c) { is_lost_control = c; }
+
+	bool can_select_scence = false;
+
 
 	float start_x;			// initial position of Mario at scene
 	float start_y; 
@@ -76,6 +100,10 @@ public:
 	bool isSpeedUp() { return speed_up; }
 	void StartRunning() { speedup_start = GetTickCount(); speed_up = true; }
 	void StopRunning() { speedup_stop = GetTickCount(); speed_up = false; }
+
+	//fly
+	bool isFlying() { return flying; }
+	void setIsFlying(bool f) { flying = f; }
 	
 	//spinning tail
 	DWORD getStartSpinning() { return spin_start; }
@@ -105,6 +133,17 @@ public:
 	//transform
 	void startTransformtoBig() { istransformingtoBig = true; big_transform_start = GetTickCount64(); }
 	void startTransFormtoLeaf() { istransformingtoLeaf = true; leaf_transform_start = GetTickCount64(); }
+	bool isTransForming() { if (istransformingtoBig || istransformingtoLeaf) return true; return false; }
+
+	//icon movement 
+	bool canGoLeft() { return can_go_left; }
+	bool canGoRight() { return can_go_right; }
+	bool canGoUp() { return can_go_up; }
+	bool canGoDown() { return can_go_down; }
+	bool canSelectScecne() { return can_select_scence; }
+
+
+	bool isLostControl() { return is_lost_control; }
 	
 	void ManageAccelerationAndSpeed();
 
@@ -123,6 +162,9 @@ public:
 	void GainMoney();
 
 	void GainScore(int point);
+
+	bool isEqual(float x, float y);
+
 
 	virtual void GetBoundingBox(float &left, float &top, float &right, float &bottom);
 };

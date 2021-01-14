@@ -280,7 +280,8 @@ void CPlayScene::Load()
 		string line(str);
 
 		if (line[0] == '#') continue;	// skip comment lines	
-
+		
+		if (line == "[MAP_BARRIERS]") { section = SCENE_SECTION_MAP_BARRIERS; continue; }
 		if (line == "[MAP_BACKGROUND]") { section = SCENE_SECTION_MAP_BACKGROUND; continue; }
 		if (line == "[TEXTURES]") { section = SCENE_SECTION_TEXTURES; continue; }
 		if (line == "[SPRITES]") { 
@@ -299,6 +300,7 @@ void CPlayScene::Load()
 		//
 		switch (section)
 		{ 
+			case SCENE_SECTION_MAP_BARRIERS: LoadWorldMapBarriers(line); break;
 			case SCENE_SECTION_MAP_BACKGROUND: _ParseSection_MAP_BACKGROUND(line); break;
 			case SCENE_SECTION_TEXTURES: _ParseSection_TEXTURES(line); break;
 			case SCENE_SECTION_SPRITES: _ParseSection_SPRITES(line); break;
@@ -397,14 +399,38 @@ void CPlayScene::Unload()
 	DebugOut(L"[INFO] Scene %s unloaded! \n", sceneFilePath);
 }
 
+
 void CPlayScenceKeyHandler::OnKeyDown(int KeyCode)
 {
 	//DebugOut(L"[INFO] KeyDown: %d\n", KeyCode);
 
 	CMario *mario = ((CPlayScene*)scence)->GetPlayer();
 	CGame *game = CGame::GetInstance();
-	if (mario->isIcon())
+	if (mario->isIcon() && !mario->isLostControl())
 	{
+		switch (KeyCode)
+		{
+		case DIK_LEFT:
+			if (mario->canGoLeft())
+				mario->SetState(MARIO_STATE_ICON_GO_LEFT);
+			break;
+		case DIK_RIGHT:
+			if (mario->canGoRight())
+				mario->SetState(MARIO_STATE_ICON_GO_RIGHT);
+			break;
+		case DIK_UP:
+			if (mario->canGoUp())
+				mario->SetState(MARIO_STATE_ICON_GO_UP);
+			break;
+		case DIK_DOWN:
+			if (mario->canGoDown())
+				mario->SetState(MARIO_STATE_ICON_GO_DOWN);
+			break;
+		case DIK_S:
+			if (mario->canSelectScecne())
+				game->SwitchSceneEx(WORLD_1_1_SCENCE_ID, WORLD_1_1_START_X, WORLD_1_1_START_Y);
+			break;
+		}
 	}
 	else
 	{
@@ -427,6 +453,12 @@ void CPlayScenceKeyHandler::OnKeyDown(int KeyCode)
 			mario->Reset();
 			break;
 		case DIK_S:
+			if (mario->getLevel() == MARIO_LEVEL_LEAF /*&& mario->isOnGround()*/)
+			{
+				mario->StartSpinning();
+			}
+			break;
+		case DIK_A:
 			if (!mario->isHolding())
 			{
 				if (mario->getLevel() == MARIO_LEVEL_FIRE)
@@ -484,8 +516,9 @@ void CPlayScenceKeyHandler::OnKeyUp(int KeyCode)
 			//kick koopas shell
 			mario->setHolding(false);
 			break;
-		case DIK_SPACE:
+		case DIK_S:
 			mario->setJumpable(false);
+			mario->setIsFlying(false);
 			break;
 		}
 	}
@@ -499,7 +532,7 @@ void CPlayScenceKeyHandler::KeyState(BYTE *states)
 	CMario *mario = ((CPlayScene*)scence)->GetPlayer();
 
 	// disable control key when Mario die 
-	if (mario->GetState() == MARIO_STATE_DIE) return;
+	if (mario->GetState() == MARIO_STATE_DIE || mario->isTransForming()) return;
 	if (mario->isIcon())
 	{
 
@@ -517,12 +550,16 @@ void CPlayScenceKeyHandler::KeyState(BYTE *states)
 		}
 		else if (game->IsKeyDown(DIK_DOWN))
 			mario->SetState(MARIO_STATE_SIT);
-		else if (game->IsKeyDown(DIK_SPACE))
+		else if (game->IsKeyDown(DIK_S))
 		{
 			if (mario->isJumpable())
 			{
+				if (mario->getStack() == MARIO_RUNNING_STACK_MAX && mario->getLevel() == MARIO_LEVEL_LEAF)
+					mario->setIsFlying(true);
 				mario->SetState(MARIO_STATE_JUMP);
 			}
+			else if (mario->isFalling() && !mario->isFlying() && mario->getLevel() == MARIO_LEVEL_LEAF)
+					mario->StartFlapping();
 
 		}
 		else if (game->IsKeyDown(DIK_RIGHT))
@@ -543,4 +580,21 @@ void CPlayScenceKeyHandler::KeyState(BYTE *states)
 	}
 
 	
+}
+
+void CPlayScene::LoadWorldMapBarriers(string line)
+{
+	vector<string> tokens = split(line);
+
+	if (tokens.size() < 6) return; // skip invalid lines 
+
+	float x = atof(tokens[0].c_str());
+	float y = atof(tokens[1].c_str());
+	int goleft = atoi(tokens[2].c_str());
+	int goup = atoi(tokens[3].c_str());
+	int goright = atoi(tokens[4].c_str());
+	int godown = atoi(tokens[5].c_str());
+
+	MapBarrier *bar = new MapBarrier(x, y, goleft, goup, goright, godown);
+	barriers.push_back(bar);
 }

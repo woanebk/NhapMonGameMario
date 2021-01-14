@@ -46,7 +46,7 @@ void CGoomba::GetBoundingBox(float &left, float &top, float &right, float &botto
 		if (level == GOOMBA_LEVEL_FLY)
 			bottom = y + FLYGOOMBA_BBOX_HEIGHT;
 		else
-			bottom = y + GOOMBA_BBOX_HEIGHT;
+			bottom = y +  GOOMBA_BBOX_HEIGHT;
 	}
 		
 }
@@ -71,7 +71,8 @@ void CGoomba::Update(DWORD dt, vector<LPGAMEOBJECT> *coObjects)
 		visable = false;
 	}
 	//Reset();
-	CalcPotentialCollisions(coObjects, coEvents);
+	if (state != GOOMBA_STATE_DIE && state != GOOMBA_STATE_DIE_KNOCKUP)
+		CalcPotentialCollisions(coObjects, coEvents);
 	if (level == GOOMBA_LEVEL_FLY)
 	{
 			if (GetTickCount64() - fly_goomba_start_walking > FLYGOOMBA_HIGH_JUMP_TIME)
@@ -254,6 +255,11 @@ void CGoomba::SetState(int state)
 		vy = 0;
 		StartRenderDie();
 		break;
+	case GOOMBA_STATE_DIE_KNOCKUP:
+		vy = -MARIO_DIE_DEFLECT_SPEED;
+		//vx = 0;
+		//enable = false;
+		break;
 	case GOOMBA_STATE_WALKING:
 		if (level == GOOMBA_LEVEL_NORMAL)
 		{
@@ -281,9 +287,11 @@ void CGoomba::HitByTail()
 		if (bb_left <= mario_bb_right + MARIO_LEAF_BBOX_TAIL_WIDTH && bb_right >= mario_bb_left - MARIO_LEAF_BBOX_TAIL_WIDTH)
 			if (bb_top <= mario_bb_bottom && bb_bottom >= mario_bb_top + (mario_bb_bottom - mario_bb_top) / 2)
 			{
-				SetState(GOOMBA_STATE_DIE);
 				Render_Tail_Hit();
+				SetState(GOOMBA_STATE_DIE_KNOCKUP);
+				y += dy;
 			}	
+	
 }
 
 void CGoomba::LevelDown()

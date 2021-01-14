@@ -147,7 +147,10 @@ void CKoopas::Update(DWORD dt, vector<LPGAMEOBJECT> *coObjects)
 			{
 				CKoopas *koopas = dynamic_cast<CKoopas*>(e->obj);
 				if (state == KOOPAS_STATE_SPIN_LEFT || state == KOOPAS_STATE_SPIN_RIGHT)
+				{
 					koopas->SetState(KOOPAS_STATE_DIE);
+					Render_Tail_Hit();
+				}
 				else
 					vx = -vx;
 			}//if Koopas
@@ -247,17 +250,6 @@ void CKoopas::Update(DWORD dt, vector<LPGAMEOBJECT> *coObjects)
 
 
 	}
-	//code mau cua thay
-	/*x += dx;
-	y += dy;
-
-	if (vx < 0 && x < 0) {
-		x = 0; vx = -vx;
-	}
-
-	if (vx > 0 && x > 290) {
-		x = 290; vx = -vx;
-	}*/
 	for (UINT i = 0; i < coEvents.size(); i++) delete coEvents[i];
 }
 

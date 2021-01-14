@@ -3,9 +3,12 @@
 #include "BreakableBrick.h"
 #include "Coin.h"
 #include "define.h"
+#include "Utils.h"
 
 void CBrick::Render()
 {
+	
+
 	if (type == BRICK_TYPE_WOOD)
 		animation_set->at(BRICK_ANI_WOOD)->Render(x, y);
 	else
@@ -31,15 +34,30 @@ void CBrick::Render()
 						animation_set->at(BRICK_ANI_BASEMENT)->Render(x, y);
 					else if (type == BRICK_TYPE_TREE_ICON)
 						animation_set->at(BRICK_ANI_TREE_ICON)->Render(x, y);
-						
-					
+					else if (type == BRICK_TYPE_HELP_ICON)
+						animation_set->at(BRICK_ANI_HELP_ICON)->Render(x, y);
+			
 	RenderBoundingBox();
 }
 
 void CBrick::Update(DWORD dt, vector<LPGAMEOBJECT> *coObjects)
 {
+	if (type == BRICK_TYPE_HELP_ICON)
+	{
+		if (GetTickCount64() - blink_render_time > BRICK_HELP_ICON_BLINK_TIME)
+		{
+			if (visable == true)
+				visable = false;
+			else
+				visable = true;
+			blink_render_time = GetTickCount64();
+		}
+	}
+
 	if (type != BRICK_TYPE_MONEYBUTTON && !Pressed)
 		return;// optimize performance
+
+
 	CGameObject::Update(dt, coObjects);
 	vector<LPCOLLISIONEVENT> coEvents;
 	vector<LPCOLLISIONEVENT> coEventsResult;

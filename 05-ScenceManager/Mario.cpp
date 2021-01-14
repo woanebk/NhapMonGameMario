@@ -21,7 +21,7 @@
 
 CMario::CMario(float x, float y) : CGameObject()
 {
-	level = MARIO_LEVEL_BIG;
+	level = MARIO_LEVEL_SMALL;
 	untouchable = 0;
 	CPlayScene* scence = (CPlayScene*)CGame::GetInstance()->GetCurrentScene();
 	if (scence->getScenceID() == WORLDMAP_1_SCENCE_ID)
@@ -48,12 +48,78 @@ void CMario::Update(DWORD dt, vector<LPGAMEOBJECT> *coObjects)
 {
 	// Calculate dx, dy 
 	CGameObject::Update(dt);
-	if (is_icon)
+	if (is_icon) // ==================== logic for ICON MARIO ON WORLD MAP
 	{
+		
+		// stop when reach certain pint on map
+		if (is_going_left)
+		{
+			if (abs(icon_old_x - x) >= MARIO_ICON_SPEED_DX)
+			{
+				SetState(MARIO_STATE_ICON);
+				x = icon_new_x;
+				is_lost_control = false;
+				is_going_left = false;
+			}
+		}
+		else if (is_going_right)
+		{
+			if (abs(x-icon_old_x )>= MARIO_ICON_SPEED_DX)
+			{
+				SetState(MARIO_STATE_ICON);
+				x = icon_new_x;
+				vx = 0;
+				is_lost_control = false;
+				is_going_right = false;
+			}
+		}
+		else if (is_going_up)
+		{
+			if (abs(icon_old_y - y )>= MARIO_ICON_SPEED_DX)
+			{
+				SetState(MARIO_STATE_ICON);
+				y = icon_new_y ;
+				vy = 0;
+				is_lost_control = false;
+				is_going_up = false;
+			}
+		}
+		else if (is_going_down)
+		{
+			if (abs(y - icon_old_y) >= MARIO_ICON_SPEED_DX)
+			{
+				SetState(MARIO_STATE_ICON);
+				y = icon_new_y;
+				vy = 0;
+				is_lost_control = false;
+				is_going_down = false;
+			}
+		}
+		
+		CPlayScene *scence = (CPlayScene*)CGame::GetInstance()->GetCurrentScene();
+		vector<LPMAPBARRIER> barriers_list = scence->getBarriersList();
+		for (int i = 0; i < barriers_list.size(); i++)
+		{
+			float bar_x, bar_y;
+			barriers_list[i]->getPosition(bar_x, bar_y);
+			DebugOut(L"barrier: %d, %d \n", bar_x, bar_y);
+			if (isEqual(bar_x, x) && isEqual(bar_y , y))
+			{
+				if (bar_x == WORLD_1_1_ONMAP_X && bar_y == WORLD_1_1_ONMAP_Y)
+					can_select_scence = true;
+				else
+					can_select_scence = false;
+				barriers_list[i]->getCanMove(can_go_left, can_go_up, can_go_right, can_go_down);
+				
+			}
+		}
+
 		x += dx;
 		y += dy;
+		DebugOut(L"%d, %d, %d, %d \t %d, %d \n", can_go_left, can_go_up, can_go_right, can_go_down, x, y);
 		return;
-	}
+	}// ====================================================================
+
 	// Simple fall down
 	vy += ay * dt;
 	ay = MARIO_GRAVITY;
@@ -441,9 +507,10 @@ void CMario::Update(DWORD dt, vector<LPGAMEOBJECT> *coObjects)
 }
 
 void CMario::Render()
-{ 
+{
 	int ani = -1;
-	if (state == MARIO_STATE_ICON)
+	if (state == MARIO_STATE_ICON || state == MARIO_STATE_ICON_GO_LEFT || state == MARIO_STATE_ICON_GO_RIGHT
+		|| state == MARIO_STATE_ICON_GO_UP || state == MARIO_STATE_ICON_GO_DOWN)
 		ani = MARIO_ANI_ICON;
 	else
 	if (istransformingtoBig)
@@ -588,12 +655,18 @@ void CMario::Render()
 					else
 						ani = MARIO_ANI_LEAF_FLAP_LEFT;
 				}
-				else if (spinning == true)
-				{
+				else if (spinning == true)				{
 					if (nx > 0)
 						ani = MARIO_ANI_LEAF_SPIN_RIGHT;
 					else
 						ani = MARIO_ANI_LEAF_SPIN_LEFT;
+				}
+				else if (flying == true)
+				{
+					if (nx > 0)
+						ani = MARIO_ANI_LEAF_FLY_RIGHT;
+					else
+						ani = MARIO_ANI_LEAF_FLY_LEFT;
 				}
 				else
 					if (vy < 0)
@@ -745,8 +818,7 @@ void CMario::SetState(int state)
 		// TODO: need to check if Mario is *current* on a platform before allowing to jump again
 		if (vy == 0)
 			vy = -MARIO_JUMP_SPEED_Y_MIN;
-		ay = -MARIO_GRAVITY;
-
+			ay = -MARIO_GRAVITY;
 		
 		break;
 	case MARIO_STATE_IDLE:
@@ -774,6 +846,39 @@ void CMario::SetState(int state)
 		ax = 0;
 		ay = 0;
 		break;
+	case MARIO_STATE_ICON_GO_LEFT:
+		icon_new_x = x - MARIO_ICON_SPEED_DX;
+		icon_old_x = x;
+		vx = -MARIO_ICON_SPEED;
+		is_going_left = true;
+		is_lost_control = true;
+		//x -= MARIO_ICON_SPEED_DX;
+		break;
+	case MARIO_STATE_ICON_GO_RIGHT:
+		icon_new_x = x + MARIO_ICON_SPEED_DX;
+		icon_old_x = x;
+		vx = MARIO_ICON_SPEED;
+		is_going_right = true;
+		is_lost_control = true;
+		//x += MARIO_ICON_SPEED_DX;
+		break;
+	case MARIO_STATE_ICON_GO_UP:
+		icon_new_y = y - MARIO_ICON_SPEED_DX;
+		icon_old_y = y;
+		vy = -MARIO_ICON_SPEED;
+		is_going_up = true;
+		is_lost_control = true;
+		//y -= MARIO_ICON_SPEED_DX;
+		break;
+	case MARIO_STATE_ICON_GO_DOWN:
+		icon_new_y = y + MARIO_ICON_SPEED_DX;
+		icon_old_y = y;
+		vy = MARIO_ICON_SPEED;
+		is_going_down = true;
+		is_lost_control = true;
+		//y += MARIO_ICON_SPEED_DX;
+		break;
+		
 	case MARIO_STATE_DIE:
 		vy = -MARIO_DIE_DEFLECT_SPEED;
 		break;
@@ -922,8 +1027,20 @@ void CMario::ManageAccelerationAndSpeed()
 	if (vy < -MARIO_JUMP_SPEED_Y_MAX)
 	{
 		vy = -MARIO_JUMP_SPEED_Y_MAX;
-		ay = MARIO_GRAVITY;
-		jumpable = false;
+		if (!flying)
+		{
+			ay = MARIO_GRAVITY;
+			jumpable = false;
+		}
+		else
+		{
+			ay = -MARIO_GRAVITY;
+		}
+	}
+	
+	if (flying && vy <= -MARIO_FLY_SPEED_MAX)
+	{
+		vy = -MARIO_FLY_SPEED_MAX;
 	}
 
 	
@@ -964,7 +1081,7 @@ void CMario::ManageAccelerationAndSpeed()
 void CMario::Reset()
 {
 	SetState(MARIO_STATE_IDLE);
-	SetLevel(MARIO_LEVEL_BIG);
+	SetLevel(MARIO_LEVEL_SMALL);
 	SetPosition(start_x, start_y);
 	SetSpeed(0, 0);
 }
@@ -1048,4 +1165,12 @@ void CMario::GainMoney()
 void CMario::GainScore(int score) 
 {
 	Score += score;
+}
+bool CMario::isEqual(float x, float y)
+{
+	const float epsilon = 0.1f;
+	/*if (fabs(x - y) < epsilon)*/
+	if(abs(x-y) < 5)
+		return true; //they are same
+	return false; //they are not same
 }

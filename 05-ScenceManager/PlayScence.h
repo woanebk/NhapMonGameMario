@@ -9,6 +9,7 @@
 #include "Koopas.h"
 #include "MapBackground.h"
 #include "Hud.h"
+#include  "MapBarrier.h"
 
 class CPlayScene: public CScene
 {
@@ -26,8 +27,9 @@ protected:
 	void _ParseSection_ANIMATION_SETS(string line);
 	void _ParseSection_OBJECTS(string line);
 	void _ParseSection_MAP_BACKGROUND(string line);
+	void LoadWorldMapBarriers(string line);
 
-	
+	vector<LPMAPBARRIER> barriers;
 public: 
 	CPlayScene(int id, LPCWSTR filePath);
 
@@ -43,7 +45,9 @@ public:
 	CMario * GetPlayer() { return player; } 
 	void SetPlayer(CMario* p) { player = p; }
 	void ReplaceMarioObjectWith(CMario* m) { objects[0] = m; }
+	vector<LPMAPBARRIER> getBarriersList() { return barriers; }
 
+	
 	//friend class CPlayScenceKeyHandler;
 };
 

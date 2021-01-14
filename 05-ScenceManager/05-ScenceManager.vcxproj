@@ -137,6 +137,7 @@
     <ClCompile Include="Koopas.cpp" />
     <ClCompile Include="Leaf.cpp" />
     <ClCompile Include="MapBackground.cpp" />
+    <ClCompile Include="MapBarrier.cpp" />
     <ClCompile Include="Mushroom.cpp" />
     <ClCompile Include="Pine.cpp" />
     <ClCompile Include="Portal.cpp" />
@@ -166,6 +167,7 @@
     <ClInclude Include="Koopas.h" />
     <ClInclude Include="Leaf.h" />
     <ClInclude Include="MapBackground.h" />
+    <ClInclude Include="MapBarrier.h" />
     <ClInclude Include="Mushroom.h" />
     <ClInclude Include="Pine.h" />
     <ClInclude Include="Portal.h" />
