@@ -32,11 +32,17 @@ void Hud::Update(DWORD dt)
 	CPlayScene* scence = (CPlayScene*)CGame::GetInstance()->GetCurrentScene();
 	CMario* mario = scence->GetPlayer();
 	
-	if (!no_timing && GetTickCount64() - countdowntime > 1000 && RemainingTime > 0)
+	if (!no_timing && GetTickCount64() - countdowntime > 1000)
 	{
-		RemainingTime -= 1;
-		countdowntime = GetTickCount64();
+		if (RemainingTime > 0)
+		{
+			RemainingTime -= 1;
+			countdowntime = GetTickCount64();
+		}
+		else
+			EndScene();
 	}
+
 	if (mario != NULL)
 	{
 		life = mario->getLife();
@@ -175,5 +181,15 @@ LPSPRITE Hud::getNumberSprite(int num)
 	}
 	LPSPRITE numspirte = (CSprite*)CSprites::GetInstance()->Get(spriteid);
 	return numspirte;
+}
+
+void Hud::EndScene()
+{
+	CGame *game = CGame::GetInstance();
+	CPlayScene *scene = (CPlayScene*)game->GetCurrentScene();
+	CMario *mario = scene->GetPlayer();
+	mario->setLostControl(true);
+	RemainingTime = GAME_LIMIT_TIME;
+	game->SwitchScene(WORLDMAP_1_SCENCE_ID);
 }
 

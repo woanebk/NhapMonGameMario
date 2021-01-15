@@ -21,6 +21,8 @@ protected:
 	vector<LPGAMEOBJECT> objects;
 	Hud* hud = NULL;
 
+	bool visited_base = false;
+
 	void _ParseSection_TEXTURES(string line);
 	void _ParseSection_SPRITES(string line);
 	void _ParseSection_ANIMATIONS(string line);
@@ -46,8 +48,8 @@ public:
 	void SetPlayer(CMario* p) { player = p; }
 	void ReplaceMarioObjectWith(CMario* m) { objects[0] = m; }
 	vector<LPMAPBARRIER> getBarriersList() { return barriers; }
-
-	
+	void setVisitedBase(bool v) { visited_base = v; }
+	bool hasVisitedBase() { return visited_base; }
 	//friend class CPlayScenceKeyHandler;
 };
 

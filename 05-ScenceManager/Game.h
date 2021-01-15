@@ -91,7 +91,9 @@ public:
 
 	static CGame * GetInstance();
 
-	bool isInCamera(float l, float t, float r, float b);
+	bool isInCamera(float l, float t);
+	bool isInCameraExSpace(float l, float t);
+	bool BBisinCamera(float l, float t, float r, float b);
 	~CGame();
 };
 

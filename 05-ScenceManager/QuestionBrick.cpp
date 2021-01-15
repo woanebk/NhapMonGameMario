@@ -37,8 +37,8 @@ void CQuestionBrick::CreateItem(int item)
 	if (item == ITEM_MUSHROOM_RED)
 	{
 		CMushroom *red_mushroom = new CMushroom(MUSHROOM_TYPE_RED);
-		red_mushroom->SetPosition(this->x, this->y - MUSHROOM_BBOX_HEIGHT*2 - 1 + 8);
-		red_mushroom->SetStartPosition(this->x, this->y - MUSHROOM_BBOX_HEIGHT*2 - 1 +8);
+		red_mushroom->SetPosition(this->x, this->y - MUSHROOM_BBOX_HEIGHT -16);
+		red_mushroom->SetStartPosition(this->x, this->y - MUSHROOM_BBOX_HEIGHT - 16);
 		red_mushroom->ChooseDirection();
 		CAnimationSets * animation_sets = CAnimationSets::GetInstance();
 		LPANIMATION_SET ani_set = animation_sets->Get(ITEM_SET_ID);
@@ -50,8 +50,8 @@ void CQuestionBrick::CreateItem(int item)
 	if (item == ITEM_MUSHROOM_GREEN)
 	{
 		CMushroom *green_mushroom = new CMushroom(MUSHROOM_TYPE_GREEN);
-		green_mushroom->SetPosition(this->x, this->y - MUSHROOM_BBOX_HEIGHT - 1);
-		green_mushroom->SetStartPosition(this->x, this->y - MUSHROOM_BBOX_HEIGHT - 1);
+		green_mushroom->SetPosition(this->x, this->y - MUSHROOM_BBOX_HEIGHT - 16);
+		green_mushroom->SetStartPosition(this->x, this->y - MUSHROOM_BBOX_HEIGHT - 16);
 		green_mushroom->ChooseDirection();
 
 		CAnimationSets * animation_sets = CAnimationSets::GetInstance();
@@ -211,7 +211,8 @@ void CQuestionBrick::HitByTail()
 						CreateItem(ITEM_MUSHROOM_RED);
 					else if (hasItem() && mario->getLevel() <= MARIO_LEVEL_LEAF)
 						CreateItem(ITEM_LEAF);
-
+					if (hasCoin())
+						CreateItem(ITEM_MONEY);
 					if (!isEmpty())
 					{
 						Jump();

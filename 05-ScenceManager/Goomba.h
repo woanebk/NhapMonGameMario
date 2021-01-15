@@ -44,4 +44,5 @@ public:
 		fly_goomba_start_walking = GetTickCount64();
 	}
 	void StartRenderDie();
+	void setSpeedY(float v) { vy = v; }
 };

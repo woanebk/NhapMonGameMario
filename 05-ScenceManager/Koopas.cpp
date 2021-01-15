@@ -10,9 +10,10 @@
 #include "QuestionBrick.h"
 #include "Coin.h"
 #include "Effect.h"
-CKoopas::CKoopas(int lvl)
+CKoopas::CKoopas(int lvl, int t)
 {
 	level = lvl;
+	type = t;
 	start_level = lvl;
 	SetState(KOOPAS_STATE_WALKING);
 }
@@ -60,9 +61,19 @@ void CKoopas::Update(DWORD dt, vector<LPGAMEOBJECT> *coObjects)
 	if (state != KOOPAS_STATE_DIE)
 		CalcPotentialCollisions(coObjects, coEvents);
 
+	//Revire if shell:
+	if (is_reviving && GetTickCount64() - start_revive > 8000 && state == KOOPAS_STATE_SHELL)
+	{
+		is_shell_up = false;
+		SetState(KOOPAS_STATE_WALKING);
+		is_reviving = false;
+		start_revive = 0;
+	}
+	Reset();
 	//holded by mario///////////////////
 	getHoldedbyMario();
 	// detect when get hit by tail///////////////////
+	if(!holded)
 	HitByTail();
 	// detect when get kick
 	getKicked();
@@ -93,6 +104,8 @@ void CKoopas::Update(DWORD dt, vector<LPGAMEOBJECT> *coObjects)
 		/*if (nx != 0) vx = 0;*/
 		if (ny != 0) vy = 0;
 
+		float koo_bb_left, koo_bb_top, koo_bb_right, koo_bb_bottom;
+		GetBoundingBox(koo_bb_left, koo_bb_top, koo_bb_right, koo_bb_bottom);
 		for (UINT i = 0; i < coEventsResult.size(); i++)
 		{
 			LPCOLLISIONEVENT e = coEventsResult[i];
@@ -148,7 +161,8 @@ void CKoopas::Update(DWORD dt, vector<LPGAMEOBJECT> *coObjects)
 				CKoopas *koopas = dynamic_cast<CKoopas*>(e->obj);
 				if (state == KOOPAS_STATE_SPIN_LEFT || state == KOOPAS_STATE_SPIN_RIGHT)
 				{
-					koopas->SetState(KOOPAS_STATE_DIE);
+					koopas->SetState(KOOPAS_STATE_SHELL);
+					koopas->is_shell_up = true;
 					Render_Tail_Hit();
 				}
 				else
@@ -197,6 +211,8 @@ void CKoopas::Update(DWORD dt, vector<LPGAMEOBJECT> *coObjects)
 			else if (dynamic_cast<CBrick*>(e->obj))
 			{
 				CBrick *brick = dynamic_cast<CBrick*>(e->obj);
+				float brick_left, brick_top, brick_right, brick_bottom;
+				brick->GetBoundingBox(brick_left, brick_top, brick_right, brick_bottom);
 				
 				if (brick->getType() == BRICK_TYPE_INVISIBLE)
 				{
@@ -214,8 +230,7 @@ void CKoopas::Update(DWORD dt, vector<LPGAMEOBJECT> *coObjects)
 				{
 					if (e->nx != 0)
 					{
-						x += min_tx * rdx + nx * 0.4f;
-						if (brick->canBounce() == 1)
+						if (brick_top < koo_bb_bottom)
 							vx = -vx;
 						break;
 					}
@@ -240,7 +255,8 @@ void CKoopas::Update(DWORD dt, vector<LPGAMEOBJECT> *coObjects)
 			}
 			else if (dynamic_cast<CCoin*> (e->obj))
 				{
-				x += dx; y += dy;
+				x += dx;
+				y += dy;
 				}//if Coin
 		}
 
@@ -260,22 +276,59 @@ void CKoopas::Render()
 		ani = KOOPAS_ANI_DIE;
 	}
 	else if (state == KOOPAS_STATE_SHELL) {
-		ani = KOOPAS_ANI_SHELL;
+		if (type == KOOPAS_TYPE_GREEN)
+		{
+			if (is_shell_up)
+				ani = KOOPAS_ANI_SHELL_UP;
+			else
+				ani = KOOPAS_ANI_SHELL;
+		}
+		else
+		{
+			if (is_shell_up)
+				ani = KOOPAS_ANI_SHELL_UP_RED;
+			else
+				ani = KOOPAS_ANI_SHELL_RED;
+		}
+		
 	}
 	else if (state == KOOPAS_STATE_SPIN_LEFT || state == KOOPAS_STATE_SPIN_RIGHT) {
-		ani = KOOPAS_ANI_SPIN;
+		if (type == KOOPAS_TYPE_GREEN)
+		{
+			if (is_shell_up)
+				ani = KOOPAS_ANI_SPIN_UP;
+			else
+				ani = KOOPAS_ANI_SPIN;
+		}
+		else
+		{
+			if (is_shell_up)
+				ani = KOOPAS_ANI_SPIN_UP_RED;
+			else
+				ani = KOOPAS_ANI_SPIN_RED;
+		}
 	}
 	else if (vx > 0)
 	{
 		if (level == KOOPAS_LEVEL_NORMAL)
-			ani = KOOPAS_ANI_WALKING_RIGHT;
+		{
+			if (type == KOOPAS_TYPE_GREEN)
+				ani = KOOPAS_ANI_WALKING_RIGHT;
+			else
+				ani = KOOPAS_ANI_WALK_RIGHT_RED;
+		}
 		else
 			ani = FLYKOOPAS_ANI_FLY_RIGHT;
 	}
 	else if (vx <= 0)
 	{
 		if (level == KOOPAS_LEVEL_NORMAL)
-			ani = KOOPAS_ANI_WALKING_LEFT;
+		{
+			if (type == KOOPAS_TYPE_GREEN)
+				ani = KOOPAS_ANI_WALKING_LEFT;
+			else
+				ani = KOOPAS_ANI_WALK_LEFT_RED;
+		}
 		else
 			ani = FLYKOOPAS_ANI_FLY_LEFT;
 	}
@@ -287,6 +340,7 @@ void CKoopas::Render()
 
 void CKoopas::SetState(int state)
 {
+	int old_state = this->state;
 	CGameObject::SetState(state);
 	switch (state)
 	{
@@ -295,7 +349,7 @@ void CKoopas::SetState(int state)
 		break;
 	case KOOPAS_STATE_SHELL:
 		vx = 0;
-		vy = 0;
+		StartRevive();
 		break;
 	case KOOPAS_STATE_SPIN_LEFT:
 		vx = -KOOPAS_SPINNING_SPEED;
@@ -305,6 +359,8 @@ void CKoopas::SetState(int state)
 		break;
 	case KOOPAS_STATE_WALKING:
 		vx = KOOPAS_WALKING_SPEED;
+		if (old_state == KOOPAS_STATE_SHELL)
+			SetPosition(x, y - (KOOPAS_BBOX_HEIGHT - KOOPAS_BBOX_HEIGHT_SHELL));
 	}
 }
 
@@ -349,7 +405,12 @@ void CKoopas::HitByTail()
 		if (bb_left <= mario_bb_right + MARIO_LEAF_BBOX_TAIL_WIDTH && bb_right >= mario_bb_left - MARIO_LEAF_BBOX_TAIL_WIDTH)
 			if (bb_top <= mario_bb_bottom && bb_bottom >= mario_bb_top + (mario_bb_bottom - mario_bb_top) / 2)
 			{
-				SetState(KOOPAS_STATE_DIE);
+				is_shell_up = true;
+				if(abs(vy)< MARIO_JUMP_DEFLECT_SPEED)
+					vy = -MARIO_JUMP_DEFLECT_SPEED;
+				SetState(KOOPAS_STATE_SHELL);
+				mario->GainScore(SCORE_100);
+				mario->RenderPoint(EFFECT_TYPE_100_POINT);
 				Render_Tail_Hit();
 				
 			}
@@ -399,25 +460,33 @@ void CKoopas::LevelDown()
 void CKoopas::Reset()
 {
 	CGame *game = CGame::GetInstance();
-	float bb_left, bb_top, bb_right, bb_bottom;
-	GetBoundingBox(bb_left, bb_top, bb_right, bb_bottom);
-	if (!Resetable)
+	float bb_left, bb_top;
+	GetPosition(bb_left, bb_top);
+	if (!isInCamera() && !game->BBisinCamera(start_x - HALF_EXTRA_SPACE, start_y, start_x + SCREEN_WIDTH + HALF_EXTRA_SPACE, start_y + GOOMBA_BBOX_HEIGHT))
 	{
-		if (!isInCamera() && !game->isInCamera(start_x - EXTRA_RESET_SPACE, start_y, start_x + (bb_right - bb_left) + EXTRA_RESET_SPACE, start_y + (bb_bottom - bb_top))) //10 tiles away from mario then reset
-		{
-			Resetable = true;
-		}
+		enable = true;
+		visable = true;
+		SetPosition(start_x, start_y);
+		setLevel(start_level);
+		SetState(KOOPAS_STATE_WALKING);
 	}
-	else
-	{
-		if (game->isInCamera(start_x, start_y, start_x + (bb_right - bb_left), start_y + (bb_bottom - bb_top)))
-		{
-			enable = true;
-			visable = true;
-			SetPosition(start_x, start_y);
-			setLevel(start_level);
-			SetState(KOOPAS_STATE_WALKING);
-			Resetable = false;
-		}
-	}
+	//if (!Resetable)
+	//{
+	//	if (!isInCamera() && !game->isInCamera(start_x - EXTRA_RESET_SPACE, start_y, start_x + (bb_right - bb_left) + EXTRA_RESET_SPACE, start_y + (bb_bottom - bb_top))) //10 tiles away from mario then reset
+	//	{
+	//		Resetable = true;
+	//	}
+	//}
+	//else
+	//{
+	//	if (game->isInCamera(start_x, start_y, start_x + (bb_right - bb_left), start_y + (bb_bottom - bb_top)))
+	//	{
+	//		enable = true;
+	//		visable = true;
+	//		SetPosition(start_x, start_y);
+	//		setLevel(start_level);
+	//		SetState(KOOPAS_STATE_WALKING);
+	//		Resetable = false;
+	//	}
+	//}
 }

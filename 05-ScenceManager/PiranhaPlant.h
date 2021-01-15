@@ -28,8 +28,8 @@ public:
 
 	void DetectMario();
 
-	void StartUp() { up_start = GetTickCount64(); is_up = true; }
-	void StartDown() { down_start = GetTickCount64(); is_down = true; }
+	void StartUp() { /*up_start = GetTickCount64();*/ is_up = true; }
+	void StartDown() { /*down_start = GetTickCount64();*/ is_down = true; }
 	void StandStill() { stand_start = GetTickCount64();  is_stand = true; }
 	void StartCalculateShot() { shot_start = GetTickCount64(); can_shot = true; }
 	void Shot();

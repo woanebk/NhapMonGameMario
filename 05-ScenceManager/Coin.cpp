@@ -100,6 +100,9 @@ void CCoin::Update(DWORD dt, vector<LPGAMEOBJECT> *coObjects)
 			enable = false;
 			visable = false;
 			mario->setOnGround(false);
+			mario->RenderPoint(EFFECT_TYPE_100_POINT);
+			mario->GainMoney();
+			mario->GainScore(SCORE_100);
 		}
 	}
 	else

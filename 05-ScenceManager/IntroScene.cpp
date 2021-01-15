@@ -152,7 +152,8 @@ void CIntroScene::_ParseSection_OBJECTS(string line)
 	case OBJECT_TYPE_KOOPAS:
 	{
 		int level = atof(tokens[4].c_str());
-		obj = new CKoopas(level);
+		int t = atof(tokens[5].c_str());
+		obj = new CKoopas(level, t);
 	}
 	break;
 	case OBJECT_TYPE_PORTAL:

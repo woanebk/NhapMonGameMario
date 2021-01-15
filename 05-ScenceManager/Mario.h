@@ -73,7 +73,6 @@ class CMario : public CGameObject
 	float icon_new_y;
 
 	bool is_lost_control = false;
-	void setLostControl(bool c) { is_lost_control = c; }
 
 	bool can_select_scence = false;
 
@@ -87,11 +86,13 @@ public:
 	virtual void Update(DWORD dt, vector<LPGAMEOBJECT> *colliable_objects = NULL);
 	virtual void Render();
 
+	void setLostControl(bool c) { is_lost_control = c; }
 	void SetState(int state);
 	void SetLevel(int l);
 	void LevelUp();
 	void LevelDown();
 	void LifeUp();
+	void LifeDown() { if (Life > 0)Life -= 1; }
 	int getLevel() { return level; }
 
 	void StartUntouchable() { untouchable = 1; untouchable_start = GetTickCount(); }
@@ -181,6 +182,9 @@ public:
 
 	void RenderPoint(int point);
 
+	void CallEndScene();
+	void EndScene();
+	void StopCallEndScene();
 
 	virtual void GetBoundingBox(float &left, float &top, float &right, float &bottom);
 };

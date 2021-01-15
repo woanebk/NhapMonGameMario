@@ -37,7 +37,7 @@ void CBrick::Render()
 					else if (type == BRICK_TYPE_HELP_ICON)
 						animation_set->at(BRICK_ANI_HELP_ICON)->Render(x, y);
 			
-	RenderBoundingBox();
+	//RenderBoundingBox();
 }
 
 void CBrick::Update(DWORD dt, vector<LPGAMEOBJECT> *coObjects)

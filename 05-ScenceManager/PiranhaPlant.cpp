@@ -24,6 +24,9 @@ void CPiranhaPlant::GetBoundingBox(float & left, float & top, float & right, flo
 
 void CPiranhaPlant::Update(DWORD dt, vector<LPGAMEOBJECT>* coObjects)
 {
+
+	if (!enable)
+		return;
 	CGameObject::Update(dt, coObjects);
 	vector<LPCOLLISIONEVENT> coEvents;
 	vector<LPCOLLISIONEVENT> coEventsResult;
@@ -53,16 +56,14 @@ void CPiranhaPlant::Update(DWORD dt, vector<LPGAMEOBJECT>* coObjects)
 	//
 	if (level == PLANT_LEVEL_PIRANHA)
 	{
-		if (is_up && GetTickCount64() - up_start >= PLANT_UP_TIME)
+		if (is_up && y <= start_y - PLANT_PIRANHA_BBOX_HEIGHT)
 		{
 			is_up = false;
-			up_start = 0;
 			StandStill();
 		}
-		if (is_down && GetTickCount64() - down_start >= PLANT_DOWN_TIME)
+		if (is_down && y>= start_y + PLANT_PIRANHA_BBOX_HEIGHT)
 		{
 			is_down = false;
-			down_start = 0;
 			StartUp();
 		}
 		if (is_stand && GetTickCount64() - stand_start >= PLANT_STAND_TIME)
@@ -74,17 +75,15 @@ void CPiranhaPlant::Update(DWORD dt, vector<LPGAMEOBJECT>* coObjects)
 	}
 	else// level fire
 	{
-		if (is_up && GetTickCount64() - up_start >= PLANT_UP_TIME_FIRE)
+		if (is_up && y <= start_y - PLANT_PIRANHA_BBOX_HEIGHT)
 		{
 			is_up = false;
-			up_start = 0;
 			StandStill();
 			StartCalculateShot();
 		}
-		if (is_down && GetTickCount64() - down_start >= PLANT_DOWN_TIME_FIRE)
+		if (is_down && y >= start_y + PLANT_PIRANHA_BBOX_HEIGHT)
 		{
 			is_down = false;
-			down_start = 0;
 			StartUp();
 		}
 		if (is_stand && GetTickCount64() - stand_start >= PLANT_STAND_TIME)
@@ -138,24 +137,48 @@ void CPiranhaPlant::Render()
 		if (type == PLANT_TYPE_GREEN)
 		{
 			if (nx < 0 && ny < 0)
-				ani = PLANT_ANI_FIRE_GREEN_LEFT_UP_OPEN;
+				if(can_shot)
+					ani = PLANT_ANI_FIRE_GREEN_LEFT_UP_OPEN;
+				else
+					ani = PLANT_ANI_FIRE_GREEN_LEFT_UP_CLOSE;
 			if (nx < 0 && ny>0)
-				ani = PLANT_ANI_FIRE_GREEN_LEFT_DOWN_OPEN;
+				if(can_shot)
+					ani = PLANT_ANI_FIRE_GREEN_LEFT_DOWN_OPEN;
+				else
+					ani= PLANT_ANI_FIRE_GREEN_LEFT_DOWN_CLOSE;
 			if (nx > 0 && ny < 0)
-				ani = PLANT_ANI_FIRE_GREEN_RIGHT_UP_OPEN;
+				if(can_shot)
+					ani = PLANT_ANI_FIRE_GREEN_RIGHT_UP_OPEN;
+				else
+					ani = PLANT_ANI_FIRE_GREEN_RIGHT_UP_CLOSE;
 			if (nx > 0 && ny > 0)
-				ani = PLANT_ANI_FIRE_GREEN_RIGHT_DOWN_OPEN;
+				if (can_shot)
+					ani = PLANT_ANI_FIRE_GREEN_RIGHT_DOWN_OPEN;
+				else
+					ani = PLANT_ANI_FIRE_GREEN_RIGHT_DOWN_CLOSE;
 		}
 		else
 		{
 			if (nx < 0 && ny < 0)
-				ani = PLANT_ANI_FIRE_RED_LEFT_UP_OPEN;
+				if (can_shot)
+					ani = PLANT_ANI_FIRE_RED_LEFT_UP_OPEN;
+				else
+					ani = PLANT_ANI_FIRE_RED_LEFT_UP_CLOSE;
 			if (nx < 0 && ny>0)
-				ani = PLANT_ANI_FIRE_RED_LEFT_DOWN_OPEN;
+				if (can_shot)
+					ani = PLANT_ANI_FIRE_RED_LEFT_DOWN_OPEN;
+				else
+					ani = PLANT_ANI_FIRE_RED_LEFT_DOWN_CLOSE;
 			if (nx > 0 && ny < 0)
-				ani = PLANT_ANI_FIRE_RED_RIGHT_UP_OPEN;
+				if (can_shot)
+					ani = PLANT_ANI_FIRE_RED_RIGHT_UP_OPEN;
+				else
+					ani = PLANT_ANI_FIRE_RED_RIGHT_UP_CLOSE;
 			if (nx > 0 && ny > 0)
-				ani = PLANT_ANI_FIRE_RED_RIGHT_DOWN_OPEN;
+				if (can_shot)
+					ani = PLANT_ANI_FIRE_RED_RIGHT_DOWN_OPEN;
+				else
+					ani = PLANT_ANI_FIRE_RED_RIGHT_DOWN_CLOSE;
 		}
 	}
 	animation_set->at(ani)->Render(x, y);
@@ -213,7 +236,8 @@ void CPiranhaPlant::DetectMario()
 {
 	CPlayScene* scence = (CPlayScene*)CGame::GetInstance()->GetCurrentScene();
 	CMario* mario = scence->GetPlayer();
-
+	if (mario == NULL)
+		return;
 	float mario_bb_left, mario_bb_top, mario_bb_right, mario_bb_bottom;
 	mario->GetBoundingBox(mario_bb_left, mario_bb_top, mario_bb_right, mario_bb_bottom);
 	float bb_left, bb_top, bb_right, bb_bottom;
@@ -226,7 +250,6 @@ void CPiranhaPlant::DetectMario()
 		ny = -1;
 	else
 		ny = 1;
-	DebugOut(L"%d, %d \n", nx, ny);
 }
 
 void CPiranhaPlant::Shot()

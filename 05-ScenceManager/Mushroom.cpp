@@ -71,7 +71,8 @@ void CMushroom::Update(DWORD dt, vector<LPGAMEOBJECT>* coObjects)
 				{
 					vy = 0;
 					vx = -vx;
-					break;
+					for (UINT i = 0; i < coEvents.size(); i++) delete coEvents[i];
+					return;
 				}
 				else
 				if (e->ny < 0)
@@ -90,7 +91,6 @@ void CMushroom::Update(DWORD dt, vector<LPGAMEOBJECT>* coObjects)
 				if (e->nx != 0)
 				{
 					x += dx;
-					y += dy;
 				}
 			}
 			if (dynamic_cast<CBreakableBrick*>(e->obj))
@@ -100,8 +100,8 @@ void CMushroom::Update(DWORD dt, vector<LPGAMEOBJECT>* coObjects)
 				{
 					vx = -vx;
 					vy = 0;
-					x += dx;
-					break;
+					for (UINT i = 0; i < coEvents.size(); i++) delete coEvents[i];
+					return;
 				}
 				if (e->ny < 0)
 				{
@@ -149,6 +149,9 @@ void CMushroom::Update(DWORD dt, vector<LPGAMEOBJECT>* coObjects)
 					{
 						x += dx;
 						vy = 0;
+
+						for (UINT i = 0; i < coEvents.size(); i++) delete coEvents[i];
+						return;
 					}
 				}
 			}
@@ -173,7 +176,7 @@ void CMushroom::Render()
 		animation_set->at(MUSHROOM_ANI_RED)->Render(x, y);
 	if(type == MUSHROOM_TYPE_GREEN)
 		animation_set->at(MUSHROOM_ANI_GREEN)->Render(x, y);
-	RenderBoundingBox();
+	//RenderBoundingBox();
 }
 
 void CMushroom::HitMario()

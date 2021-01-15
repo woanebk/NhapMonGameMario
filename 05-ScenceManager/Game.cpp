@@ -197,7 +197,21 @@ void CGame::ProcessKeyboard()
 	}
 }
 
-bool CGame::isInCamera(float l, float t, float r, float b)
+bool CGame::isInCamera(float l, float t)
+{
+	if (l > cam_x && l < cam_x + SCREEN_WIDTH && t > cam_y && t < cam_y + SCREEN_HEIGHT)
+		return true;
+	return false;
+}
+
+bool CGame::isInCameraExSpace(float l, float t)
+{
+	if (l > cam_x - EXTRA_RESET_SPACE && l < cam_x  + SCREEN_WIDTH + EXTRA_RESET_SPACE /*&& t > cam_y  -EXTRA_RESET_SPACE*/ /*&& t < cam_y + SCREEN_HEIGHT + EXTRA_RESET_SPACE*/)
+		return true;
+	return false;
+}
+
+bool CGame::BBisinCamera(float l, float t, float r, float b)
 {
 	if (r > cam_x && l < cam_x + SCREEN_WIDTH && b > cam_y && t < cam_y + SCREEN_HEIGHT)
 		return true;
@@ -401,6 +415,7 @@ void CGame::Load(LPCWSTR gameFile)
 void CGame::SwitchScene(int scene_id)
 {
 	DebugOut(L"[INFO] Switching to scene %d\n", scene_id);
+	
 	scenes[current_scene]->Unload();;
 
 	CTextures::GetInstance()->Clear();
@@ -413,14 +428,6 @@ void CGame::SwitchScene(int scene_id)
 	CGame::GetInstance()->SetKeyHandler(s->GetKeyEventHandler());
 	s->Load();	
 	//
-	if (scene_id == WORLDMAP_1_SCENCE_ID)
-	{
-		CPlayScene *scence = (CPlayScene*)CGame::GetInstance()->GetCurrentScene();
-		Hud* no_timing_hud = scence->getHud();
-		no_timing_hud->setNoTiming(true);
-		scence->setHud(no_timing_hud);
-	}
-	//
 }
 
 void CGame::SwitchSceneEx(int scene_id, float mario_x, float mario_y) //save old scence to call later
@@ -431,6 +438,10 @@ void CGame::SwitchSceneEx(int scene_id, float mario_x, float mario_y) //save old
 	CMario *post_mario = is_currently_running_scence->GetPlayer();
 	Hud* post_hud = is_currently_running_scence->getHud();
 
+	//flag to check switch base scene
+	if (scene_id == WORLD_1_1_SECRECT_SCENCE_ID)
+		is_currently_running_scence->setVisitedBase(true);
+
 	post_scence = current_scene;
 
 	//no unload or clear textures, sprties, anis, anisets, objs of post scence to get it later 
@@ -440,7 +451,8 @@ void CGame::SwitchSceneEx(int scene_id, float mario_x, float mario_y) //save old
 
 	CGame::GetInstance()->SetKeyHandler(s->GetKeyEventHandler());
 
-	post_mario->SetPosition(mario_x, mario_y);
+	post_mario->SetSpeed(0, 0);
+
 	if (scene_id == WORLDMAP_1_SCENCE_ID)
 		post_mario->SetState(MARIO_STATE_ICON);
 	else
@@ -448,6 +460,10 @@ void CGame::SwitchSceneEx(int scene_id, float mario_x, float mario_y) //save old
 
 	if (scene_id != WORLDMAP_1_SCENCE_ID)
 		post_mario->setIsIcon(false);
+	else
+		post_mario->setIsIcon(true);
+	post_mario->setLostControl(false);
+	post_mario->SetPosition(mario_x, mario_y);
 
 	s->Load();// add textures, sprties, anis, anisets, objs
 

@@ -162,7 +162,8 @@ void CPlayScene::_ParseSection_OBJECTS(string line)
 	case OBJECT_TYPE_KOOPAS:
 	{
 		int level = atof(tokens[4].c_str());
-		obj = new CKoopas(level);
+		int t = atof(tokens[5].c_str());
+		obj = new CKoopas(level, t);
 	}
 	break;
 	case OBJECT_TYPE_PORTAL:
@@ -335,15 +336,21 @@ void CPlayScene::Update(DWORD dt)
 	// We know that Mario is the first object in the list hence we won't add him into the colliable object list
 	// TO-DO: This is a "dirty" way, need a more organized way 
 
+	// skip the rest if scene was already unloaded (Mario::Update might trigger PlayScene::Unload) // Nam
+	if (player == NULL) return;
+
 	vector<LPGAMEOBJECT> coObjects;
 	for (size_t i = 1; i < objects.size(); i++)
 	{
-		coObjects.push_back(objects[i]);
+			coObjects.push_back(objects[i]);
 	}
-
+	CGame *game = CGame::GetInstance();
 	for (size_t i = 0; i < objects.size(); i++)
 	{
-		objects[i]->Update(dt, &coObjects);
+		float l, t;
+		objects[i]->GetPosition(l, t);
+		if(game->isInCameraExSpace(l ,t))
+			objects[i]->Update(dt, &coObjects);
 	}
 
 	// skip the rest if scene was already unloaded (Mario::Update might trigger PlayScene::Unload)
@@ -352,7 +359,6 @@ void CPlayScene::Update(DWORD dt)
 	// Update camera to follow mario
 	float cx, cy;
 	player->GetPosition(cx, cy);
-	CGame *game = CGame::GetInstance();
 
 	if (id == WORLDMAP_1_SCENCE_ID)
 	{
@@ -401,7 +407,9 @@ void CPlayScene::Render()
 void CPlayScene::Unload()
 {
 	for (int i = 0; i < objects.size(); i++)
+	{
 		delete objects[i];
+	}
 
 	objects.clear();
 	player = NULL;
@@ -438,7 +446,8 @@ void CPlayScenceKeyHandler::OnKeyDown(int KeyCode)
 			break;
 		case DIK_S:
 			if (mario->canSelectScecne())
-				game->SwitchSceneEx(WORLD_1_1_SCENCE_ID, WORLD_1_1_START_X, WORLD_1_1_START_Y);
+				/*game->SwitchSceneEx(WORLD_1_1_SCENCE_ID, WORLD_1_1_START_X, WORLD_1_1_START_Y);*/
+				game->SwitchScene(WORLD_1_1_SCENCE_ID);
 			break;
 		}
 	}
@@ -494,14 +503,17 @@ void CPlayScenceKeyHandler::OnKeyDown(int KeyCode)
 			game->SwitchSceneEx(WORLD_1_1_SCENCE_ID, WORLD_1_1_SWITCHBACK_START_X, WORLD_1_1_SWITCHBACK_START_Y);
 			//game->SwitchSceneEx(WORLDMAP_1_SCENCE_ID,100,100);
 			break;
-		case DIK_M: //
-			game->SwitchSceneEx(WORLDMAP_1_SCENCE_ID, 100, 0);
-			mario->SetState(MARIO_STATE_ICON);
-			mario->setIsIcon(true);
-			break;
+		//case DIK_M: //
+		//	game->SwitchSceneEx(WORLDMAP_1_SCENCE_ID, 100, 0);
+		//	mario->SetState(MARIO_STATE_ICON);
+		//	mario->setIsIcon(true);
+		//	break;
 		case DIK_N: //
 			mario->SetState(MARIO_STATE_ICON);
 			mario->setIsIcon(true);
+			break;
+		case DIK_M: //
+			mario->EndScene();
 			break;
 		}
 	}

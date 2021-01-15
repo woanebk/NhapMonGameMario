@@ -122,6 +122,7 @@ void CMario::Update(DWORD dt, vector<LPGAMEOBJECT> *coObjects)
 		return;
 	}// ====================================================================
 
+	
 	// Simple fall down
 	vy += ay * dt;
 	ay = MARIO_GRAVITY;
@@ -168,7 +169,10 @@ void CMario::Update(DWORD dt, vector<LPGAMEOBJECT> *coObjects)
 			x = 0;
 		if (x > WORLD_1_1_WIDTH)
 			x = WORLD_1_1_WIDTH; //relocate mario inside map
+		if (y > WORLD_1_1_HEIGHT + HUD_HEIGHT + EXTRA_RESET_SPACE)
+			y = WORLD_1_1_HEIGHT + HUD_HEIGHT + EXTRA_RESET_SPACE;
 		isonground = false;
+		
 	}
 	else
 	{
@@ -209,6 +213,7 @@ void CMario::Update(DWORD dt, vector<LPGAMEOBJECT> *coObjects)
 							GainScore(SCORE_400);
 							RenderPoint(EFFECT_TYPE_100_POINT);
 							vy = -MARIO_JUMP_DEFLECT_SPEED;
+							goomba->setSpeedY(MARIO_JUMP_DEFLECT_SPEED);
 						}
 						else
 						{
@@ -243,7 +248,10 @@ void CMario::Update(DWORD dt, vector<LPGAMEOBJECT> *coObjects)
 								StartUntouchable();
 							}
 							else
+							{
 								SetState(MARIO_STATE_DIE);
+								LifeDown();
+							}
 						}
 					}
 				}
@@ -300,7 +308,10 @@ void CMario::Update(DWORD dt, vector<LPGAMEOBJECT> *coObjects)
 									StartUntouchable();
 								}
 								else
+								{
 									SetState(MARIO_STATE_DIE);
+									LifeDown();
+								}
 							}
 						}
 				}
@@ -371,6 +382,8 @@ void CMario::Update(DWORD dt, vector<LPGAMEOBJECT> *coObjects)
 					CCoin *coin = dynamic_cast<CCoin*>(e->obj);
 					isonground = false; // fix double jump bug
 					GainMoney();
+					RenderPoint(EFFECT_TYPE_100_POINT);
+					GainScore(SCORE_100);
 					coin->setEnable(false);
 					coin->setVisable(false);
 				}
@@ -379,7 +392,10 @@ void CMario::Update(DWORD dt, vector<LPGAMEOBJECT> *coObjects)
 					CPine *pine = dynamic_cast<CPine*>(e->obj);
 					if (e->nx != 0) {
 						vx = 0;
-						break;
+						x += min_tx * dx + nx * 0.8f;
+						// clean up collision events and return to fix bug
+						for (UINT i = 0; i < coEvents.size(); i++) delete coEvents[i];
+						return;
 					}
 					if (e->ny != 0) {
 						vy = 0;
@@ -398,7 +414,8 @@ void CMario::Update(DWORD dt, vector<LPGAMEOBJECT> *coObjects)
 					if (e->nx != 0)
 					{
 						vx = 0;
-						break; //to stop interact walking when collide on y
+						for (UINT i = 0; i < coEvents.size(); i++) delete coEvents[i];
+						return; //to stop interact walking when collide on y
 					}
 					else
 					if (e->ny != 0)
@@ -413,7 +430,9 @@ void CMario::Update(DWORD dt, vector<LPGAMEOBJECT> *coObjects)
 					if (e->nx != 0)
 					{
 						vx = 0;
-						break; //to stop interact walking when collide on y
+						// clean up collision events and return to fix bug
+						for (UINT i = 0; i < coEvents.size(); i++) delete coEvents[i];
+						return; //to stop interact walking when collide on y
 					}
 					if (e->ny < 0)
 					{
@@ -444,6 +463,8 @@ void CMario::Update(DWORD dt, vector<LPGAMEOBJECT> *coObjects)
 							vy = MARIO_GRAVITY; //push mario down a bit
 							isfalling = true;
 							jumpable = false;
+							// clean up collision events and return to fix bug
+							for (UINT i = 0; i < coEvents.size(); i++) delete coEvents[i];
 							return; //no brick jumping needed
 						}
 
@@ -478,14 +499,16 @@ void CMario::Update(DWORD dt, vector<LPGAMEOBJECT> *coObjects)
 						{
 							vy = 0;
 							x += dx;
-							break;
+							// clean up collision events and return to fix bug
+							for (UINT i = 0; i < coEvents.size(); i++) delete coEvents[i];
+							return;
 						}
 						else if (e->ny > 0)
 							y += dy;
 						else if (e->nx != 0)
 						{
 							x += dx;
-							y += dy;
+							//y += dy;
 						}
 						
 					}
@@ -493,9 +516,19 @@ void CMario::Update(DWORD dt, vector<LPGAMEOBJECT> *coObjects)
 					{ //gach thuong
 						if (e->nx != 0 && brick->canBounce())
 						{
-							vx = 0;
-							vy = 0; //to stop interact walking when collide on y
-							break;
+							if (!isonground)
+							{
+								y += dy;
+								vx = 0;
+							}
+							else
+							{
+								vx = 0;
+								vy = 0;
+							} //to stop interact walking when collide on y
+							// clean up collision events and return to fix bug
+							for (UINT i = 0; i < coEvents.size(); i++) delete coEvents[i];
+							return;
 						}
 						else
 						if (e->ny != 0 )
@@ -547,7 +580,10 @@ void CMario::Update(DWORD dt, vector<LPGAMEOBJECT> *coObjects)
 						StartUntouchable();
 					}
 					else
+					{
 						SetState(MARIO_STATE_DIE);
+						LifeDown();
+					}
 				}
 				} //if Plant
 				else if (dynamic_cast<CEnemyFireBall*>(e->obj))
@@ -561,7 +597,10 @@ void CMario::Update(DWORD dt, vector<LPGAMEOBJECT> *coObjects)
 						StartUntouchable();
 					}
 					else
+					{
 						SetState(MARIO_STATE_DIE);
+						LifeDown();
+					}
 				}
 				} //if Plant
 		}
@@ -1244,8 +1283,11 @@ void CMario::TimingEvent() {
 		is_pine_down = false;
 		start_pine_down = 0;
 		CGame *game = CGame::GetInstance();
-		
+		CPlayScene* current_scene = (CPlayScene*)game->GetCurrentScene();
+		if(!current_scene->hasVisitedBase())
 			game->SwitchSceneEx(WORLD_1_1_SECRECT_SCENCE_ID, WORLD_1_1_SECRECT_START_X, WORLD_1_1_SECRECT_START_Y);
+		else
+			game->SwitchBackScence(WORLD_1_1_SECRECT_SCENCE_ID, WORLD_1_1_SECRECT_START_X, WORLD_1_1_SECRECT_START_Y);
 		
 	}
 
@@ -1289,4 +1331,28 @@ void CMario::RenderPoint(int type)
 
 	CPlayScene *currenscence = (CPlayScene*)CGame::GetInstance()->GetCurrentScene();
 	currenscence->PushBackObject(point_effect);
+}
+
+void CMario::CallEndScene()
+{
+	CGame *game = CGame::GetInstance();
+	CPlayScene *scene = (CPlayScene*)game->GetCurrentScene();
+	Hud *hud = scene->getHud();
+	hud->StartEndScene();
+}
+
+void CMario::EndScene()
+{
+	CGame *game = CGame::GetInstance();
+	CPlayScene *scene = (CPlayScene*)game->GetCurrentScene();
+	Hud *hud = scene->getHud();
+	hud->EndScene();
+}
+
+void CMario::StopCallEndScene()
+{
+	CGame *game = CGame::GetInstance();
+	CPlayScene *scene = (CPlayScene*)game->GetCurrentScene();
+	Hud *hud = scene->getHud();
+	hud->StopEndingScene();
 }

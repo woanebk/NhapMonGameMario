@@ -24,14 +24,14 @@ CGoomba::CGoomba(int lvl)
 
 void CGoomba::GetBoundingBox(float &left, float &top, float &right, float &bottom)
 {
-	if (enable == false)
+	/*if (enable == false)
 	{
 		left = 0;
 		top = 0;
 		right = 0;
 		bottom = 0;
 		return;
-	}
+	}*/
 	left = x;
 	top = y;
 	right = x + GOOMBA_BBOX_WIDTH;
@@ -70,7 +70,7 @@ void CGoomba::Update(DWORD dt, vector<LPGAMEOBJECT> *coObjects)
 		renderdie_start = 0;
 		visable = false;
 	}
-	//Reset();
+	Reset();
 	if (state != GOOMBA_STATE_DIE && state != GOOMBA_STATE_DIE_KNOCKUP)
 		CalcPotentialCollisions(coObjects, coEvents);
 	if (level == GOOMBA_LEVEL_FLY)
@@ -100,16 +100,8 @@ void CGoomba::Update(DWORD dt, vector<LPGAMEOBJECT> *coObjects)
 		// TODO: This is a very ugly designed function!!!!
 		FilterCollision(coEvents, coEventsResult, min_tx, min_ty, nx, ny, rdx, rdy);
 
-		// how to push back Mario if collides with a moving objects, what if Mario is pushed this way into another object?
-		//if (rdx != 0 && rdx!=dx)
-		//	x += nx*abs(rdx); 
-
-		// block every object first!
-		/*x += min_tx * dx + nx * 0.4f;
-		y += min_ty * dy + ny * 0.4f;
-
-		if (nx != 0) vx = 0;
-		if (ny != 0) vy = 0;*/
+		float goom_bb_l, goom_bb_t, goom_bb_r, goom_bb_b;
+		GetBoundingBox(goom_bb_l, goom_bb_t, goom_bb_r, goom_bb_b);
 
 		for (UINT i = 0; i < coEventsResult.size(); i++)
 		{
@@ -176,6 +168,8 @@ void CGoomba::Update(DWORD dt, vector<LPGAMEOBJECT> *coObjects)
 				else if (dynamic_cast<CBrick*>(e->obj))
 				{
 					CBrick *brick = dynamic_cast<CBrick*>(e->obj);
+					float brick_bb_l, brick_bb_t, brick_bb_r, brick_bb_b;
+					brick->GetBoundingBox(brick_bb_l, brick_bb_t, brick_bb_r, brick_bb_b);
 					if (brick->getType() == BRICK_TYPE_INVISIBLE)
 					{
 						x += dx; y += dy;
@@ -189,13 +183,13 @@ void CGoomba::Update(DWORD dt, vector<LPGAMEOBJECT> *coObjects)
 								vy = 0;
 								y += min_ty * rdy + ny * 0.4f;
 								x += dx;
-								if (brick->canBounce() == 1)
-									vx = -vx;
+								/*if (brick_bb_t < goom_bb_b)
+									vx = -vx;*/
 							}
 							else
 							{
-								if (brick->canBounce() == 1)
-									vx = -vx;
+								/*if (brick_bb_t < goom_bb_b)
+									vx = -vx;*/
 								x += dx;
 								y += min_ty * rdy + ny * 0.4f;
 								
@@ -205,7 +199,7 @@ void CGoomba::Update(DWORD dt, vector<LPGAMEOBJECT> *coObjects)
 						if (e->nx != 0)
 						{
 							x += min_tx * dx + nx * 0.4f;
-							if (brick->canBounce() == 1)
+							if (brick_bb_t < goom_bb_b)
 								vx = -vx;
 						}
 					}
@@ -214,6 +208,7 @@ void CGoomba::Update(DWORD dt, vector<LPGAMEOBJECT> *coObjects)
 				{
 					CQuestionBrick *questionbrick = dynamic_cast<CQuestionBrick*>(e->obj);
 					vx = -vx;
+					if(level == GOOMBA_LEVEL_FLY)
 					y += dy;
 				}// if brick
 		}
@@ -308,27 +303,17 @@ void CGoomba::LevelDown()
 void CGoomba::Reset()
 {
 	CGame *game = CGame::GetInstance();
-	float bb_left, bb_top, bb_right, bb_bottom;
-	GetBoundingBox(bb_left, bb_top, bb_right, bb_bottom);
-	if (!Resetable)
+	float bb_left, bb_top;
+	GetPosition(bb_left, bb_top);
+	if (!isInCamera() && !game->BBisinCamera(start_x - HALF_EXTRA_SPACE,start_y,start_x+SCREEN_WIDTH+ HALF_EXTRA_SPACE, start_y+GOOMBA_BBOX_HEIGHT))
 	{
-		if (!isInCamera() && !game->isInCamera(start_x - EXTRA_RESET_SPACE, start_y, start_x + (bb_right - bb_left) + EXTRA_RESET_SPACE, start_y + (bb_bottom - bb_top))) //10 tiles away from mario then reset
-		{
-			Resetable = true;
-		}
+		enable = true;
+		visable = true;
+		SetPosition(start_x, start_y);
+		setLevel(start_level);
+		SetState(GOOMBA_STATE_WALKING);
 	}
-	else
-	{
-		if (game->isInCamera(start_x, start_y, start_x + (bb_right - bb_left), start_y + (bb_bottom - bb_top)))
-		{
-			enable = true;
-			visable = true;
-			SetPosition(start_x, start_y);
-			setLevel(start_level);
-			SetState(KOOPAS_STATE_WALKING);
-			Resetable = false;
-		}
-	}
+	
 	
 		
 }

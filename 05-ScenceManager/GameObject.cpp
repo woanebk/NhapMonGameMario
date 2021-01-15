@@ -155,6 +155,8 @@ bool CGameObject::SpecialCollision(float friend_left, float friend_top, float fr
 
 bool CGameObject::isInCamera()
 {
+	if (!visable)
+		return false;
 	float cam_left, cam_top;
 	float bb_left, bb_top, bb_right, bb_bottom;
 	float left, top, right, bottom;
