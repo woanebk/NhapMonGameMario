@@ -19,6 +19,8 @@
 #include "Leaf.h"
 #include "Mushroom.h"
 #include "Effect.h"
+#include "PiranhaPlant.h"
+#include "EnemyFireBall.h"
 
 CMario::CMario(float x, float y) : CGameObject()
 {
@@ -534,6 +536,34 @@ void CMario::Update(DWORD dt, vector<LPGAMEOBJECT> *coObjects)
 					mushroom->setVisable(false);
 					mushroom->setEnable(false);
 				} //if Mushroom
+				else if (dynamic_cast<CPiranhaPlant*>(e->obj))
+				{
+				CPiranhaPlant *plant = dynamic_cast<CPiranhaPlant*>(e->obj);
+				if (untouchable == 0)
+				{
+					if (level > MARIO_LEVEL_SMALL)
+					{
+						LevelDown();
+						StartUntouchable();
+					}
+					else
+						SetState(MARIO_STATE_DIE);
+				}
+				} //if Plant
+				else if (dynamic_cast<CEnemyFireBall*>(e->obj))
+				{
+				CEnemyFireBall *fireball = dynamic_cast<CEnemyFireBall*>(e->obj);
+				if (untouchable == 0)
+				{
+					if (level > MARIO_LEVEL_SMALL)
+					{
+						LevelDown();
+						StartUntouchable();
+					}
+					else
+						SetState(MARIO_STATE_DIE);
+				}
+				} //if Plant
 		}
 	}
 

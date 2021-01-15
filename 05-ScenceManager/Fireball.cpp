@@ -15,7 +15,7 @@ CFireBall::CFireBall(float left, float top)
 	vy = FIREBALL_SPEED_Y;
 	nx = 1;
 	CAnimationSets * animation_sets = CAnimationSets::GetInstance();
-	animation_set = animation_sets->Get(6);
+	animation_set = animation_sets->Get(FIREBALL_SET_ID);
 }
 
 void CFireBall::GetBoundingBox(float & left, float & top, float & right, float & bottom)

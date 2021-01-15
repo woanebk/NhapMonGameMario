@@ -7,6 +7,7 @@
 #include "Sprites.h"
 #include "Fireball.h"
 #include "Pine.h"
+#include "PiranhaPlant.h"
 #include "Block.h"
 #include "Portal.h"
 #include "Coin.h"
@@ -212,6 +213,13 @@ void CPlayScene::_ParseSection_OBJECTS(string line)
 	{
 		int t = atof(tokens[4].c_str());
 		obj = new CMushroom(t);
+	}
+	break;
+	case OBJECT_TYPE_PLANT_PIRANHA:
+	{
+		int t = atof(tokens[4].c_str());
+		int l = atof(tokens[5].c_str());
+		obj = new CPiranhaPlant(t, l);
 	}
 	break;
 	default:
@@ -510,6 +518,7 @@ void CPlayScenceKeyHandler::OnKeyUp(int KeyCode)
 		switch (KeyCode)
 		{
 		case DIK_DOWN:
+			if(mario->getLevel() != MARIO_LEVEL_SMALL)
 			mario->SetPosition(mario->x, mario->y - (MARIO_BIG_BBOX_HEIGHT - MARIO_BBOX_SIT_HEIGHT) - 1);
 			break;//push mario up a bit after stand up
 		case DIK_A:
@@ -549,20 +558,9 @@ void CPlayScenceKeyHandler::KeyState(BYTE *states)
 			if (mario->isFalling() && mario->getLevel() == MARIO_LEVEL_LEAF)
 				mario->StartFlapping();
 		}
-		else if (game->IsKeyDown(DIK_DOWN))
+		else if (game->IsKeyDown(DIK_DOWN) && mario->getLevel()!=MARIO_LEVEL_SMALL)
 			mario->SetState(MARIO_STATE_SIT);
-		else if (game->IsKeyDown(DIK_S))
-		{
-			if (mario->isJumpable())
-			{
-				if (mario->getStack() == MARIO_RUNNING_STACK_MAX && mario->getLevel() == MARIO_LEVEL_LEAF)
-					mario->setIsFlying(true);
-				mario->SetState(MARIO_STATE_JUMP);
-			}
-			else if (mario->isFalling() && !mario->isFlying() && mario->getLevel() == MARIO_LEVEL_LEAF)
-					mario->StartFlapping();
-
-		}
+		
 		else if (game->IsKeyDown(DIK_RIGHT))
 		{
 			mario->SetState(MARIO_STATE_WALKING_RIGHT);
@@ -578,6 +576,19 @@ void CPlayScenceKeyHandler::KeyState(BYTE *states)
 			else
 				mario->SetState(MARIO_STATE_IDLE);
 		}
+
+		 if (game->IsKeyDown(DIK_S))
+			{
+				if (mario->isJumpable())
+				{
+					if (mario->getStack() == MARIO_RUNNING_STACK_MAX && mario->getLevel() == MARIO_LEVEL_LEAF)
+						mario->setIsFlying(true);
+					mario->SetState(MARIO_STATE_JUMP);
+				}
+				else if (mario->isFalling() && !mario->isFlying() && mario->getLevel() == MARIO_LEVEL_LEAF)
+					mario->StartFlapping();
+
+			}
 	}
 
 	

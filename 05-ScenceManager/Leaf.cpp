@@ -93,8 +93,10 @@ void CLeaf::HitMario()
 	mario->GetBoundingBox(mario_bb_l, mario_bb_t, mario_bb_r, mario_bb_b);
 	if (SpecialCollision(mario_bb_l, mario_bb_t, mario_bb_r, mario_bb_b))
 	{
-		if(mario->getLevel() < MARIO_LEVEL_LEAF)
+		if (mario->getLevel() < MARIO_LEVEL_LEAF)
 			mario->LevelUp();
+		else
+			mario->GainScore(SCORE_1000);
 		enable = false;
 		visable = false;
 	}
