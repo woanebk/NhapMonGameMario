@@ -11,8 +11,9 @@ class CPine : public CGameObject
 	int height;
 	int scene_id = -1;
 	bool can_switch_scence=false;
+	int type; // animation 
 public:
-	CPine (float l, float t, float r, float b, int id );
+	CPine (float l, float t, float r, float b, int id, int ty );
 	virtual void Render();
 	virtual void GetBoundingBox(float &l, float &t, float &r, float &b);
 	bool canSwitchScence() { return can_switch_scence; }

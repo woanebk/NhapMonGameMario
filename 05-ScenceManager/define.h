@@ -69,6 +69,26 @@
 #define WORLD_1_1_SECRECT_MATRIX_ID		2
 #define WORLDMAP_1_TILESET_ID	3
 #define WORLDMAP_1_MATRIX_ID		3
+
+//INTRO SCENCE
+#define INTRO_SCENE_ID	999
+#define INTRO_SCENE_TILESET_ID	999
+#define INTRO_SCENE_MATRIX_ID	999
+
+#define INTRO_SCENE_TILESET		L"Intro_scence_bank.png"
+#define INTRO_SCENE_MATRIX_TXT	L"Intro_scence_matrix.txt"
+
+#define ANI_NUMBER_3_ID			1400
+#define ANI_NUMBER_3_X			112
+#define ANI_NUMBER_3_Y			102
+
+#define SELECTOR_SPRITE_ID		21004
+
+#define SELECT_1_PLAYER_X		70
+#define SELECT_1_PLAYER_Y		150
+#define SELECT_2_PLAYER_X		70
+#define SELECT_2_PLAYER_Y		168
+
 //GENERAL
 #define EXTRA_RESET_SPACE		320
 //MARIO
@@ -325,6 +345,9 @@
 //PINE
 #define PINE_ANI_TO_SECRECT				0
 #define PINE_ANI_SWITCH_BACK			1
+#define PINE_ANI_1ST_1_1				2
+#define PINE_ANI_2ND_1_1				3
+#define PINE_ANI_3RD_1_1				4
 //BRICK
 #define BRICK_BBOX_WIDTH  16
 #define BRICK_BBOX_HEIGHT 16
@@ -500,7 +523,7 @@
 #define PLANT_PIRANHA_STATE_DOWN		2
 
 #define PLANT_PIRANHA_SPEED_Y		0.03f
-#define PLANT_FIRE_SPEED_Y			0.04f
+#define PLANT_FIRE_SPEED_Y			0.02f
 #define PLANT_UP_TIME				1500
 #define PLANT_DOWN_TIME				1500
 #define PLANT_STAND_TIME				1000

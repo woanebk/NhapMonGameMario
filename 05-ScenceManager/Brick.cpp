@@ -14,12 +14,12 @@ void CBrick::Render()
 	else
 		if (type == BRICK_TYPE_QUESTION)
 			animation_set->at(BRICK_ANI_QUESTION)->Render(x, y);
-		/*else
+		else
 			if (type == BRICK_TYPE_GROUND_1)
 				animation_set->at(BRICK_ANI_GROUND_1)->Render(x, y);
 			else
 				if (type == BRICK_TYPE_GROUND_2)
-					animation_set->at(BRICK_ANI_GROUND_2)->Render(x, y);*/
+					animation_set->at(BRICK_ANI_GROUND_2)->Render(x, y);
 				else
 					if (type == BRICK_TYPE_CLOUD)
 						animation_set->at(BRICK_ANI_CLOUD)->Render(x, y);

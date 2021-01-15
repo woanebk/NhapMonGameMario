@@ -135,6 +135,7 @@
     <ClCompile Include="Coin.cpp" />
     <ClCompile Include="Effect.cpp" />
     <ClCompile Include="Fireball.cpp" />
+    <ClCompile Include="IntroScene.cpp" />
     <ClCompile Include="Koopas.cpp" />
     <ClCompile Include="Leaf.cpp" />
     <ClCompile Include="MapBackground.cpp" />
@@ -167,6 +168,7 @@
     <ClInclude Include="define.h" />
     <ClInclude Include="Effect.h" />
     <ClInclude Include="Fireball.h" />
+    <ClInclude Include="IntroScene.h" />
     <ClInclude Include="Koopas.h" />
     <ClInclude Include="Leaf.h" />
     <ClInclude Include="MapBackground.h" />

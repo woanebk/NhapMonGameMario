@@ -187,7 +187,8 @@ void CPlayScene::_ParseSection_OBJECTS(string line)
 		float r = atof(tokens[4].c_str());
 		float b = atof(tokens[5].c_str());
 		float s= atof(tokens[6].c_str());
-		obj = new CPine(x, y, r, b, s);
+		float ty = atof(tokens[7].c_str());
+		obj = new CPine(x, y, r, b, s, ty);
 	}
 	break;
 	case OBJECT_TYPE_BREAKABLE_BRICK:

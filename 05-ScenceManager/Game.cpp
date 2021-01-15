@@ -5,6 +5,7 @@
 #include "Utils.h"
 
 #include "PlayScence.h"
+#include "IntroScene.h"
 
 CGame * CGame::__instance = NULL;
 
@@ -321,6 +322,7 @@ CGame *CGame::GetInstance()
 
 #define MAX_GAME_LINE 1024
 
+#define INTRO_SCENE_ID	999
 
 #define GAME_FILE_SECTION_UNKNOWN -1
 #define GAME_FILE_SECTION_SETTINGS 1
@@ -344,9 +346,17 @@ void CGame::_ParseSection_SCENES(string line)
 	if (tokens.size() < 2) return;
 	int id = atoi(tokens[0].c_str());
 	LPCWSTR path = ToLPCWSTR(tokens[1]);
-
-	LPSCENE scene = new CPlayScene(id, path);
-	scenes[id] = scene;
+	if (id == INTRO_SCENE_ID)
+	{
+		LPSCENE scene = new CIntroScene(id, path);
+		scenes[id] = scene;
+	}
+	else
+	{
+		LPSCENE scene = new CPlayScene(id, path);
+		scenes[id] = scene;
+	}
+		
 }
 
 /*
@@ -435,6 +445,7 @@ void CGame::SwitchSceneEx(int scene_id, float mario_x, float mario_y) //save old
 		post_mario->SetState(MARIO_STATE_ICON);
 	else
 		post_mario->SetState(MARIO_STATE_IDLE);
+
 	if (scene_id != WORLDMAP_1_SCENCE_ID)
 		post_mario->setIsIcon(false);
 
