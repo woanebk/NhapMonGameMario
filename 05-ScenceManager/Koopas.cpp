@@ -153,7 +153,7 @@ void CKoopas::Update(DWORD dt, vector<LPGAMEOBJECT> *coObjects)
 				{
 					if (state != KOOPAS_STATE_SPIN_LEFT && state != KOOPAS_STATE_SPIN_RIGHT)
 						vx = -vx;
-					y += vy;
+					//y += dy;
 				}
 			}//if Goomba
 			else if (dynamic_cast<CKoopas*> (e->obj))
@@ -245,7 +245,7 @@ void CKoopas::Update(DWORD dt, vector<LPGAMEOBJECT> *coObjects)
 						else
 						{
 							x += dx;
-							break;
+							return;
 						}
 						//if (brick->canBounce() == 1)
 						//	if (state != KOOPAS_STATE_SPIN_LEFT && state != KOOPAS_STATE_SPIN_RIGHT)
@@ -256,7 +256,8 @@ void CKoopas::Update(DWORD dt, vector<LPGAMEOBJECT> *coObjects)
 			else if (dynamic_cast<CCoin*> (e->obj))
 				{
 				x += dx;
-				y += dy;
+				if(e->ny<0)
+					y += dy;
 				}//if Coin
 		}
 
@@ -335,7 +336,7 @@ void CKoopas::Render()
 
 	animation_set->at(ani)->Render(x, y);
 
-	//RenderBoundingBox();
+	RenderBoundingBox();
 }
 
 void CKoopas::SetState(int state)
@@ -360,7 +361,15 @@ void CKoopas::SetState(int state)
 	case KOOPAS_STATE_WALKING:
 		vx = KOOPAS_WALKING_SPEED;
 		if (old_state == KOOPAS_STATE_SHELL)
-			SetPosition(x, y - (KOOPAS_BBOX_HEIGHT - KOOPAS_BBOX_HEIGHT_SHELL));
+		{
+			if(!holded)
+				SetPosition(x, y - (KOOPAS_BBOX_HEIGHT - KOOPAS_BBOX_HEIGHT_SHELL));
+			else
+			{
+				SetPosition(x, y - (KOOPAS_BBOX_HEIGHT ));
+				holded = false;
+			}
+		}
 	}
 }
 

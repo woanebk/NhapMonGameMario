@@ -5,7 +5,11 @@
 #include "Pine.h"
 #include "Block.h"
 #include "Coin.h"
+#include "BreakableBrick.h"
+#include "EnemyFireBall.h"
+#include "QuestionBrick.h"
 #include "Utils.h"
+#include "PiranhaPlant.h"
 
 CFireBall::CFireBall(float left, float top)
 {
@@ -28,6 +32,8 @@ void CFireBall::GetBoundingBox(float & left, float & top, float & right, float &
 
 void CFireBall::Update(DWORD dt, vector<LPGAMEOBJECT>* coObjects)
 {
+	if (!enable)
+		return;
 	CGameObject::Update(dt, coObjects);
 	if (vy < 0)
 	{
@@ -66,19 +72,26 @@ void CFireBall::Update(DWORD dt, vector<LPGAMEOBJECT>* coObjects)
 			if (dynamic_cast<CBrick*>(e->obj))
 			{
 				CBrick *brick = dynamic_cast<CBrick*>(e->obj);
-				if (e->nx != 0)
+				if (brick->getType() == BRICK_TYPE_INVISIBLE)
 				{
-					if(brick->canBounce() == 1)
-					{
-						RenderExplosion();
-						enable = false;
-						visable = false;
-					}// fix dissapear on ground, now only dissapear when hitting an edge
+					x += dx; y == dy;
 				}
-				if (e->ny != 0)
+				else
 				{
-					SetSpeed(vx, -vy);
-					StartSwitchSpeed();
+					if (e->nx != 0)
+					{
+						if (brick->canBounce() == 1 || brick->getType() == BRICK_TYPE_CLOUD)
+						{
+							RenderExplosion();
+							enable = false;
+							visable = false;
+						}// fix dissapear on ground, now only dissapear when hitting an edge
+					}
+					if (e->ny != 0)
+					{
+						SetSpeed(vx, -vy);
+						StartSwitchSpeed();
+					}
 				}
 			}
 			else if (dynamic_cast<CBlock*>(e->obj))
@@ -112,13 +125,22 @@ void CFireBall::Update(DWORD dt, vector<LPGAMEOBJECT>* coObjects)
 			else if (dynamic_cast<CGoomba*>(e->obj))
 			{
 				CGoomba *goomba = dynamic_cast<CGoomba*>(e->obj);
+				goomba->Render_Tail_Hit();
 				goomba->SetState(GOOMBA_STATE_DIE);
+				enable = false;
+				visable = false;
+			}
+			else if (dynamic_cast<CPiranhaPlant*>(e->obj))
+			{
+				CPiranhaPlant *plant = dynamic_cast<CPiranhaPlant*>(e->obj);
+				plant->Killed();
 				enable = false;
 				visable = false;
 			}
 			else if (dynamic_cast<CKoopas*>(e->obj))
 			{
 				CKoopas *koopas = dynamic_cast<CKoopas*>(e->obj);
+				koopas->Render_Tail_Hit();
 				koopas->SetState(KOOPAS_STATE_DIE);
 				enable = false;
 				visable = false;
@@ -126,6 +148,47 @@ void CFireBall::Update(DWORD dt, vector<LPGAMEOBJECT>* coObjects)
 			else if (dynamic_cast<CCoin*>(e->obj))
 			{
 				CCoin *coin = dynamic_cast<CCoin*>(e->obj);
+				x += dx;
+				y += dy;
+			}
+			if (dynamic_cast<CQuestionBrick*>(e->obj))
+			{
+				CQuestionBrick *brick = dynamic_cast<CQuestionBrick*>(e->obj);
+				if (e->nx != 0)
+				{
+					if (brick->canBounce() == 1)
+					{
+						RenderExplosion();
+						enable = false;
+						visable = false;
+					}// fix dissapear on ground, now only dissapear when hitting an edge
+				}
+				if (e->ny != 0)
+				{
+					SetSpeed(vx, -vy);
+					StartSwitchSpeed();
+				}
+			}
+			if (dynamic_cast<CBreakableBrick*>(e->obj))
+			{
+				CBreakableBrick *brick = dynamic_cast<CBreakableBrick*>(e->obj);
+				if (e->nx != 0)
+				{
+					if (brick->canBounce() == 1)
+					{
+						RenderExplosion();
+						enable = false;
+						visable = false;
+					}// fix dissapear on ground, now only dissapear when hitting an edge
+				}
+				if (e->ny != 0)
+				{
+					SetSpeed(vx, -vy);
+					StartSwitchSpeed();
+				}
+			}
+			if (dynamic_cast<CEnemyFireBall*>(e->obj))
+			{
 				x += dx;
 				y += dy;
 			}

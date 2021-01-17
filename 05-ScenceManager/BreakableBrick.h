@@ -18,5 +18,6 @@ public:
 	bool isBroken() { return Broken; }
 	~CBreakableBrick();
 	void Break();
+	void CreatePieces();
 };
 

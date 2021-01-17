@@ -238,7 +238,7 @@ void CGoomba::Render()
 
 	animation_set->at(ani)->Render(x, y);
 
-	//RenderBoundingBox();
+	RenderBoundingBox();
 }
 
 void CGoomba::SetState(int state)
@@ -286,6 +286,7 @@ void CGoomba::HitByTail()
 			if (bb_top <= mario_bb_bottom && bb_bottom >= mario_bb_top + (mario_bb_bottom - mario_bb_top) / 2)
 			{
 				Render_Tail_Hit();
+				LevelDown();
 				SetState(GOOMBA_STATE_DIE_KNOCKUP);
 				y += dy;
 				mario->GainScore(SCORE_100);

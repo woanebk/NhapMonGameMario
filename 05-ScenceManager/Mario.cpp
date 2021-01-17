@@ -422,6 +422,8 @@ void CMario::Update(DWORD dt, vector<LPGAMEOBJECT> *coObjects)
 					{
 						vy = 0;
 						x += dx;
+						if(e->ny>0)
+							breakablebrick->Break();
 					}
 				} //if breakable brick
 				else if (dynamic_cast<CQuestionBrick*>(e->obj))
@@ -477,7 +479,7 @@ void CMario::Update(DWORD dt, vector<LPGAMEOBJECT> *coObjects)
 						isfalling = true;
 						jumpable = false;
 					}
-				} //if breakable brick
+				} //if question brick
 				else if (dynamic_cast<CBrick*>(e->obj))
 				{
 					CBrick *brick = dynamic_cast<CBrick*>(e->obj);

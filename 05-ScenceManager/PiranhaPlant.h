@@ -33,5 +33,6 @@ public:
 	void StandStill() { stand_start = GetTickCount64();  is_stand = true; }
 	void StartCalculateShot() { shot_start = GetTickCount64(); can_shot = true; }
 	void Shot();
+	void Killed();
 };
 

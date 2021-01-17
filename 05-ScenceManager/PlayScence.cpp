@@ -512,6 +512,9 @@ void CPlayScenceKeyHandler::OnKeyDown(int KeyCode)
 			mario->SetState(MARIO_STATE_ICON);
 			mario->setIsIcon(true);
 			break;
+		case DIK_V: //
+			mario->SetPosition(2263, 0);
+			break;
 		case DIK_M: //
 			mario->EndScene();
 			break;

@@ -30,6 +30,8 @@ void CBrokenBrickPiece::Render()
 
 void CBrokenBrickPiece::Update(DWORD dt, vector<LPGAMEOBJECT>* coObjects)
 {
+	if (!isInCamera())
+		return;
 	CGameObject::Update(dt, coObjects);
 	x += dx;
 	y += dy;

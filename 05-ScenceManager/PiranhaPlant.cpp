@@ -210,11 +210,7 @@ void CPiranhaPlant::HitByTail()
 		if (bb_left <= mario_bb_right + MARIO_LEAF_BBOX_TAIL_WIDTH && bb_right >= mario_bb_left - MARIO_LEAF_BBOX_TAIL_WIDTH)
 			if (bb_top <= mario_bb_bottom && bb_bottom >= mario_bb_top + (mario_bb_bottom - mario_bb_top) / 2)
 			{
-				Render_Tail_Hit();
-				enable = false;
-				visable = false;
-				mario->GainScore(SCORE_100);
-				mario->RenderPoint(EFFECT_TYPE_100_POINT);
+				Killed();
 			}
 
 }
@@ -258,4 +254,15 @@ void CPiranhaPlant::Shot()
 	CEnemyFireBall *fireball = new CEnemyFireBall(x + PLANT_PIRANHA_BBOX_WIDTH / 2, y, nx, ny);
 	scence->PushBackObject(fireball);
 
+}
+
+void CPiranhaPlant::Killed()
+{
+	CPlayScene* scence = (CPlayScene*)CGame::GetInstance()->GetCurrentScene();
+	CMario* mario = scence->GetPlayer();
+	Render_Tail_Hit();
+	enable = false;
+	visable = false;
+	mario->GainScore(SCORE_100);
+	mario->RenderPoint(EFFECT_TYPE_100_POINT);
 }

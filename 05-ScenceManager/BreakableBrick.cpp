@@ -14,6 +14,8 @@ CBreakableBrick::CBreakableBrick(int b)
 
 void CBreakableBrick::Update(DWORD dt, vector<LPGAMEOBJECT> *coObjects)
 {
+	if (Broken)
+		return;
 	CGameObject::Update(dt, coObjects);
 	vector<LPCOLLISIONEVENT> coEvents;
 	vector<LPCOLLISIONEVENT> coEventsResult;
@@ -77,29 +79,9 @@ void CBreakableBrick::HitByTail()
 		if (bb_left <= mario_bb_right + MARIO_LEAF_BBOX_TAIL_WIDTH && bb_right >= mario_bb_left - MARIO_LEAF_BBOX_TAIL_WIDTH) 
 			if (bb_top <= mario_bb_bottom && bb_bottom >= mario_bb_top + (mario_bb_bottom - mario_bb_top)/2)
 			{
-				enable = false;
-				visable = false;
-				Broken = true;
+				Break();
 				//broken pieces:
-				CBrokenBrickPiece *piece_top_left = new CBrokenBrickPiece(-1, -1);
-				piece_top_left->SetPosition(this->x + BRICK_BBOX_WIDTH/2 , this->y + BRICK_BBOX_HEIGHT/2);
-				piece_top_left->SetStartPosition(this->x + BRICK_BBOX_WIDTH / 2, this->y + BRICK_BBOX_HEIGHT / 2);
-				scence->PushBackObject(piece_top_left);
-
-				CBrokenBrickPiece *piece_top_right = new CBrokenBrickPiece(1, -1);
-				piece_top_right->SetPosition(this->x + BRICK_BBOX_WIDTH / 2, this->y + BRICK_BBOX_HEIGHT / 2);
-				piece_top_right->SetStartPosition(this->x + BRICK_BBOX_WIDTH / 2, this->y + BRICK_BBOX_HEIGHT / 2);
-				scence->PushBackObject(piece_top_right);
-
-				CBrokenBrickPiece *piece_bottom_left = new CBrokenBrickPiece(-1, 1);
-				piece_bottom_left->SetPosition(this->x + BRICK_BBOX_WIDTH / 2, this->y + BRICK_BBOX_HEIGHT / 2);
-				piece_bottom_left->SetStartPosition(this->x + BRICK_BBOX_WIDTH / 2, this->y + BRICK_BBOX_HEIGHT / 2);
-				scence->PushBackObject(piece_bottom_left);
-
-				CBrokenBrickPiece *piece_bottom_right = new CBrokenBrickPiece(1, 1);
-				piece_bottom_right->SetPosition(this->x + BRICK_BBOX_WIDTH / 2, this->y + BRICK_BBOX_HEIGHT / 2);
-				piece_bottom_right->SetStartPosition(this->x + BRICK_BBOX_WIDTH / 2, this->y + BRICK_BBOX_HEIGHT / 2);
-				scence->PushBackObject(piece_bottom_right);
+				
 
 			}
 }
@@ -112,7 +94,31 @@ void CBreakableBrick::Break()
 	visable = false;
 	enable = false;
 	Broken = true;
+	CreatePieces();
 	//need to add break animation
 }
 
+void CBreakableBrick::CreatePieces()
+{
 
+	CPlayScene* scence = (CPlayScene*)CGame::GetInstance()->GetCurrentScene();
+	CBrokenBrickPiece *piece_top_left = new CBrokenBrickPiece(-1, -1);
+	piece_top_left->SetPosition(this->x + BRICK_BBOX_WIDTH / 2, this->y + BRICK_BBOX_HEIGHT / 2);
+	piece_top_left->SetStartPosition(this->x + BRICK_BBOX_WIDTH / 2, this->y + BRICK_BBOX_HEIGHT / 2);
+	scence->PushBackObject(piece_top_left);
+
+	CBrokenBrickPiece *piece_top_right = new CBrokenBrickPiece(1, -1);
+	piece_top_right->SetPosition(this->x + BRICK_BBOX_WIDTH / 2, this->y + BRICK_BBOX_HEIGHT / 2);
+	piece_top_right->SetStartPosition(this->x + BRICK_BBOX_WIDTH / 2, this->y + BRICK_BBOX_HEIGHT / 2);
+	scence->PushBackObject(piece_top_right);
+
+	CBrokenBrickPiece *piece_bottom_left = new CBrokenBrickPiece(-1, 1);
+	piece_bottom_left->SetPosition(this->x + BRICK_BBOX_WIDTH / 2, this->y + BRICK_BBOX_HEIGHT / 2);
+	piece_bottom_left->SetStartPosition(this->x + BRICK_BBOX_WIDTH / 2, this->y + BRICK_BBOX_HEIGHT / 2);
+	scence->PushBackObject(piece_bottom_left);
+
+	CBrokenBrickPiece *piece_bottom_right = new CBrokenBrickPiece(1, 1);
+	piece_bottom_right->SetPosition(this->x + BRICK_BBOX_WIDTH / 2, this->y + BRICK_BBOX_HEIGHT / 2);
+	piece_bottom_right->SetStartPosition(this->x + BRICK_BBOX_WIDTH / 2, this->y + BRICK_BBOX_HEIGHT / 2);
+	scence->PushBackObject(piece_bottom_right);
+}
