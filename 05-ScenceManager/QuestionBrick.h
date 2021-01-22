@@ -10,15 +10,14 @@ class CQuestionBrick :public CGameObject
 	int Item = 0;
 	DWORD jumptime = 0;
 public:
-	CQuestionBrick(int t, int b, int hasitem) {
+	CQuestionBrick(int t, int b, int hasitem, int hascoin) {
 		x = y = 0;
 		vx = vy = 0;
 		nx = 1;
 		Item = hasitem;
 		bounce = b;
 		type = t;
-		if (Item == 0)
-			Coin = 1;
+		Coin = hascoin;
 	}
 	virtual void Render();
 	void Update(DWORD dt, vector<LPGAMEOBJECT>* coObjects);
@@ -32,7 +31,8 @@ public:
 	void setBounce(int b) { bounce = b; }
 
 	bool hasCoin() { if (Coin != 0) return true; return false; }
-	void setHasCoin(int c) { Coin = c; }
+	void setCoin(int c) { if(c >= 0)Coin = c; }
+	int getCoin() { return Coin; }
 
 	bool hasItem() { if (Item != 0) return true; return false; }
 	void setHasItem(int r) { Item = r; }

@@ -44,7 +44,10 @@ void CGoomba::GetBoundingBox(float &left, float &top, float &right, float &botto
 	else
 	{
 		if (level == GOOMBA_LEVEL_FLY)
+		{
+			top = y + GOOMBA_FLY_SMALL_EXTRA_HEIGHT;
 			bottom = y + FLYGOOMBA_BBOX_HEIGHT;
+		}
 		else
 			bottom = y +  GOOMBA_BBOX_HEIGHT;
 	}
@@ -111,7 +114,7 @@ void CGoomba::Update(DWORD dt, vector<LPGAMEOBJECT> *coObjects)
 				CKoopas *koopas = dynamic_cast<CKoopas *>(e->obj);
 				if (e->nx != 0)
 				{
-					if (koopas->GetState() == KOOPAS_STATE_SPIN_LEFT || koopas->GetState() == KOOPAS_STATE_SPIN_RIGHT)
+					if (koopas->GetState() == KOOPAS_STATE_SPIN_LEFT || koopas->GetState() == KOOPAS_STATE_SPIN_RIGHT || koopas->isHolded())
 					{
 						SetState(GOOMBA_STATE_DIE); //die if get hit by a spinning koopas
 						Render_Tail_Hit();
@@ -126,6 +129,65 @@ void CGoomba::Update(DWORD dt, vector<LPGAMEOBJECT> *coObjects)
 				}
 
 			} //if koopas
+			if (dynamic_cast<CMario*>(e->obj) && e->obj->isEnabled())
+			{
+				CGame *game = CGame::GetInstance();
+				CMario *mario = ((CPlayScene*)game->GetCurrentScene())->GetPlayer();
+
+				if (e->ny > 0)
+				{
+					if (state != GOOMBA_STATE_DIE)
+					{
+						if (level == GOOMBA_LEVEL_FLY)
+						{
+							LevelDown();
+							mario->GainScore(SCORE_400);
+							mario->RenderPoint(EFFECT_TYPE_100_POINT);
+							mario->SetSpeedY(-MARIO_JUMP_DEFLECT_SPEED);
+							y = (MARIO_JUMP_DEFLECT_SPEED);
+						}
+						else
+						{
+							SetState(GOOMBA_STATE_DIE);
+							if (type == GOOMBA_TYPE_NORMAL)
+							{
+								mario->GainScore(SCORE_100);
+								mario->RenderPoint(EFFECT_TYPE_100_POINT);
+							}
+							else
+							{
+								mario->GainScore(SCORE_800);
+								mario->RenderPoint(EFFECT_TYPE_800_POINT);
+							}
+							//deflect
+							if (mario->getLevel() != MARIO_LEVEL_LEAF)
+								mario->SetSpeedY(-MARIO_JUMP_DEFLECT_SPEED);
+							else
+								mario->SetSpeedY(-MARIO_LEAF_JUMP_DEFLECT_SPEED);
+						}
+					}
+				}
+				else if (e->nx != 0)
+				{
+					if (mario->isUntouchable() == 0)
+					{
+						if (state != GOOMBA_STATE_DIE)
+						{
+							if (mario->getLevel() > MARIO_LEVEL_SMALL)
+							{
+								mario->LevelDown();
+								mario->StartUntouchable();
+							}
+							else
+							{
+								mario->SetState(MARIO_STATE_DIE);
+								mario->LifeDown();
+							}
+						}
+					}
+				}
+
+			} 
 			else if (dynamic_cast<CBlock*>(e->obj))
 			{
 				CBlock *block = dynamic_cast<CBlock*>(e->obj);
@@ -181,7 +243,7 @@ void CGoomba::Update(DWORD dt, vector<LPGAMEOBJECT> *coObjects)
 							if (level == GOOMBA_LEVEL_NORMAL)
 							{
 								vy = 0;
-								y += min_ty * rdy + ny * 0.4f;
+								//y += min_ty * rdy + ny * 0.4f;
 								x += dx;
 								/*if (brick_bb_t < goom_bb_b)
 									vx = -vx;*/
@@ -191,7 +253,7 @@ void CGoomba::Update(DWORD dt, vector<LPGAMEOBJECT> *coObjects)
 								/*if (brick_bb_t < goom_bb_b)
 									vx = -vx;*/
 								x += dx;
-								y += min_ty * rdy + ny * 0.4f;
+								//y += min_ty * rdy + ny * 0.4f;
 								
 							}
 
@@ -331,6 +393,8 @@ void CGoomba::Render_Tail_Hit()
 
 	CPlayScene *currenscence = (CPlayScene*)CGame::GetInstance()->GetCurrentScene();
 	currenscence->PushBackObject(tailhiteffect);
+
+	tailhiteffect->AddtoGrid();
 }
 
 void CGoomba::StartRenderDie()

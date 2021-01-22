@@ -34,4 +34,5 @@ public:
 	int getLevel() { return level; }
 	void LevelDown();
 	void Reset();
+	bool CalculateTurningAround(vector<LPGAMEOBJECT>* coObjects);
 };

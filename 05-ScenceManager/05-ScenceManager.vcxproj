@@ -127,10 +127,13 @@
   <ItemGroup>
     <ClCompile Include="Animations.cpp" />
     <ClCompile Include="Block.cpp" />
+    <ClCompile Include="Boomerang.cpp" />
+    <ClCompile Include="BoomerangBro.cpp" />
     <ClCompile Include="BreakableBrick.cpp" />
     <ClCompile Include="Brick.cpp" />
     <ClCompile Include="BrokenBrickPiece.cpp" />
     <ClCompile Include="EnemyFireBall.cpp" />
+    <ClCompile Include="Grid.cpp" />
     <ClCompile Include="Hud.cpp" />
     <ClCompile Include="Coin.cpp" />
     <ClCompile Include="Effect.cpp" />
@@ -140,11 +143,13 @@
     <ClCompile Include="Leaf.cpp" />
     <ClCompile Include="MapBackground.cpp" />
     <ClCompile Include="MapBarrier.cpp" />
+    <ClCompile Include="MovingPlatform.cpp" />
     <ClCompile Include="Mushroom.cpp" />
     <ClCompile Include="Pine.cpp" />
     <ClCompile Include="PiranhaPlant.cpp" />
     <ClCompile Include="Portal.cpp" />
     <ClCompile Include="QuestionBrick.cpp" />
+    <ClCompile Include="Roulette.cpp" />
     <ClCompile Include="Utils.cpp" />
     <ClCompile Include="Game.cpp" />
     <ClCompile Include="GameObject.cpp" />
@@ -159,10 +164,13 @@
   <ItemGroup>
     <ClInclude Include="Animations.h" />
     <ClInclude Include="Block.h" />
+    <ClInclude Include="Boomerang.h" />
+    <ClInclude Include="BoomerangBro.h" />
     <ClInclude Include="BreakableBrick.h" />
     <ClInclude Include="Brick.h" />
     <ClInclude Include="BrokenBrickPiece.h" />
     <ClInclude Include="EnemyFireBall.h" />
+    <ClInclude Include="Grid.h" />
     <ClInclude Include="Hud.h" />
     <ClInclude Include="Coin.h" />
     <ClInclude Include="define.h" />
@@ -173,11 +181,13 @@
     <ClInclude Include="Leaf.h" />
     <ClInclude Include="MapBackground.h" />
     <ClInclude Include="MapBarrier.h" />
+    <ClInclude Include="MovingPlatform.h" />
     <ClInclude Include="Mushroom.h" />
     <ClInclude Include="Pine.h" />
     <ClInclude Include="PiranhaPlant.h" />
     <ClInclude Include="Portal.h" />
     <ClInclude Include="QuestionBrick.h" />
+    <ClInclude Include="Roulette.h" />
     <ClInclude Include="Utils.h" />
     <ClInclude Include="Game.h" />
     <ClInclude Include="GameObject.h" />

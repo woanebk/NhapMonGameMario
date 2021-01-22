@@ -18,12 +18,17 @@
 #include "QuestionBrick.h"
 #include "Leaf.h"
 #include "Mushroom.h"
+#include "MovingPlatform.h"
 #include "Effect.h"
+#include "BoomerangBro.h"
+#include "Boomerang.h"
 #include "PiranhaPlant.h"
 #include "EnemyFireBall.h"
+#include "Roulette.h"
 
 CMario::CMario(float x, float y) : CGameObject()
 {
+	
 	level = MARIO_LEVEL_SMALL;
 	untouchable = 0;
 	CPlayScene* scence = (CPlayScene*)CGame::GetInstance()->GetCurrentScene();
@@ -31,6 +36,7 @@ CMario::CMario(float x, float y) : CGameObject()
 	{
 		SetState(MARIO_STATE_ICON);
 		is_icon = true;
+		level = MARIO_LEVEL_SMALL;
 	}
 	else
 		SetState(MARIO_STATE_IDLE);
@@ -42,15 +48,13 @@ CMario::CMario(float x, float y) : CGameObject()
 	ax = 0;
 	ay = MARIO_GRAVITY;
 	Stack = 0;
-	Life = MARIO_START_LIFE;
-	Money = 0;
-	Score = 0;
 }
 
 void CMario::Update(DWORD dt, vector<LPGAMEOBJECT> *coObjects)
 {
 	// Calculate dx, dy 
 	CGameObject::Update(dt);
+	//
 	if (is_icon) // ==================== logic for ICON MARIO ON WORLD MAP
 	{
 		// stop when reach certain pint on map
@@ -104,11 +108,18 @@ void CMario::Update(DWORD dt, vector<LPGAMEOBJECT> *coObjects)
 		{
 			float bar_x, bar_y;
 			barriers_list[i]->getPosition(bar_x, bar_y);
-			DebugOut(L"barrier: %d, %d \n", bar_x, bar_y);
 			if (isEqual(bar_x, x) && isEqual(bar_y , y))
 			{
 				if (bar_x == WORLD_1_1_ONMAP_X && bar_y == WORLD_1_1_ONMAP_Y)
+				{
 					can_select_scence = true;
+					scence_selected = WORLD_1_1_SCENCE_ID;
+				}
+				else if (bar_x == WORLD_1_4_ONMAP_X && bar_y == WORLD_1_4_ONMAP_Y)
+				{
+					can_select_scence = true;
+					scence_selected = WORLD_1_4_SCENCE_ID;
+				}
 				else
 					can_select_scence = false;
 				barriers_list[i]->getCanMove(can_go_left, can_go_up, can_go_right, can_go_down);
@@ -118,7 +129,6 @@ void CMario::Update(DWORD dt, vector<LPGAMEOBJECT> *coObjects)
 
 		x += dx;
 		y += dy;
-		DebugOut(L"%d, %d, %d, %d \t %d, %d \n", can_go_left, can_go_up, can_go_right, can_go_down, x, y);
 		return;
 	}// ====================================================================
 
@@ -159,16 +169,30 @@ void CMario::Update(DWORD dt, vector<LPGAMEOBJECT> *coObjects)
 
 	ManageAccelerationAndSpeed();
 	TimingEvent();
-
+	
 	// No collision occured, proceed normally
 	if (coEvents.size() == 0)
 	{
+		CPlayScene *scene = (CPlayScene*)CGame::GetInstance()->GetCurrentScene();
+		int scene_id = scene->getScenceID();
+
+		float cam_x, cam_y;
+		CGame::GetInstance()->GetCamPos(cam_x, cam_y);
 		x += dx;
 		y += dy;
-		if (x < 0)
-			x = 0;
-		if (x > WORLD_1_1_WIDTH)
-			x = WORLD_1_1_WIDTH; //relocate mario inside map
+		if (x < cam_x + 1)
+			x = cam_x + 1;
+		if (scene_id == WORLD_1_4_SCENCE_ID)
+		{
+			if (x > cam_x + SCREEN_WIDTH - 2 * MARIO_BIG_BBOX_WIDTH)
+				x = cam_x + SCREEN_WIDTH - 2 * MARIO_BIG_BBOX_WIDTH;
+		}
+		else
+		{
+			if (x > WORLD_1_1_WIDTH)
+				x = WORLD_1_1_WIDTH;
+		}
+		 //relocate mario inside map
 		if (y > WORLD_1_1_HEIGHT + HUD_HEIGHT + EXTRA_RESET_SPACE)
 			y = WORLD_1_1_HEIGHT + HUD_HEIGHT + EXTRA_RESET_SPACE;
 		isonground = false;
@@ -261,6 +285,68 @@ void CMario::Update(DWORD dt, vector<LPGAMEOBJECT> *coObjects)
 			//	CPortal *p = dynamic_cast<CPortal *>(e->obj);
 			//	CGame::GetInstance()->SwitchScene(p->GetSceneId());
 			//} //if Portal
+			else if (dynamic_cast<CBoomerang *>(e->obj) && e->obj->isEnabled())
+			{
+				CBoomerang *boomerang = dynamic_cast<CBoomerang *>(e->obj);
+				x += dx;
+				if (!boomerang->isFlying())
+					y += dy;
+				if (untouchable == 0 && boomerang->isFlying())
+				{
+					if (level > MARIO_LEVEL_SMALL)
+					{
+						LevelDown();
+						StartUntouchable();
+					}
+					else
+					{
+						SetState(MARIO_STATE_DIE);
+						LifeDown();
+					}
+					
+				}
+			}
+			else if (dynamic_cast<CBoomerangBro *>(e->obj) && e->obj->isEnabled())  
+			{
+				CBoomerangBro *boomerangbro = dynamic_cast<CBoomerangBro *>(e->obj);
+
+				// jump on top >> kill Goomba and deflect a bit 
+				if (e->ny < 0)
+				{
+					if (boomerangbro->GetState() != BOOMERANG_BRO_STATE_DIE)
+					{
+						boomerangbro->SetState(BOOMERANG_BRO_STATE_DIE);
+
+						GainScore(SCORE_1000);
+						RenderPoint(EFFECT_TYPE_1000_POINT);
+
+						//deflect
+						if (level != MARIO_LEVEL_LEAF)
+							vy = -MARIO_JUMP_DEFLECT_SPEED;
+						else
+							vy = -MARIO_LEAF_JUMP_DEFLECT_SPEED;
+					}
+				}
+				else if (e->nx != 0)
+				{
+					if (untouchable == 0)
+					{
+						if (boomerangbro->GetState() != BOOMERANG_BRO_STATE_DIE)
+						{
+							if (level > MARIO_LEVEL_SMALL)
+							{
+								LevelDown();
+								StartUntouchable();
+							}
+							else
+							{
+								SetState(MARIO_STATE_DIE);
+								LifeDown();
+							}
+						}
+					}
+				}
+			} // if Goomba
 			else if (dynamic_cast<CKoopas *>(e->obj))
 			{
 				CKoopas *koopas = dynamic_cast<CKoopas *>(e->obj);
@@ -269,7 +355,7 @@ void CMario::Update(DWORD dt, vector<LPGAMEOBJECT> *coObjects)
 
 				if (e->nx != 0 || e->ny > 0)
 				{
-					
+
 					if (koopas->GetState() == KOOPAS_STATE_SHELL)
 					{
 						if (speed_up == false)
@@ -294,8 +380,6 @@ void CMario::Update(DWORD dt, vector<LPGAMEOBJECT> *coObjects)
 							holding = true;
 							koopas->setHolded(true);
 						}
-
-
 					}
 					else
 						if (untouchable == 0)
@@ -323,17 +407,28 @@ void CMario::Update(DWORD dt, vector<LPGAMEOBJECT> *coObjects)
 					{
 						if (koopas->GetState() != KOOPAS_STATE_SHELL)
 						{
-							if (koopas->getLevel() == KOOPAS_LEVEL_FLY)
+							if (koopas->getLevel() == KOOPAS_LEVEL_FLOAT)
 							{
 								koopas->LevelDown();
 								GainScore(SCORE_100);
 								RenderPoint(EFFECT_TYPE_100_POINT);
-								if(level != MARIO_LEVEL_LEAF)
+								if (level != MARIO_LEVEL_LEAF)
 									vy = -MARIO_JUMP_DEFLECT_SPEED;
 								else
 									vy = -MARIO_LEAF_JUMP_DEFLECT_SPEED;
 							}
 							else
+							if (koopas->getLevel() == KOOPAS_LEVEL_FLY)
+							{
+								koopas->LevelDown();
+								GainScore(SCORE_100);
+								RenderPoint(EFFECT_TYPE_100_POINT);
+								if (level != MARIO_LEVEL_LEAF)
+									vy = -MARIO_JUMP_DEFLECT_SPEED;
+								else
+									vy = -MARIO_LEAF_JUMP_DEFLECT_SPEED;
+							}
+							else//level normal
 							{
 								koopas->SetState(KOOPAS_STATE_SHELL);
 								GainScore(SCORE_100);
@@ -358,222 +453,261 @@ void CMario::Update(DWORD dt, vector<LPGAMEOBJECT> *coObjects)
 					}
 				}
 			} //if Koopas
-			else
-				if (dynamic_cast<CBlock*> (e->obj))
-				{
-					CBlock *block = dynamic_cast<CBlock*>(e->obj);
-					if (e->ny < 0) {
-						vy = 0;
-						x += dx;
-					}
-					else
-						if (e->ny > 0)
-						{
-							x += dx;
-							y += dy;
-						}
-					if (e->nx != 0)
-					{
-						x += dx;
-					}
-				}//if block
-				else if (dynamic_cast<CCoin*>(e->obj))
-				{
-					CCoin *coin = dynamic_cast<CCoin*>(e->obj);
-					isonground = false; // fix double jump bug
-					GainMoney();
-					RenderPoint(EFFECT_TYPE_100_POINT);
-					GainScore(SCORE_100);
-					coin->setEnable(false);
-					coin->setVisable(false);
+			else if (dynamic_cast<CBlock*> (e->obj))
+			{
+				CBlock *block = dynamic_cast<CBlock*>(e->obj);
+				if (e->ny < 0) {
+					vy = 0;
+					x += dx;
 				}
-				else if (dynamic_cast<CPine*>(e->obj))
-				{
-					CPine *pine = dynamic_cast<CPine*>(e->obj);
-					if (e->nx != 0) {
-						vx = 0;
-						x += min_tx * dx + nx * 0.8f;
-						// clean up collision events and return to fix bug
-						for (UINT i = 0; i < coEvents.size(); i++) delete coEvents[i];
-						return;
-					}
-					if (e->ny != 0) {
-						vy = 0;
-						x += dx;
-						if (e->ny < 0 && pine->canSwitchScence() && state == MARIO_STATE_SIT)
-						{
-							SetState(MARIO_STATE_PINEDOWN);
-						}
-						else if (e->ny > 0 && pine->canSwitchScence())
-							SetState(MARIO_STATE_PINEUP);
-					}
-				} //if Pine
-				else if (dynamic_cast<CBreakableBrick*>(e->obj))
-				{
-					CBreakableBrick *breakablebrick = dynamic_cast<CBreakableBrick*>(e->obj);
-					if (e->nx != 0)
+				else
+					if (e->ny > 0)
 					{
-						vx = 0;
-						for (UINT i = 0; i < coEvents.size(); i++) delete coEvents[i];
-						return; //to stop interact walking when collide on y
+						x += dx;
+						y += dy;
 					}
-					else
+				if (e->nx != 0)
+				{
+					x += dx;
+				}
+			}//if block
+			else if (dynamic_cast<CCoin*>(e->obj))
+			{
+				CCoin *coin = dynamic_cast<CCoin*>(e->obj);
+				isonground = false; // fix double jump bug
+				GainMoney();
+				RenderPoint(EFFECT_TYPE_100_POINT);
+				GainScore(SCORE_100);
+				coin->setEnable(false);
+				coin->setVisable(false);
+			}
+			else if (dynamic_cast<CPine*>(e->obj))
+			{
+				CPine *pine = dynamic_cast<CPine*>(e->obj);
+				if (e->nx != 0) {
+					vx = 0;
+					x += min_tx * dx + nx * 0.8f;
+					// clean up collision events and return to fix bug
+					for (UINT i = 0; i < coEvents.size(); i++) delete coEvents[i];
+					return;
+				}
+				if (e->ny != 0) {
+					vy = 0;
+					x += dx;
+					if (e->ny < 0 && pine->canSwitchScence() && pine->getScenceID()!= 0 && state == MARIO_STATE_SIT)
+					{
+						switch_to_scene = pine->getScenceID();
+						SetState(MARIO_STATE_PINEDOWN);
+					}
+					else if (e->ny > 0 && pine->canSwitchScence())
+						SetState(MARIO_STATE_PINEUP);
+				}
+			} //if Pine
+			else if (dynamic_cast<CMovingPlatform*>(e->obj))
+			{
+			CMovingPlatform *movingplatform = dynamic_cast<CMovingPlatform*>(e->obj);
+			if (e->nx != 0)
+			{
+				vx = 0;
+				if(!isonground)
+				y += dy;
+				break;
+			}
+			else if (e->ny != 0)
+				{
+					vy = 0;
+					x += dx;
+					movingplatform->setTouched(true);
+				}
+			} //if breakable brick
+			else if (dynamic_cast<CBreakableBrick*>(e->obj))
+			{
+				CBreakableBrick *breakablebrick = dynamic_cast<CBreakableBrick*>(e->obj);
+				if (e->nx != 0)
+				{
+					vx = 0;
+					break;
+				}
+				else
 					if (e->ny != 0)
 					{
 						vy = 0;
 						x += dx;
-						if(e->ny>0)
+						if (e->ny > 0)
 							breakablebrick->Break();
 					}
-				} //if breakable brick
-				else if (dynamic_cast<CQuestionBrick*>(e->obj))
+			} //if breakable brick
+			else if (dynamic_cast<CQuestionBrick*>(e->obj))
+			{
+				CQuestionBrick *questionbrick = dynamic_cast<CQuestionBrick*>(e->obj);
+				if (e->nx != 0)
 				{
-					CQuestionBrick *questionbrick = dynamic_cast<CQuestionBrick*>(e->obj);
-					if (e->nx != 0)
+					vx = 0;
+					x += min_tx * dx + nx * 0.4f;
+					// clean up collision events and return to fix bug
+					break;
+					for (UINT i = 0; i < coEvents.size(); i++) delete coEvents[i];
+					return; //to stop interact walking when collide on y
+				}
+
+				if (e->ny < 0)
+				{
+					vy = 0;
+					x += dx;
+				}
+				else
+				{
+					if (questionbrick->getType() == QUESTION_BRICK_TYPE_NORMAL)
 					{
-						vx = 0;
+						if (questionbrick->hasItem() && level == MARIO_LEVEL_SMALL)
+							questionbrick->CreateItem(ITEM_MUSHROOM_RED);
+						else if (questionbrick->hasItem() && level <= MARIO_LEVEL_LEAF)
+							questionbrick->CreateItem(ITEM_LEAF);
+						else if (questionbrick->hasCoin())
+							questionbrick->CreateItem(ITEM_MONEY);
+					}
+					else if (questionbrick->getType() == QUESTION_BRICK_TYPE_ONSKY_BREAKABLE_ALIKE)//1 UP
+					{
+						if (questionbrick->hasItem())
+							questionbrick->CreateItem(ITEM_MUSHROOM_GREEN);
+						else if (questionbrick->hasCoin())
+							questionbrick->CreateItem(ITEM_MONEY);
+					}
+					else if (questionbrick->getType() == QUESTION_BRICK_TYPE_NORMAL_BREAKABLE_ALIKE)
+					{
+						if (questionbrick->hasItem() && level == MARIO_LEVEL_SMALL)
+							questionbrick->CreateItem(ITEM_MUSHROOM_RED);
+						else if (questionbrick->hasItem() && level <= MARIO_LEVEL_LEAF)
+							questionbrick->CreateItem(ITEM_LEAF);
+						else if (questionbrick->hasCoin())
+							questionbrick->CreateItem(ITEM_MONEY);
+					}
+					else if (questionbrick->getType() == QUESTION_BRICK_TYPE_MONEY_BUTTON_CREATOR)
+					{
+						if (questionbrick->hasItem())
+							questionbrick->CreateItem(ITEM_MONEY_BUTTON);
+						questionbrick->getUsed();//coin and item set to 0
+						vy = MARIO_GRAVITY; //push mario down a bit
+						isfalling = true;
+						jumpable = false;
 						// clean up collision events and return to fix bug
 						for (UINT i = 0; i < coEvents.size(); i++) delete coEvents[i];
-						return; //to stop interact walking when collide on y
+						return; //no brick jumping needed
 					}
+
+					if (!questionbrick->isEmpty())
+						questionbrick->Jump();
+					if (questionbrick->hasCoin())
+						GainMoney();
+					questionbrick->getUsed();//coin and item set to 0
+					vy = MARIO_GRAVITY; //push mario down a bit
+					isfalling = true;
+					jumpable = false;
+				}
+			} //if question brick
+			else if (dynamic_cast<CBrick*>(e->obj))
+			{
+				CBrick *brick = dynamic_cast<CBrick*>(e->obj);
+
+				float brick_bb_left, brick_bb_top, brick_bb_right, brick_bb_bottom;
+				brick->GetBoundingBox(brick_bb_left, brick_bb_top, brick_bb_right, brick_bb_bottom);
+
+				if (brick->getType() == BRICK_TYPE_INVISIBLE)
+				{
+					x += dx; y += dy;
+				} //////INVISIBLE
+				else if (brick->getType() == BRICK_TYPE_MONEYBUTTON)
+				{
+					x += dx; y += dy;
+				} //////MONEY BUTTON
+				else if (brick->getType() == BRICK_TYPE_CLOUD) //gach may
+				{
 					if (e->ny < 0)
 					{
 						vy = 0;
 						x += dx;
 					}
-					else
+					else if (e->ny > 0)
+						y += dy;
+					else if (e->nx != 0)
 					{
-						if (questionbrick->getType() == QUESTION_BRICK_TYPE_NORMAL)
-						{
-							if (questionbrick->hasItem() && level == MARIO_LEVEL_SMALL)
-								questionbrick->CreateItem(ITEM_MUSHROOM_RED);
-							else if (questionbrick->hasItem() && level <= MARIO_LEVEL_LEAF)
-								questionbrick->CreateItem(ITEM_LEAF);
-							else if (questionbrick->hasCoin())
-								questionbrick->CreateItem(ITEM_MONEY);
-						}
-						else if(questionbrick->getType() == QUESTION_BRICK_TYPE_ONSKY_BREAKABLE_ALIKE)//1 UP
-						{
-							if (questionbrick->hasItem())
-								questionbrick->CreateItem(ITEM_MUSHROOM_GREEN);
-						}
-						else if (questionbrick->getType() == QUESTION_BRICK_TYPE_MONEY_BUTTON_CREATOR)
-						{
-							if (questionbrick->hasItem())
-								questionbrick->CreateItem(ITEM_MONEY_BUTTON);
-							questionbrick->getUsed();//coin and item set to 0
-							vy = MARIO_GRAVITY; //push mario down a bit
-							isfalling = true;
-							jumpable = false;
-							// clean up collision events and return to fix bug
-							for (UINT i = 0; i < coEvents.size(); i++) delete coEvents[i];
-							return; //no brick jumping needed
-						}
-
-						if (!questionbrick->isEmpty())
-							questionbrick->Jump();
-						if (questionbrick->hasCoin())
-							GainMoney();
-						questionbrick->getUsed();//coin and item set to 0
-						vy = MARIO_GRAVITY; //push mario down a bit
-						isfalling = true;
-						jumpable = false;
+						x += dx;
+						y += dy;
 					}
-				} //if question brick
-				else if (dynamic_cast<CBrick*>(e->obj))
-				{
-					CBrick *brick = dynamic_cast<CBrick*>(e->obj);
 
-					float brick_bb_left, brick_bb_top, brick_bb_right, brick_bb_bottom;
-					brick->GetBoundingBox(brick_bb_left, brick_bb_top, brick_bb_right, brick_bb_bottom);
-
-					if (brick->getType() == BRICK_TYPE_INVISIBLE)
+				}
+				else
+				{ //gach thuong
+					if (e->nx != 0 && (/*brick->canBounce() ||*/ brick_bb_top< mario_bb_bottom))
 					{
-						x += dx; y += dy;
-					} //////INVISIBLE
-					else if(brick->getType() == BRICK_TYPE_MONEYBUTTON)
-					{
-						x += dx; y += dy;
-					} //////MONEY BUTTON
-					else if (brick->getType() == BRICK_TYPE_CLOUD) //gach may
-					{
-						if (e->ny < 0)
+						if (!isonground)
 						{
-							vy = 0;
-							x += dx;
-							// clean up collision events and return to fix bug
-							for (UINT i = 0; i < coEvents.size(); i++) delete coEvents[i];
-							return;
-						}
-						else if (e->ny > 0)
 							y += dy;
-						else if (e->nx != 0)
-						{
-							x += dx;
-							//y += dy;
-						}
-						
-					}
-					else 
-					{ //gach thuong
-						if (e->nx != 0 && brick->canBounce())
-						{
-							if (!isonground)
-							{
-								y += dy;
-								vx = 0;
-							}
-							else
-							{
-								vx = 0;
-								vy = 0;
-							} //to stop interact walking when collide on y
-							// clean up collision events and return to fix bug
-							for (UINT i = 0; i < coEvents.size(); i++) delete coEvents[i];
-							return;
+							vx = 0;
+							break;
 						}
 						else
-						if (e->ny != 0 )
+						{
+							vx = 0;
+							vy = 0;
+							break;
+						} //to stop interact walking when collide on y
+						// clean up collision events and return to fix bug
+						
+					}
+					else
+						if (e->ny != 0)
 						{
 							vy = 0;
 							x += dx;//loi di xuyen dach	
-							
+
 						}
-					}
-				} //if brick
-				else if (dynamic_cast<CLeaf*>(e->obj))
+				}
+			} //if brick
+			else if (dynamic_cast<CLeaf*>(e->obj))
+			{
+				CLeaf *leaf = dynamic_cast<CLeaf*>(e->obj);
+				if (level < MARIO_LEVEL_LEAF)
+					LevelUp();
+				else
 				{
-					CLeaf *leaf = dynamic_cast<CLeaf*>(e->obj);
-					if(level < MARIO_LEVEL_LEAF)
-						LevelUp();
-					else
-					{
-						GainScore(SCORE_1000);
-						RenderPoint(EFFECT_TYPE_1000_POINT);
-					}
-					leaf->setVisable(false);
-					leaf->setEnable(false);
-				} //if Leaf
-				else if (dynamic_cast<CMushroom*>(e->obj))
+					GainScore(SCORE_1000);
+					RenderPoint(EFFECT_TYPE_1000_POINT);
+				}
+				leaf->setVisable(false);
+				leaf->setEnable(false);
+			} //if Leaf
+			else if (dynamic_cast<CRoulette*>(e->obj))
+			{
+				x += dx;
+				y += dy;
+				CRoulette *roulette = dynamic_cast<CRoulette*>(e->obj);
+				roulette->Achived();
+
+			} //if Roulette
+			else if (dynamic_cast<CMushroom*>(e->obj))
+			{
+				CMushroom *mushroom = dynamic_cast<CMushroom*>(e->obj);
+				if (mushroom->getType() == MUSHROOM_TYPE_RED)
 				{
-					CMushroom *mushroom = dynamic_cast<CMushroom*>(e->obj);
-					if (mushroom->getType() == MUSHROOM_TYPE_RED)
-					{
-						LevelUp();
-						GainScore(SCORE_1000);
-						RenderPoint(EFFECT_TYPE_1000_POINT);
-					}
-					else //type green
-					{
-						LifeUp();
-						RenderPoint(EFFECT_TYPE_1_UP);
-					}
-					mushroom->setVisable(false);
-					mushroom->setEnable(false);
-				} //if Mushroom
-				else if (dynamic_cast<CPiranhaPlant*>(e->obj))
+					LevelUp();
+					GainScore(SCORE_1000);
+					RenderPoint(EFFECT_TYPE_1000_POINT);
+				}
+				else //type green
 				{
+					LifeUp();
+					RenderPoint(EFFECT_TYPE_1_UP);
+				}
+				mushroom->setVisable(false);
+				mushroom->setEnable(false);
+			} //if Mushroom
+			else if (dynamic_cast<CPiranhaPlant*>(e->obj))
+			{
 				CPiranhaPlant *plant = dynamic_cast<CPiranhaPlant*>(e->obj);
+				x += dx;
+				if (!isonground)
+					y += dy;
 				if (untouchable == 0)
 				{
 					if (level > MARIO_LEVEL_SMALL)
@@ -587,10 +721,15 @@ void CMario::Update(DWORD dt, vector<LPGAMEOBJECT> *coObjects)
 						LifeDown();
 					}
 				}
-				} //if Plant
-				else if (dynamic_cast<CEnemyFireBall*>(e->obj))
-				{
+				
+			} //if Plant
+			else if (dynamic_cast<CEnemyFireBall*>(e->obj))
+			{
 				CEnemyFireBall *fireball = dynamic_cast<CEnemyFireBall*>(e->obj);
+				if (!isonground || !istransformingtoBig || !istransformingtoLeaf)
+				{
+					x += dx; y += dy;
+				}
 				if (untouchable == 0)
 				{
 					if (level > MARIO_LEVEL_SMALL)
@@ -604,7 +743,7 @@ void CMario::Update(DWORD dt, vector<LPGAMEOBJECT> *coObjects)
 						LifeDown();
 					}
 				}
-				} //if Plant
+			} //if Enemy Fireball
 		}
 	}
 
@@ -899,14 +1038,17 @@ void CMario::Render()
 	int alpha = 255;
 	if (untouchable) alpha = 128;
 
-	animation_set->at(ani)->Render(x, y, alpha);
+	if(level == MARIO_LEVEL_LEAF && nx>0)
+		animation_set->at(ani)->Render(x - MARIO_LEAF_BBOX_TAILDOWN_WIDTH, y, alpha);
+	else
+		animation_set->at(ani)->Render(x, y, alpha);
 
 	for (int i = 0; i < firebullets.size(); i++)
 	{
 		if (firebullets[i]->isVisabled())
 			firebullets[i]->Render();
 	} //render shooting
-	//RenderBoundingBox();
+	RenderBoundingBox();
 }
 
 void CMario::SetState(int state)
@@ -1052,10 +1194,6 @@ void CMario::LevelDown()
 	}
 }
 
-void CMario::LifeUp()
-{
-	Life++;
-}
 
 void CMario::GetBoundingBox(float &left, float &top, float &right, float &bottom)
 {
@@ -1079,7 +1217,7 @@ void CMario::GetBoundingBox(float &left, float &top, float &right, float &bottom
 	{
 		if (state == MARIO_STATE_SIT)
 		{
-			right = x + MARIO_BBOX_LEAF_SIT_WIDTH;
+			right = x + MARIO_BBOX_SIT_WIDTH;
 			bottom = y + MARIO_BBOX_LEAF_SIT_HEIGHT - 1;
 		}
 		else
@@ -1094,7 +1232,7 @@ void CMario::GetBoundingBox(float &left, float &top, float &right, float &bottom
 				}
 				else
 				{
-					left = x + MARIO_LEAF_BBOX_TAILDOWN_WIDTH;
+					left = x ;
 					right = left + MARIO_LEAF_BBOX_WIDTH;
 					top = y;
 					bottom = y + MARIO_LEAF_BBOX_HEIGHT;
@@ -1109,7 +1247,7 @@ void CMario::GetBoundingBox(float &left, float &top, float &right, float &bottom
 				}
 				else
 				{
-					left = x + MARIO_LEAF_BBOX_TAILDOWN_WIDTH;
+					//left = x + MARIO_LEAF_BBOX_TAILDOWN_WIDTH;
 					right = left + MARIO_LEAF_BBOX_WIDTH;
 					top = y;
 					bottom = y + MARIO_LEAF_BBOX_HEIGHT;
@@ -1218,6 +1356,7 @@ void CMario::Shot()
 		fireball->SetPosition(x, y + MARIO_LEAF_BBOX_HEIGHT / 2);
 	}
 	firebullets.push_back(fireball);
+	fireball->AddtoGrid();
 }
 
 void CMario::Kick()
@@ -1250,7 +1389,7 @@ void CMario::TimingEvent() {
 		untouchable = 0;
 	}
 	//if leaf mario is spinning tail then stop
-	if (GetTickCount() - spin_start > 400) //4 sprites = 4*100ms
+	if (GetTickCount() - spin_start > 200) //4 sprites = 4*100ms
 	{
 		spin_start = 0; //reset timer
 		spinning = false; //no more spinning
@@ -1286,15 +1425,24 @@ void CMario::TimingEvent() {
 		start_pine_down = 0;
 		CGame *game = CGame::GetInstance();
 		CPlayScene* current_scene = (CPlayScene*)game->GetCurrentScene();
-		if(!current_scene->hasVisitedBase())
-			game->SwitchSceneEx(WORLD_1_1_SECRECT_SCENCE_ID, WORLD_1_1_SECRECT_START_X, WORLD_1_1_SECRECT_START_Y);
-		else
-			game->SwitchBackScence(WORLD_1_1_SECRECT_SCENCE_ID, WORLD_1_1_SECRECT_START_X, WORLD_1_1_SECRECT_START_Y);
+		if (switch_to_scene == WORLD_1_1_SECRECT_SCENCE_ID)
+		{
+			if (!current_scene->hasVisitedBase())
+				game->SwitchSceneEx(WORLD_1_1_SECRECT_SCENCE_ID, 180, 50);
+			else
+				game->SwitchBackScence(WORLD_1_1_SECRECT_SCENCE_ID, WORLD_1_1_SECRECT_START_X, WORLD_1_1_SECRECT_START_Y);
+		}
+		else if (switch_to_scene == WORLD_1_4_SECRECT_SCENCE_ID)
+		{
+			//game->SwitchScene(WORLD_1_4_SECRECT_SCENCE_ID);
+			game->SwitchSceneEx(WORLD_1_4_SECRECT_SCENCE_ID, 136, 130);
+		}
 		
 	}
 
 	if (is_pine_up && GetTickCount64() - start_pine_up > MARIO_PINEUP_TIME)
 	{
+
 		is_lost_control = false;
 		is_pine_up = false;
 		start_pine_up = 0;
@@ -1306,11 +1454,28 @@ void CMario::TimingEvent() {
 
 void CMario::GainMoney()
 {
-	Money++;
+	CGame* game = CGame::GetInstance();
+	int money = game->getMoney();
+	game->setMoney(money + 1);
 }
 void CMario::GainScore(int score) 
 {
-	Score += score;
+	CGame* game = CGame::GetInstance();
+	int s = game->getScore();
+	game->setScore(s + score);
+}
+
+void CMario::LifeUp()
+{
+	CGame* game = CGame::GetInstance();
+	int l = game->getLife();
+	game->setLife(l + 1);
+}
+void CMario::LifeDown()
+{
+	CGame* game = CGame::GetInstance();
+	int l = game->getLife();
+	game->setLife(l - 1);
 }
 bool CMario::isEqual(float x, float y)
 {
@@ -1333,6 +1498,8 @@ void CMario::RenderPoint(int type)
 
 	CPlayScene *currenscence = (CPlayScene*)CGame::GetInstance()->GetCurrentScene();
 	currenscence->PushBackObject(point_effect);
+
+	point_effect->AddtoGrid();
 }
 
 void CMario::CallEndScene()
@@ -1358,3 +1525,4 @@ void CMario::StopCallEndScene()
 	Hud *hud = scene->getHud();
 	hud->StopEndingScene();
 }
+

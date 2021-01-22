@@ -12,10 +12,8 @@ class CMario : public CGameObject
 	float ay = 0; //acceleration for jump
 
 	bool is_icon = false;
-	//status
-	int Life;
-	int Money;
-	int Score;
+
+	bool is_switching_scene = false;
 	//jump
 	bool isonground = false;
 	bool jumpable = false;
@@ -56,6 +54,8 @@ class CMario : public CGameObject
 	bool is_pine_up = false;
 	DWORD start_pine_up;
 
+	int switch_to_scene = 0;
+
 	//icon movement on map:
 	bool can_go_left = false;
 	bool can_go_right = false;
@@ -75,6 +75,7 @@ class CMario : public CGameObject
 	bool is_lost_control = false;
 
 	bool can_select_scence = false;
+	int scence_selected = 0;
 
 
 	float start_x;			// initial position of Mario at scene
@@ -92,15 +93,13 @@ public:
 	void LevelUp();
 	void LevelDown();
 	void LifeUp();
-	void LifeDown() { if (Life > 0)Life -= 1; }
+	void LifeDown();
 	int getLevel() { return level; }
 
 	void StartUntouchable() { untouchable = 1; untouchable_start = GetTickCount(); }
+	int isUntouchable() { return untouchable; }
 	
 	int getStack() { return Stack; }
-	int getLife() { return Life; }
-	int getMoney() { return Money; }
-	int getScore() { return Score; }
 
 	bool isIcon() { return is_icon; }
 	void setIsIcon(bool i) { is_icon = i; }
@@ -156,6 +155,7 @@ public:
 	bool canGoUp() { return can_go_up; }
 	bool canGoDown() { return can_go_down; }
 	bool canSelectScecne() { return can_select_scence; }
+	int getSelectedScene() { return scence_selected; }
 
 
 	bool isLostControl() { return is_lost_control; }
@@ -186,5 +186,6 @@ public:
 	void EndScene();
 	void StopCallEndScene();
 
+	void setIsSwitchingScene(bool s) { is_switching_scene = s; }
 	virtual void GetBoundingBox(float &left, float &top, float &right, float &bottom);
 };

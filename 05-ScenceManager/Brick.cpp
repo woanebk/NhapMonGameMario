@@ -17,9 +17,9 @@ void CBrick::Render()
 		else
 			if (type == BRICK_TYPE_GROUND_1)
 				animation_set->at(BRICK_ANI_GROUND_1)->Render(x, y);
-			else
+			/*else
 				if (type == BRICK_TYPE_GROUND_2)
-					animation_set->at(BRICK_ANI_GROUND_2)->Render(x, y);
+					animation_set->at(BRICK_ANI_GROUND_2)->Render(x, y);*/
 				else
 					if (type == BRICK_TYPE_CLOUD)
 						animation_set->at(BRICK_ANI_CLOUD)->Render(x, y);
@@ -44,13 +44,13 @@ void CBrick::Update(DWORD dt, vector<LPGAMEOBJECT> *coObjects)
 {
 	if (type == BRICK_TYPE_HELP_ICON)
 	{
-		if (GetTickCount64() - blink_render_time > BRICK_HELP_ICON_BLINK_TIME)
+		if (GetTickCount64() - (DWORD)blink_render_time > BRICK_HELP_ICON_BLINK_TIME)
 		{
 			if (visable == true)
 				visable = false;
 			else
 				visable = true;
-			blink_render_time = GetTickCount64();
+			blink_render_time = (DWORD)GetTickCount64();
 		}
 	}
 
@@ -124,11 +124,16 @@ void CBrick::ChangeBreakableBricktoCoin()
 {
 	CPlayScene *currenscence = (CPlayScene*)CGame::GetInstance()->GetCurrentScene();
 	vector<LPGAMEOBJECT> objects = currenscence->GetObjectList();
-	for (UINT i = 0; i < objects.size(); i++)
+	vector<Unit*> list_units;
+	float cam_x, cam_y;
+	CGame::GetInstance()->GetCamPos(cam_x, cam_y);
+
+	currenscence->getGrid()->getListUnits(cam_x,cam_y,list_units);
+	for (UINT i = 0; i < list_units.size(); i++)
 	{
-		if (dynamic_cast<CBreakableBrick*>(objects[i]))
+		if (dynamic_cast<CBreakableBrick*>(list_units[i]->GetObj()))
 		{
-			CBreakableBrick *breakablebrick = dynamic_cast<CBreakableBrick*>(objects[i]);
+			CBreakableBrick *breakablebrick = dynamic_cast<CBreakableBrick*>(list_units[i]->GetObj());
 			if (!breakablebrick->isBroken())
 			{
 				breakablebrick->enable = false;
@@ -144,6 +149,7 @@ void CBrick::ChangeBreakableBricktoCoin()
 
 				coin->setCanTurnToBrick(true);
 				currenscence->PushBackObject(coin);
+				coin->AddtoGrid();
 				coin->StartCountingTime();
 			}
 

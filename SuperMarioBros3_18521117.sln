@@ -5,6 +5,8 @@ VisualStudioVersion = 15.0.27004.2005
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "MarioBros3_18521117", "05-ScenceManager\05-ScenceManager.vcxproj", "{C83A385D-5992-4E1B-B783-AB1D446414D5}"
 EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "CreateGrid", "CreateGrid\CreateGrid.vcxproj", "{91A36592-BADA-422E-9A3D-F01CD946DE81}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -31,6 +33,20 @@ Global
 		{C83A385D-5992-4E1B-B783-AB1D446414D5}.Release|Win32.Build.0 = Release|Win32
 		{C83A385D-5992-4E1B-B783-AB1D446414D5}.Release|x64.ActiveCfg = Release|x64
 		{C83A385D-5992-4E1B-B783-AB1D446414D5}.Release|x64.Build.0 = Release|x64
+		{91A36592-BADA-422E-9A3D-F01CD946DE81}.Debug|Any CPU.ActiveCfg = Debug|Win32
+		{91A36592-BADA-422E-9A3D-F01CD946DE81}.Debug|Mixed Platforms.ActiveCfg = Debug|Win32
+		{91A36592-BADA-422E-9A3D-F01CD946DE81}.Debug|Mixed Platforms.Build.0 = Debug|Win32
+		{91A36592-BADA-422E-9A3D-F01CD946DE81}.Debug|Win32.ActiveCfg = Debug|Win32
+		{91A36592-BADA-422E-9A3D-F01CD946DE81}.Debug|Win32.Build.0 = Debug|Win32
+		{91A36592-BADA-422E-9A3D-F01CD946DE81}.Debug|x64.ActiveCfg = Debug|x64
+		{91A36592-BADA-422E-9A3D-F01CD946DE81}.Debug|x64.Build.0 = Debug|x64
+		{91A36592-BADA-422E-9A3D-F01CD946DE81}.Release|Any CPU.ActiveCfg = Release|Win32
+		{91A36592-BADA-422E-9A3D-F01CD946DE81}.Release|Mixed Platforms.ActiveCfg = Release|Win32
+		{91A36592-BADA-422E-9A3D-F01CD946DE81}.Release|Mixed Platforms.Build.0 = Release|Win32
+		{91A36592-BADA-422E-9A3D-F01CD946DE81}.Release|Win32.ActiveCfg = Release|Win32
+		{91A36592-BADA-422E-9A3D-F01CD946DE81}.Release|Win32.Build.0 = Release|Win32
+		{91A36592-BADA-422E-9A3D-F01CD946DE81}.Release|x64.ActiveCfg = Release|x64
+		{91A36592-BADA-422E-9A3D-F01CD946DE81}.Release|x64.Build.0 = Release|x64
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

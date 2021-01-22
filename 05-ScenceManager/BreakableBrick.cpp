@@ -106,19 +106,23 @@ void CBreakableBrick::CreatePieces()
 	piece_top_left->SetPosition(this->x + BRICK_BBOX_WIDTH / 2, this->y + BRICK_BBOX_HEIGHT / 2);
 	piece_top_left->SetStartPosition(this->x + BRICK_BBOX_WIDTH / 2, this->y + BRICK_BBOX_HEIGHT / 2);
 	scence->PushBackObject(piece_top_left);
+	piece_top_left->AddtoGrid();
 
 	CBrokenBrickPiece *piece_top_right = new CBrokenBrickPiece(1, -1);
 	piece_top_right->SetPosition(this->x + BRICK_BBOX_WIDTH / 2, this->y + BRICK_BBOX_HEIGHT / 2);
 	piece_top_right->SetStartPosition(this->x + BRICK_BBOX_WIDTH / 2, this->y + BRICK_BBOX_HEIGHT / 2);
 	scence->PushBackObject(piece_top_right);
+	piece_top_right->AddtoGrid();
 
 	CBrokenBrickPiece *piece_bottom_left = new CBrokenBrickPiece(-1, 1);
 	piece_bottom_left->SetPosition(this->x + BRICK_BBOX_WIDTH / 2, this->y + BRICK_BBOX_HEIGHT / 2);
 	piece_bottom_left->SetStartPosition(this->x + BRICK_BBOX_WIDTH / 2, this->y + BRICK_BBOX_HEIGHT / 2);
 	scence->PushBackObject(piece_bottom_left);
+	piece_bottom_left->AddtoGrid();
 
 	CBrokenBrickPiece *piece_bottom_right = new CBrokenBrickPiece(1, 1);
 	piece_bottom_right->SetPosition(this->x + BRICK_BBOX_WIDTH / 2, this->y + BRICK_BBOX_HEIGHT / 2);
 	piece_bottom_right->SetStartPosition(this->x + BRICK_BBOX_WIDTH / 2, this->y + BRICK_BBOX_HEIGHT / 2);
 	scence->PushBackObject(piece_bottom_right);
+	piece_bottom_right->AddtoGrid();
 }

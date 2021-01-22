@@ -66,7 +66,8 @@ void CGame::Init(HWND hWnd)
 */
 void CGame::Draw(float x, float y, LPDIRECT3DTEXTURE9 texture, int left, int top, int right, int bottom, int alpha)
 {
-	D3DXVECTOR3 p(x - cam_x, y - cam_y, 0);
+	
+	D3DXVECTOR3 p(round(x - cam_x), round(y - cam_y), 0);
 	RECT r; 
 	r.left = left;
 	r.top = top;
@@ -206,7 +207,14 @@ bool CGame::isInCamera(float l, float t)
 
 bool CGame::isInCameraExSpace(float l, float t)
 {
-	if (l > cam_x - EXTRA_RESET_SPACE && l < cam_x  + SCREEN_WIDTH + EXTRA_RESET_SPACE /*&& t > cam_y  -EXTRA_RESET_SPACE*/ /*&& t < cam_y + SCREEN_HEIGHT + EXTRA_RESET_SPACE*/)
+	if (l > cam_x - HALF_EXTRA_SPACE && l < cam_x  + SCREEN_WIDTH + HALF_EXTRA_SPACE /*&& t > cam_y  -EXTRA_RESET_SPACE*/ /*&& t < cam_y + SCREEN_HEIGHT + EXTRA_RESET_SPACE*/)
+		return true;
+	return false;
+}
+
+bool CGame::isInCameraExSpaceHorizonal(float l, float t)
+{
+	if (l > cam_x - HALF_EXTRA_SPACE && l < cam_x + SCREEN_WIDTH + HALF_EXTRA_SPACE)
 		return true;
 	return false;
 }
@@ -428,10 +436,15 @@ void CGame::SwitchScene(int scene_id)
 	CGame::GetInstance()->SetKeyHandler(s->GetKeyEventHandler());
 	s->Load();	
 	//
+	if (scene_id == WORLDMAP_1_SCENCE_ID)
+	{
+		((CPlayScene*)s)->getHud()->setNoTiming(true);
+	}
 }
 
 void CGame::SwitchSceneEx(int scene_id, float mario_x, float mario_y) //save old scence to call later
 {
+
 	DebugOut(L"[INFO] Switching to scene %d\n", scene_id);
 	//get old mario :
 	CPlayScene *is_currently_running_scence = (CPlayScene*)CGame::GetInstance()->GetCurrentScene();
@@ -463,17 +476,16 @@ void CGame::SwitchSceneEx(int scene_id, float mario_x, float mario_y) //save old
 	else
 		post_mario->setIsIcon(true);
 	post_mario->setLostControl(false);
+	post_mario->setEnable(true);
 	post_mario->SetPosition(mario_x, mario_y);
 
 	s->Load();// add textures, sprties, anis, anisets, objs
 
-	((CPlayScene*)s)->ReplaceMarioObjectWith(post_mario);
+	//((CPlayScene*)s)->ReplaceMarioObjectWith(post_mario);
 	((CPlayScene*)s)->SetPlayer(post_mario);
-	if (scene_id == WORLDMAP_1_SCENCE_ID)
-		post_hud->setNoTiming(true);
-	else
-		post_hud->setNoTiming(false);
-	((CPlayScene*)s)->setHud(post_hud);
+	post_mario->SetSpeed(0, 0);
+	post_mario->SetPosition(mario_x, mario_y);
+
 }
 
 void CGame::SwitchBackScence(int scene_id, float mario_x, float mario_y)
@@ -502,6 +514,8 @@ void CGame::SwitchBackScence(int scene_id, float mario_x, float mario_y)
 	}
 	else
 		post_mario->setIsIcon(true);
-	((CPlayScene*)s)->ReplaceMarioObjectWith(post_mario);
+
+	((CPlayScene*)s)->SetPlayer(post_mario);
+	//((CPlayScene*)s)->ReplaceMarioObjectWith(post_mario);
 	((CPlayScene*)s)->setHud(post_hud);
 }

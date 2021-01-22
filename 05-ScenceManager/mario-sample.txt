@@ -1,9 +1,10 @@
 [SETTINGS]
-start	999
+start	1
 #scene list
 [SCENES]
 1	scence-world-1-1.txt
 2	scence-world-1-1-secrect.txt
 3	scence_worldmap_1.txt
-4	scene2.txt
+4	scence-world-1-4.txt
+5	scence-world-1-4-secrect.txt
 999	scene-intro.txt

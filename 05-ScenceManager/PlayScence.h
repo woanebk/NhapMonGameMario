@@ -10,6 +10,7 @@
 #include "MapBackground.h"
 #include "Hud.h"
 #include  "MapBarrier.h"
+#include "Grid.h"
 
 class CPlayScene: public CScene
 {
@@ -19,7 +20,9 @@ protected:
 	LPMAPBACKGROUND mapbackground;	//Add a map background
 
 	vector<LPGAMEOBJECT> objects;
+	vector<Unit*> listUnits;
 	Hud* hud = NULL;
+	Grid* grid = NULL;
 
 	bool visited_base = false;
 
@@ -27,9 +30,13 @@ protected:
 	void _ParseSection_SPRITES(string line);
 	void _ParseSection_ANIMATIONS(string line);
 	void _ParseSection_ANIMATION_SETS(string line);
+	void _ParseSection_OBJECTSfromGRIDFILE(string gridfilepath);
 	void _ParseSection_OBJECTS(string line);
 	void _ParseSection_MAP_BACKGROUND(string line);
+	void _ParseSection_GRID(string line);
 	void LoadWorldMapBarriers(string line);
+
+	void UpdateGrid();
 
 	vector<LPMAPBARRIER> barriers;
 public: 
@@ -46,10 +53,15 @@ public:
 	vector<LPGAMEOBJECT> GetObjectList() { return objects; }
 	CMario * GetPlayer() { return player; } 
 	void SetPlayer(CMario* p) { player = p; }
-	void ReplaceMarioObjectWith(CMario* m) { objects[0] = m; }
+	void ReplaceMarioObjectWith(CMario* m) {
+		//delete objects[0];
+		objects[0] = m;
+		} //obj [0] is always mario
 	vector<LPMAPBARRIER> getBarriersList() { return barriers; }
 	void setVisitedBase(bool v) { visited_base = v; }
 	bool hasVisitedBase() { return visited_base; }
+
+	Grid* getGrid() { return grid; }
 	//friend class CPlayScenceKeyHandler;
 };
 

@@ -14,6 +14,8 @@
 #include "BreakableBrick.h"
 #include "QuestionBrick.h"
 #include "Leaf.h"
+#include "Roulette.h"
+#include "MovingPlatform.h"
 #include "Mushroom.h"
 
 using namespace std;
@@ -193,7 +195,8 @@ void CIntroScene::_ParseSection_OBJECTS(string line)
 		int t = atof(tokens[4].c_str());
 		int b = atof(tokens[5].c_str());
 		int r = atof(tokens[6].c_str());
-		obj = new CQuestionBrick(t, b, r);
+		int c = atof(tokens[7].c_str());
+		obj = new CQuestionBrick(t, b, r, c);
 	}
 	break;
 	case OBJECT_TYPE_LEAF:
@@ -212,6 +215,16 @@ void CIntroScene::_ParseSection_OBJECTS(string line)
 		int t = atof(tokens[4].c_str());
 		int l = atof(tokens[5].c_str());
 		obj = new CPiranhaPlant(t, l);
+	}
+	break;
+	case OBJECT_TYPE_ROULETTE:
+	{
+		obj = new CRoulette();
+	}
+	break;
+	case OBJECT_TYPE_MOVING_PLATFORM:
+	{
+		obj = new CMovingPlatform();
 	}
 	break;
 	default:

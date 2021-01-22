@@ -7,6 +7,7 @@
 #include "Game.h"
 #include "GameObject.h"
 #include "Sprites.h"
+#include "PlayScence.h"
 #include "define.h"
 
 CGameObject::CGameObject()
@@ -77,7 +78,19 @@ void CGameObject::CalcPotentialCollisions(
 		LPCOLLISIONEVENT e = SweptAABBEx(coObjects->at(i));
 
 		if (e->t > 0 && e->t <= 1.0f)
+		{
+
+			float mleft, mtop, mright, mbottom;
+			GetBoundingBox(mleft, mtop, mright, mbottom);
+			float oleft, otop, obottom, oright;
+			e->obj->GetBoundingBox(oleft, otop, oright, obottom);
+			if (e->nx != 0)
+			{
+				if (ceil(mbottom) == otop) //fix bug : go through wall and stuff
+					continue;
+			}
 			coEvents.push_back(e);
+		}
 		else
 			delete e;
 	}
@@ -178,4 +191,10 @@ bool CGameObject::isInCamera()
 CGameObject::~CGameObject()
 {
 
+}
+void CGameObject::AddtoGrid() {
+	CPlayScene *scene = (CPlayScene*)CGame::GetInstance()->GetCurrentScene();
+	Grid* grid = scene->getGrid();
+	Unit* unit = new Unit(grid, this->x, this->y, this);
+	grid->Add(unit);
 }

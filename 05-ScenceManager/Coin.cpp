@@ -61,6 +61,7 @@ void CCoin::Update(DWORD dt, vector<LPGAMEOBJECT> *coObjects)
 
 		CPlayScene *currenscence = (CPlayScene*)CGame::GetInstance()->GetCurrentScene();
 		currenscence->PushBackObject(breakablebrick);
+		breakablebrick->AddtoGrid();
 	}
 
 	if (isjumping)
@@ -141,4 +142,5 @@ void CCoin::RenderPoint(int type)
 
 	CPlayScene *currenscence = (CPlayScene*)CGame::GetInstance()->GetCurrentScene();
 	currenscence->PushBackObject(point_effect);
+	point_effect->AddtoGrid();
 }

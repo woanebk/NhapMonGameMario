@@ -108,7 +108,10 @@ public:
 	// acceleration
 	void setAcceleration(float a) { ax = a; }
 	
+	void SetSpeedX(float x) { vx = x; }
+	void SetSpeedY(float y) { vy = y; }
 	bool isInCamera();
 	~CGameObject();
+	void AddtoGrid();
 };
 

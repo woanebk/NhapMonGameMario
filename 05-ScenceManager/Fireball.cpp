@@ -24,10 +24,15 @@ CFireBall::CFireBall(float left, float top)
 
 void CFireBall::GetBoundingBox(float & left, float & top, float & right, float & bottom)
 {
-	left = x;
-	top = y;
-	right = x + FIREBALL_BBOX_WIDTH;
-	bottom = y + FIREBALL_BBOX_HEIGHT;
+	if (!enable)
+		left = top = right = bottom = 0;
+	else
+	{
+		left = x;
+		top = y;
+		right = x + FIREBALL_BBOX_WIDTH;
+		bottom = y + FIREBALL_BBOX_HEIGHT;
+	}
 }
 
 void CFireBall::Update(DWORD dt, vector<LPGAMEOBJECT>* coObjects)
@@ -206,7 +211,7 @@ void CFireBall::Render()
 
 void CFireBall::RenderExplosion()
 {
-	CAnimations * animations = CAnimations::GetInstance();
+	//CAnimations * animations = CAnimations::GetInstance();
 	
 }
 

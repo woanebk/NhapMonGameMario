@@ -22,6 +22,8 @@
 90	textures\HUD-only.png	100	100	100
 #Font:
 91	textures\HUD.png	0	224	142
+#Goal Roulette
+92	textures\goal-roulette.png	0	183	239
 # for map :100
 100	textures\worldmap.png	3	26	110
 #for mario: 101
@@ -509,6 +511,26 @@ idle right
 # === P MAX STACK (w:15 h:7)
 14221	73	162	88	169	91
 
+#GOAL-ROULETTE (14300++) (w:16 h:16)
+#Mushroom
+14300	667	368	683	384	92
+#Flower
+14301	649	368	665	384	92
+#Star
+14302	647	386	663	402	92
+#Mushroom Achived (w:10 h:16)
+14303	257	373	273	389	92
+14304	316	375	329	390	92
+#Flower Achived
+14305	277	374	293	390	92
+14306	329	375	342	391	92
+#Star Achived
+14307	297	373	313	389	92
+14308	344	374	357	390	92
+#COURSE CLEAR (w:248 h:73)
+14309	4	348	252	390	92
+
+
 # //=========//===========//=INTRO
 #NUMBER 3 INTRO:
 21000	194	363	236	404	999
@@ -858,6 +880,19 @@ idle right
 1032	70200	100
 #green
 1033	70201	100
+#GOAL-ROULETTE (w:16 h:16)
+#Mushroom roulette
+1034	14300	100
+#Flower roulette
+1035	14301	100
+#Star roulette
+1036	14302	100
+#Mushroom Achived (w:10 h:16)
+1037	14303	100	14304	100
+#Flower Achived
+1038	14305	100	14306	100
+#Star Achived
+1039	14307	100	14308	100
 
 # =========INTRO ====== (1400++)
 1400	21000	100	21001	100	21002	100	21003	100
@@ -876,8 +911,8 @@ idle right
 5	901
 # FIREBALL
 6	1000	1001
-#ITEM (LEAF(2 first), red, green )
-7	1030	1031	1032	1033
+#ITEM (LEAF(2 first), red, green, mushroom roulette, flower roulette, star roulette, mushroom achived, flower achived, star achived  )
+7	1030	1031	1032	1033	1034	1035	1036	1037	1038	1039
 # EFFECT (HITTAIL, BROKEN_PIECES)
 8	413	414	415	416	417	418	419	420	421	422	423
 #PINE
@@ -885,77 +920,7 @@ idle right
 #PLANT
 10	1300	1301	1302	1303	1304	1305	1306	1307	1308	1309	1310	1311	1312	1313	1314	1315	1316
 [OBJECTS]
-# type	x	y	ani_set_id	extra_settings per object type
-# type: 0 = Mario , 1 = Brick, 2 = Goomba, 3 = Koopas, Block = 4, Coin = 5, Pine = 6, FireBall = 7, Brickable Brick= 8, Question Brick = 9, Leaf = 10, Mushroom = 11 
-# MARIO
-0	24	45	1
-#BRICK 
-#type	l	t	aniset_id	type	bounce
-1	8	13	2	9	0
-1	24	13	2	9	0
-1	40	13	2	9	0
-
-1	8	29	2	9	0
-1	24	29	2	9	0
-1	40	29	2	9	0
-
-1	8	61	2	9	0
-1	24	61	2	9	0
-1	40	61	2	9	0
-
-1	8	77	2	9	0
-1	24	77	2	9	0
-1	40	77	2	9	0
-
-1	8	93	2	9	0
-#collumn 2
-1	72	29	2	9	0
-1	88	29	2	9	0
-1	104	29	2	9	0
-
-1	72	45	2	9	0
-1	88	45	2	9	0
-1	104	45	2	9	0
-
-1	72	61	2	9	0
-1	88	61	2	9	0
-1	104	61	2	9	0
-
-1	88	93	2	9	0
-1	104	93	2	9	0
-1	120	93	2	9	0
-
-#collumn 3
-1	136	29	2	9	0
-1	152	29	2	9	0
-1	168	29	2	9	0
-
-#collumn 4
-1	200	13	2	9	0
-1	216	13	2	9	0
-1	200	29	2	9	0
-1	216	29	2	9	0
-1	200	45	2	9	0
-1	216	45	2	9	0
-
-1	136	61	2	9	0
-1	152	61	2	9	0
-1	168	61	2	9	0
-1	184	61	2	9	0
-1	200	61	2	9	0
-1	216	61	2	9	0
-
-1	136	77	2	9	0
-1	152	77	2	9	0
-1	216	77	2	9	0
-
-1	216	93	2	9	0
-1	216	109	2	9	0
-1	216	125	2	9	0
-1	216	141	2	9	0
-
-#help brick
-1	200	90	2	10	0
+GridFile\worldmap1-grid.txt
 
 [MAP_BARRIERS]
 #	x	y	goleft	goup	goright	godown

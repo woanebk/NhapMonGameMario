@@ -12,7 +12,10 @@
 #include "Portal.h"
 #include "Coin.h"
 #include "BreakableBrick.h"
+#include "Roulette.h"
+#include "MovingPlatform.h"
 #include "QuestionBrick.h"
+#include "BoomerangBro.h"
 #include "Leaf.h"
 #include "Mushroom.h"
 
@@ -116,127 +119,304 @@ void CPlayScene::_ParseSection_ANIMATION_SETS(string line)
 /*
 	Parse a line in section [OBJECTS] 
 */
+void CPlayScene::_ParseSection_OBJECTSfromGRIDFILE(string gridfilepath)
+{
+	//wstring gridFilePath = ToWSTR(gridfilepath);
+	ifstream gridfile;
+	gridfile.open(gridfilepath);
+	if (!gridfile)
+	{
+		DebugOut(L"Cannot open grid file to parse Objects \n");
+	}
+	else
+	{
+		char str[MAX_SCENE_LINE];
+		while (gridfile.getline(str, MAX_SCENE_LINE))
+		{
+			string line(str);
+			vector<string> tokens = split(line);
+			if (tokens.size() < 5)
+				continue; //skip cols and rows
+			if (tokens[0] == "#")
+				continue; //skip cmt
+			int obj_type = atoi(tokens[0].c_str());
+			float x = atof(tokens[1].c_str());
+			float y = atof(tokens[2].c_str());
+			int ani_set_id = atoi(tokens[3].c_str());
+
+			// grid col row:
+			int grid_col = atoi(tokens[tokens.size()- 2].c_str());
+			int grid_row = atoi(tokens[tokens.size() - 1].c_str());
+
+			CAnimationSets * animation_sets = CAnimationSets::GetInstance();
+
+			CGameObject *obj = NULL;
+
+			switch (obj_type)
+			{
+			case OBJECT_TYPE_MARIO:
+				if (player != NULL)
+				{
+					DebugOut(L"[ERROR] MARIO object was created before!\n");
+					return;
+				}
+				obj = new CMario(x, y);
+				player = (CMario*)obj;
+
+				DebugOut(L"[INFO] Player object created!\n");
+				break;
+			case OBJECT_TYPE_GOOMBA:
+			{
+				int level = atof(tokens[4].c_str());
+				obj = new CGoomba(level);
+			}
+			break;
+			case OBJECT_TYPE_BRICK: {
+				int t = atof(tokens[4].c_str());
+				int b = atof(tokens[5].c_str());
+				obj = new CBrick(t, b);
+			}
+									break;
+			case OBJECT_TYPE_KOOPAS:
+			{
+				int level = atof(tokens[4].c_str());
+				int t = atof(tokens[5].c_str());
+				obj = new CKoopas(level, t);
+			}
+			break;
+			case OBJECT_TYPE_PORTAL:
+			{
+				float r = atof(tokens[4].c_str());
+				float b = atof(tokens[5].c_str());
+				int scene_id = atoi(tokens[6].c_str());
+				obj = new CPortal(x, y, r, b, scene_id);
+			}
+			break;
+			case OBJECT_TYPE_BLOCK:
+			{
+				float r = atof(tokens[4].c_str());
+				float b = atof(tokens[5].c_str());
+				obj = new CBlock(x, y, r, b);
+			}
+			break;
+			case OBJECT_TYPE_COIN: obj = new CCoin();
+				break;
+			case OBJECT_TYPE_PINE:
+			{
+				float r = atof(tokens[4].c_str());
+				float b = atof(tokens[5].c_str());
+				float s = atof(tokens[6].c_str());
+				float ty = atof(tokens[7].c_str());
+				obj = new CPine(x, y, r, b, s, ty);
+			}
+			break;
+			case OBJECT_TYPE_BREAKABLE_BRICK:
+			{
+				int b = atof(tokens[4].c_str());
+				obj = new CBreakableBrick(b);
+			}
+			break;
+			case OBJECT_TYPE_QUESTION_BRICK:
+			{
+				int t = atof(tokens[4].c_str());
+				int b = atof(tokens[5].c_str());
+				int r = atof(tokens[6].c_str());
+				int c = atof(tokens[7].c_str());
+				obj = new CQuestionBrick(t, b, r, c);
+			}
+			break;
+			case OBJECT_TYPE_LEAF:
+			{
+				obj = new CLeaf();
+			}
+			break;
+			case OBJECT_TYPE_MUSHROOM:
+			{
+				int t = atof(tokens[4].c_str());
+				obj = new CMushroom(t);
+			}
+			break;
+			case OBJECT_TYPE_PLANT_PIRANHA:
+			{
+				int t = atof(tokens[4].c_str());
+				int l = atof(tokens[5].c_str());
+				obj = new CPiranhaPlant(t, l);
+			}
+			break;
+			case OBJECT_TYPE_ROULETTE:
+			{
+				obj = new CRoulette();
+			}
+			break;
+			case OBJECT_TYPE_MOVING_PLATFORM:
+			{
+				obj = new CMovingPlatform();
+			}
+			break;
+			case OBJECT_TYPE_BOOMERANG_BRO:
+			{
+				obj = new CBoomerangBro();
+			}
+			break;
+			default:
+				DebugOut(L"[ERR] Invalid object type: %d\n", obj_type);
+				return;
+			}
+
+			// General object setup
+			obj->SetPosition(x, y);
+			obj->SetStartPosition(x, y);
+			
+
+			LPANIMATION_SET ani_set = animation_sets->Get(ani_set_id);
+
+			obj->SetAnimationSet(ani_set);
+			objects.push_back(obj);
+
+			Unit* unit = new Unit(grid, x, y, obj);
+			if(!dynamic_cast<CMario*>(unit->GetObj()))
+			grid->Add(unit,grid_col,grid_row); //add Unit into its CELL
+		}
+	}
+}
 void CPlayScene::_ParseSection_OBJECTS(string line)
 {
-	vector<string> tokens = split(line);
+	_ParseSection_OBJECTSfromGRIDFILE(line);
+	//vector<string> tokens = split(line);
 
-	//DebugOut(L"--> %s\n",ToWSTR(line).c_str());
+	////DebugOut(L"--> %s\n",ToWSTR(line).c_str());
 
-	if (tokens.size() < 3) return; // skip invalid lines - an object set must have at least id, x, y
+	//if (tokens.size() < 3) return; // skip invalid lines - an object set must have at least id, x, y
 
-	int object_type = atoi(tokens[0].c_str());
-	float x = atof(tokens[1].c_str());
-	float y = atof(tokens[2].c_str());
+	//int object_type = atoi(tokens[0].c_str());
+	//float x = atof(tokens[1].c_str());
+	//float y = atof(tokens[2].c_str());
 
-	int ani_set_id = atoi(tokens[3].c_str());
+	//int ani_set_id = atoi(tokens[3].c_str());
 
-	CAnimationSets * animation_sets = CAnimationSets::GetInstance();
+	//CAnimationSets * animation_sets = CAnimationSets::GetInstance();
 
-	CGameObject *obj = NULL;
+	//CGameObject *obj = NULL;
 
-	switch (object_type)
-	{
-	case OBJECT_TYPE_MARIO:
-		if (player != NULL)
-		{
-			DebugOut(L"[ERROR] MARIO object was created before!\n");
-			return;
-		}
-		obj = new CMario(x, y);
-		player = (CMario*)obj;
+	//switch (object_type)
+	//{
+	//case OBJECT_TYPE_MARIO:
+	//	if (player != NULL)
+	//	{
+	//		DebugOut(L"[ERROR] MARIO object was created before!\n");
+	//		return;
+	//	}
+	//	obj = new CMario(x, y);
+	//	player = (CMario*)obj;
 
-		DebugOut(L"[INFO] Player object created!\n");
-		break;
-	case OBJECT_TYPE_GOOMBA: 
-	{
-		int level = atof(tokens[4].c_str());
-		obj = new CGoomba(level);
-	}
-	break;
-	case OBJECT_TYPE_BRICK: { 
-		int t = atof(tokens[4].c_str());
-		int b = atof(tokens[5].c_str());
-		obj = new CBrick(t,b);
-	}
-		break;
-	case OBJECT_TYPE_KOOPAS:
-	{
-		int level = atof(tokens[4].c_str());
-		int t = atof(tokens[5].c_str());
-		obj = new CKoopas(level, t);
-	}
-	break;
-	case OBJECT_TYPE_PORTAL:
-	{
-		float r = atof(tokens[4].c_str());
-		float b = atof(tokens[5].c_str());
-		int scene_id = atoi(tokens[6].c_str());
-		obj = new CPortal(x, y, r, b, scene_id);
-	}
-	break;
-	case OBJECT_TYPE_BLOCK:
-	{
-		float r = atof(tokens[4].c_str());
-		float b = atof(tokens[5].c_str());
-		obj = new CBlock(x, y, r, b);
-	}
-		  break;
-	case OBJECT_TYPE_COIN: obj = new CCoin();
-		break;
-	case OBJECT_TYPE_PINE: 
-	{
-		float r = atof(tokens[4].c_str());
-		float b = atof(tokens[5].c_str());
-		float s= atof(tokens[6].c_str());
-		float ty = atof(tokens[7].c_str());
-		obj = new CPine(x, y, r, b, s, ty);
-	}
-	break;
-	case OBJECT_TYPE_BREAKABLE_BRICK:
-	{
-		int b = atof(tokens[4].c_str());
-		obj = new CBreakableBrick(b);
-	}
-	break;
-	case OBJECT_TYPE_QUESTION_BRICK:
-	{
-		int t = atof(tokens[4].c_str());
-		int b = atof(tokens[5].c_str());
-		int r = atof(tokens[6].c_str());
-		obj = new CQuestionBrick(t, b, r);
-	}
-	break;
-	case OBJECT_TYPE_LEAF:
-	{
-		obj = new CLeaf();
-	}
-	break;
-	case OBJECT_TYPE_MUSHROOM:
-	{
-		int t = atof(tokens[4].c_str());
-		obj = new CMushroom(t);
-	}
-	break;
-	case OBJECT_TYPE_PLANT_PIRANHA:
-	{
-		int t = atof(tokens[4].c_str());
-		int l = atof(tokens[5].c_str());
-		obj = new CPiranhaPlant(t, l);
-	}
-	break;
-	default:
-		DebugOut(L"[ERR] Invalid object type: %d\n", object_type);
-		return;
-	}
+	//	DebugOut(L"[INFO] Player object created!\n");
+	//	break;
+	//case OBJECT_TYPE_GOOMBA: 
+	//{
+	//	int level = atof(tokens[4].c_str());
+	//	obj = new CGoomba(level);
+	//}
+	//break;
+	//case OBJECT_TYPE_BRICK: { 
+	//	int t = atof(tokens[4].c_str());
+	//	int b = atof(tokens[5].c_str());
+	//	obj = new CBrick(t,b);
+	//}
+	//	break;
+	//case OBJECT_TYPE_KOOPAS:
+	//{
+	//	int level = atof(tokens[4].c_str());
+	//	int t = atof(tokens[5].c_str());
+	//	obj = new CKoopas(level, t);
+	//}
+	//break;
+	//case OBJECT_TYPE_PORTAL:
+	//{
+	//	float r = atof(tokens[4].c_str());
+	//	float b = atof(tokens[5].c_str());
+	//	int scene_id = atoi(tokens[6].c_str());
+	//	obj = new CPortal(x, y, r, b, scene_id);
+	//}
+	//break;
+	//case OBJECT_TYPE_BLOCK:
+	//{
+	//	float r = atof(tokens[4].c_str());
+	//	float b = atof(tokens[5].c_str());
+	//	obj = new CBlock(x, y, r, b);
+	//}
+	//	  break;
+	//case OBJECT_TYPE_COIN: obj = new CCoin();
+	//	break;
+	//case OBJECT_TYPE_PINE: 
+	//{
+	//	float r = atof(tokens[4].c_str());
+	//	float b = atof(tokens[5].c_str());
+	//	float s= atof(tokens[6].c_str());
+	//	float ty = atof(tokens[7].c_str());
+	//	obj = new CPine(x, y, r, b, s, ty);
+	//}
+	//break;
+	//case OBJECT_TYPE_BREAKABLE_BRICK:
+	//{
+	//	int b = atof(tokens[4].c_str());
+	//	obj = new CBreakableBrick(b);
+	//}
+	//break;
+	//case OBJECT_TYPE_QUESTION_BRICK:
+	//{
+	//	int t = atof(tokens[4].c_str());
+	//	int b = atof(tokens[5].c_str());
+	//	int r = atof(tokens[6].c_str());
+	//	int c = atof(tokens[7].c_str());
+	//	obj = new CQuestionBrick(t, b, r, c);
+	//}
+	//break;
+	//case OBJECT_TYPE_LEAF:
+	//{
+	//	obj = new CLeaf();
+	//}
+	//break;
+	//case OBJECT_TYPE_MUSHROOM:
+	//{
+	//	int t = atof(tokens[4].c_str());
+	//	obj = new CMushroom(t);
+	//}
+	//break;
+	//case OBJECT_TYPE_PLANT_PIRANHA:
+	//{
+	//	int t = atof(tokens[4].c_str());
+	//	int l = atof(tokens[5].c_str());
+	//	obj = new CPiranhaPlant(t, l);
+	//}
+	//break;
+	//case OBJECT_TYPE_ROULETTE:
+	//{
+	//	obj = new CRoulette();
+	//}
+	//break;
+	//case OBJECT_TYPE_MOVING_PLATFORM:
+	//{
+	//	obj = new CMovingPlatform();
+	//}
+	//break;
+	//case OBJECT_TYPE_BOOMERANG_BRO:
+	//{
+	//	obj = new CBoomerangBro();
+	//}
+	//break;
+	//default:
+	//	DebugOut(L"[ERR] Invalid object type: %d\n", object_type);
+	//	return;
+	//}
 
-	// General object setup
-	obj->SetPosition(x, y);
-	obj->SetStartPosition(x, y);
+	//// General object setup
+	//obj->SetPosition(x, y);
+	//obj->SetStartPosition(x, y);
 
-	LPANIMATION_SET ani_set = animation_sets->Get(ani_set_id);
+	//LPANIMATION_SET ani_set = animation_sets->Get(ani_set_id);
 
-	obj->SetAnimationSet(ani_set);
-	objects.push_back(obj);
+	//obj->SetAnimationSet(ani_set);
+	//objects.push_back(obj);
 }
 
 void CPlayScene::_ParseSection_MAP_BACKGROUND(string line)
@@ -261,6 +441,10 @@ void CPlayScene::_ParseSection_MAP_BACKGROUND(string line)
 		mapbackground->SetTileSet(WORLD_1_1_SECRECT_TILESET, D3DCOLOR_XRGB(255, 255, 255));
 	else if(tile_set == WORLDMAP_1_TILESET_ID)
 		mapbackground->SetTileSet(WORLDMAP_1_TILESET, D3DCOLOR_XRGB(255, 255, 255));
+	else if (tile_set == WORLD_1_4_TILESET_ID)
+		mapbackground->SetTileSet(WORLD_1_4_TILESET, D3DCOLOR_XRGB(255, 255, 255));
+	else if (tile_set == WORLD_1_4_SECRECT_TILESET_ID)
+		mapbackground->SetTileSet(WORLD_1_4_SECRECT_TILESET, D3DCOLOR_XRGB(255, 255, 255));
 	//load matrix:
 	if(matrix == WORLD_1_1_MATRIX_ID)
 		mapbackground->LoadMatrix(WORLD_1_1_MATRIX_TXT);
@@ -268,6 +452,26 @@ void CPlayScene::_ParseSection_MAP_BACKGROUND(string line)
 		mapbackground->LoadMatrix(WORLD_1_1_SECRECT_MATRIX_TXT);
 	else if (matrix == WORLDMAP_1_MATRIX_ID)
 		mapbackground->LoadMatrix(WORLDMAP_1_MATRIX_TXT);
+	else if (matrix == WORLD_1_4_MATRIX_ID)
+		mapbackground->LoadMatrix(WORLD_1_4_MATRIX_TXT);
+	else if (matrix == WORLD_1_4_SECRECT_MATRIX_ID)
+		mapbackground->LoadMatrix(WORLD_1_4_SECRECT_MATRIX_TXT);
+
+	//Add grid 
+	_ParseSection_GRID(line);
+}
+
+// use when meet section mapbackground
+void CPlayScene::_ParseSection_GRID(string line)
+{
+	vector<string> tokens = split(line);
+
+	if (tokens.size() < 5) return; // skip invalid lines - an animation set must at least id and one animation id
+
+	int map_columns_count = atoi(tokens[2].c_str());
+	int map_rows_count = atoi(tokens[3].c_str());
+
+	grid = new Grid(map_columns_count, map_rows_count);
 }
 
 void CPlayScene::Load()
@@ -329,6 +533,9 @@ void CPlayScene::Load()
 	hud = new Hud();
 
 	DebugOut(L"[INFO] Done loading scene resources %s\n", sceneFilePath);
+	//fix bug:
+	if (id == WORLD_1_1_SECRECT_SCENCE_ID)
+		player->SetPosition(150, 80);
 }
 
 void CPlayScene::Update(DWORD dt)
@@ -336,10 +543,30 @@ void CPlayScene::Update(DWORD dt)
 	// We know that Mario is the first object in the list hence we won't add him into the colliable object list
 	// TO-DO: This is a "dirty" way, need a more organized way 
 
-	// skip the rest if scene was already unloaded (Mario::Update might trigger PlayScene::Unload) // Nam
-	if (player == NULL) return;
+	objects.clear();
+	listUnits.clear();
+
+	float cam_x, cam_y;
+	CGame::GetInstance()->GetCamPos(cam_x, cam_y);
+
+	grid->getListUnits(cam_x, cam_y, listUnits);
 
 	vector<LPGAMEOBJECT> coObjects;
+	for (size_t i = 0; i < listUnits.size(); i++)
+	{
+		coObjects.push_back(listUnits[i]->GetObj());
+		
+	}
+	CGame *game = CGame::GetInstance();
+	for (size_t i = 0; i < listUnits.size(); i++)
+	{
+		if(!player->isTransForming())
+		listUnits[i]->GetObj()->Update(dt, &coObjects);
+	}
+	if(player!=NULL)
+		player->Update(dt, &coObjects);
+	//==
+	/*vector<LPGAMEOBJECT> coObjects;
 	for (size_t i = 1; i < objects.size(); i++)
 	{
 			coObjects.push_back(objects[i]);
@@ -349,20 +576,36 @@ void CPlayScene::Update(DWORD dt)
 	{
 		float l, t;
 		objects[i]->GetPosition(l, t);
-		if(game->isInCameraExSpace(l ,t))
+		if(game->isInCameraExSpaceHorizonal(l ,t) || dynamic_cast<CRoulette*>(objects[i]) || dynamic_cast<CMario*>(objects[i]))
 			objects[i]->Update(dt, &coObjects);
-	}
+	}*/
 
 	// skip the rest if scene was already unloaded (Mario::Update might trigger PlayScene::Unload)
 	if (player == NULL) return; 
 
 	// Update camera to follow mario
-	float cx, cy;
+	float cx = 0, cy = 0;
 	player->GetPosition(cx, cy);
 
 	if (id == WORLDMAP_1_SCENCE_ID)
 	{
 		CGame::GetInstance()->SetCamPos(-(SCREEN_WIDTH -WORLDMAP_1_WIDTH)/2 + 8,0);
+	}
+	else if (id == WORLD_1_4_SCENCE_ID)
+	{
+		float cam_x = 1, cam_y = 0;
+		CGame::GetInstance()->GetCamPos(cam_x, cam_y);
+		cy -= game->GetScreenHeight() / 2;
+		
+		
+		if (cy < 0)
+			cy = 0;
+		if (cy > mapbackground->GetMapHeight() - game->GetScreenHeight() + HUD_HEIGHT)
+			cy = mapbackground->GetMapHeight() - game->GetScreenHeight() + HUD_HEIGHT;
+		if(cam_x < WORLD_1_4_WIDTH - SCREEN_WIDTH + BRICK_BBOX_WIDTH)
+			CGame::GetInstance()->SetCamPos(cam_x + 0.5f, cy);
+		else
+			CGame::GetInstance()->SetCamPos(cam_x, cy);
 	}
 	else
 	{
@@ -380,23 +623,44 @@ void CPlayScene::Update(DWORD dt)
 	}
 
 	hud->Update(dt);
+	//UpdateGrid();//relocate unit in grid after every CPlayScene::update
 }
 
 void CPlayScene::Render()
 {
 	//render background
 	mapbackground->Render(mapbackground->GetTileSet());
-	
-	for (int i = 0; i < objects.size(); i++)
+
+	player->Render();
+	for (int i = 0; i < listUnits.size(); i++)
 	{
-		if (objects[i]->isVisabled() && objects[i]->isInCamera())
-		{
-			/*if (dynamic_cast<CMario*>(objects[i]))
+		if (listUnits[i]->GetObj()->isVisabled())
+			if (dynamic_cast<CPine*>(listUnits[i]->GetObj()))
 				continue;
-			else*/
-			objects[i]->Render();
-		}
+			else
+				listUnits[i]->GetObj()->Render();
 	}
+	for (int i = 0; i < listUnits.size(); i++)
+	{
+		if (listUnits[i]->GetObj()->isVisabled())
+			if (dynamic_cast<CPine*>(listUnits[i]->GetObj()))
+				listUnits[i]->GetObj()->Render();
+			else
+				continue;
+	}
+
+	
+
+	//for (int i = 0; i < objects.size(); i++)
+	//{
+	//	if ((objects[i]->isVisabled() && objects[i]->isInCamera()) || dynamic_cast<CRoulette*>(objects[i]) || dynamic_cast<CMario*>(objects[i]))
+	//	{
+	//		/*if (dynamic_cast<CMario*>(objects[i]))
+	//			continue;
+	//		else*/
+	//		objects[i]->Render();
+	//	}
+	//}
 	//objects[0]->Render(); //mario is the last to be rendered
 	hud->Render();
 }
@@ -412,6 +676,14 @@ void CPlayScene::Unload()
 	}
 
 	objects.clear();
+
+	for (int i = 0; i < listUnits.size(); i++)
+	{
+		delete listUnits[i];
+	}
+
+	listUnits.clear();
+
 	player = NULL;
 
 	DebugOut(L"[INFO] Scene %s unloaded! \n", sceneFilePath);
@@ -445,9 +717,13 @@ void CPlayScenceKeyHandler::OnKeyDown(int KeyCode)
 				mario->SetState(MARIO_STATE_ICON_GO_DOWN);
 			break;
 		case DIK_S:
-			if (mario->canSelectScecne())
+			if (mario->canSelectScecne() && mario->getSelectedScene() == WORLD_1_1_SCENCE_ID)
 				/*game->SwitchSceneEx(WORLD_1_1_SCENCE_ID, WORLD_1_1_START_X, WORLD_1_1_START_Y);*/
 				game->SwitchScene(WORLD_1_1_SCENCE_ID);
+			else if (mario->canSelectScecne() && mario->getSelectedScene() == WORLD_1_4_SCENCE_ID)
+			{
+				game->SwitchScene(WORLD_1_4_SCENCE_ID);
+			}
 			break;
 		}
 	}
@@ -515,6 +791,12 @@ void CPlayScenceKeyHandler::OnKeyDown(int KeyCode)
 		case DIK_V: //
 			mario->SetPosition(2263, 0);
 			break;
+		case DIK_B: //
+			mario->SetPosition(2000, 130);
+			break;
+		case DIK_G: //
+			mario->SetPosition(180, 50);
+			break;
 		case DIK_M: //
 			mario->EndScene();
 			break;
@@ -574,7 +856,7 @@ void CPlayScenceKeyHandler::KeyState(BYTE *states)
 			if (mario->isFalling() && mario->getLevel() == MARIO_LEVEL_LEAF)
 				mario->StartFlapping();
 		}
-		else if (game->IsKeyDown(DIK_DOWN) && mario->getLevel()!=MARIO_LEVEL_SMALL)
+		else if (game->IsKeyDown(DIK_DOWN) /*&& mario->getLevel()!=MARIO_LEVEL_SMALL*/)
 			mario->SetState(MARIO_STATE_SIT);
 		
 		else if (game->IsKeyDown(DIK_RIGHT))
@@ -625,4 +907,15 @@ void CPlayScene::LoadWorldMapBarriers(string line)
 
 	MapBarrier *bar = new MapBarrier(x, y, goleft, goup, goright, godown);
 	barriers.push_back(bar);
+}
+
+void CPlayScene::UpdateGrid()
+{
+	for (unsigned int i = 0; i < listUnits.size(); i++)
+	{
+		Unit *unit = listUnits[i];
+		float new_x, new_y;
+		unit->GetObj()->GetPosition(new_x, new_y);
+		grid->Move(unit, new_x, new_y);
+	}
 }

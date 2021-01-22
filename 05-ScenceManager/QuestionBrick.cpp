@@ -14,7 +14,8 @@ bool CQuestionBrick::isEmpty()
 
 void CQuestionBrick::getUsed()
 {
-	Coin = 0;
+	if (Coin > 0)
+		Coin -= 1;
 	Item = 0;
 }
 
@@ -32,6 +33,7 @@ void CQuestionBrick::CreateItem(int item)
 
 		CPlayScene *currenscence = (CPlayScene*)CGame::GetInstance()->GetCurrentScene();
 		currenscence->PushBackObject(leaf);
+		leaf->AddtoGrid();
 		leaf->Jump();
 	}
 	if (item == ITEM_MUSHROOM_RED)
@@ -46,6 +48,7 @@ void CQuestionBrick::CreateItem(int item)
 
 		CPlayScene *currenscence = (CPlayScene*)CGame::GetInstance()->GetCurrentScene();
 		currenscence->PushBackObject(red_mushroom);
+		red_mushroom->AddtoGrid();
 	}
 	if (item == ITEM_MUSHROOM_GREEN)
 	{
@@ -60,6 +63,8 @@ void CQuestionBrick::CreateItem(int item)
 
 		CPlayScene *currenscence = (CPlayScene*)CGame::GetInstance()->GetCurrentScene();
 		currenscence->PushBackObject(green_mushroom);
+
+		green_mushroom->AddtoGrid();
 	}
 	if (item == ITEM_MONEY_BUTTON)
 	{
@@ -73,6 +78,7 @@ void CQuestionBrick::CreateItem(int item)
 
 		CPlayScene *currenscence = (CPlayScene*)CGame::GetInstance()->GetCurrentScene();
 		currenscence->PushBackObject(moneybutton);
+		moneybutton->AddtoGrid();
 	}
 	if (item == ITEM_MONEY)
 	{
@@ -84,6 +90,7 @@ void CQuestionBrick::CreateItem(int item)
 		LPANIMATION_SET ani_set = animation_sets->Get(COIN_SET_ID);
 		coin->SetAnimationSet(ani_set);
 
+		coin->AddtoGrid();
 		coin->Jump();
 
 		CPlayScene *currenscence = (CPlayScene*)CGame::GetInstance()->GetCurrentScene();
@@ -113,6 +120,9 @@ void CQuestionBrick::Render()
 			animation_set->at(BRICK_ANI_BREAKABLE)->Render(x, y);
 		else if(type == QUESTION_BRICK_TYPE_MONEY_BUTTON_CREATOR)
 			animation_set->at(BRICK_ANI_BREAKABLE)->Render(x, y);
+		else if (type == QUESTION_BRICK_TYPE_NORMAL_BREAKABLE_ALIKE)
+			animation_set->at(BRICK_ANI_BREAKABLE)->Render(x, y);
+		
 	}
 }
 
@@ -205,6 +215,20 @@ void CQuestionBrick::HitByTail()
 						Render_Tail_Hit();
 					}
 				}
+				else if (type == QUESTION_BRICK_TYPE_NORMAL_BREAKABLE_ALIKE)
+				{
+					if (hasItem() && mario->getLevel() == MARIO_LEVEL_SMALL)
+						CreateItem(ITEM_MUSHROOM_RED);
+					else if (hasItem() && mario->getLevel() <= MARIO_LEVEL_LEAF)
+						CreateItem(ITEM_LEAF);
+					if (hasCoin())
+						CreateItem(ITEM_MONEY);
+					if (!isEmpty())
+					{
+						Jump();
+						Render_Tail_Hit();
+					}
+				}
 				else
 				{
 					if (hasItem() && mario->getLevel() == MARIO_LEVEL_SMALL)
@@ -235,4 +259,5 @@ void CQuestionBrick::Render_Tail_Hit()
 
 	CPlayScene *currenscence = (CPlayScene*)CGame::GetInstance()->GetCurrentScene();
 	currenscence->PushBackObject(tailhiteffect);
+	tailhiteffect->AddtoGrid();
 }

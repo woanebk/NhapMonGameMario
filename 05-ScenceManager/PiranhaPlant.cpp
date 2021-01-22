@@ -227,6 +227,7 @@ void CPiranhaPlant::Render_Tail_Hit()
 
 	CPlayScene *currenscence = (CPlayScene*)CGame::GetInstance()->GetCurrentScene();
 	currenscence->PushBackObject(tailhiteffect);
+	tailhiteffect->AddtoGrid();
 }
 void CPiranhaPlant::DetectMario() 
 {
@@ -253,7 +254,7 @@ void CPiranhaPlant::Shot()
 	CPlayScene* scence = (CPlayScene*)CGame::GetInstance()->GetCurrentScene();
 	CEnemyFireBall *fireball = new CEnemyFireBall(x + PLANT_PIRANHA_BBOX_WIDTH / 2, y, nx, ny);
 	scence->PushBackObject(fireball);
-
+	fireball->AddtoGrid();
 }
 
 void CPiranhaPlant::Killed()

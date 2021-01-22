@@ -29,6 +29,7 @@ void Hud::GetBoundingBox(float & left, float & top, float & right, float & botto
 
 void Hud::Update(DWORD dt)
 {
+	CGame* game = CGame::GetInstance();
 	CPlayScene* scence = (CPlayScene*)CGame::GetInstance()->GetCurrentScene();
 	CMario* mario = scence->GetPlayer();
 	
@@ -43,14 +44,14 @@ void Hud::Update(DWORD dt)
 			EndScene();
 	}
 
-	if (mario != NULL)
-	{
-		life = mario->getLife();
-		score = mario->getScore();
-		money = mario->getMoney();
-		stack = mario->getStack();
-	}
 
+	life = game->getLife();
+	score = game->getScore();
+	money = game->getMoney();
+	if (mario != NULL)
+		stack = mario->getStack();
+
+	// change score from int to sprite
 	string scores_str = to_string(score);
 	string preset = "0";
 	while (scores_str.length() < MARIO_SCORE_NUMBERS) scores_str = preset + scores_str; //string be like : 0000xxx;
@@ -130,6 +131,7 @@ void Hud::Render()
 
 	// ====== Render score:
 	for (int i = 0; i < 7; i++)
+		if(scoreSprite.size() != 0)
 			scoreSprite[i]->Draw(hud_x + SCORE_SPRITE_0_X + i * SCORE_SPRITE_WIDTH, hud_y + SCORE_SPRITE_0_Y);
 	
 }
