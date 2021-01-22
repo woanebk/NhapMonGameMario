@@ -102,6 +102,7 @@ void CQuestionBrick::Jump()
 {
 	vy = -BRICK_QUESTION_JUMP_SPEED;
 	jumptime = GetTickCount64();
+	isjumping = true;
 }
 
 CQuestionBrick::~CQuestionBrick()
@@ -142,6 +143,7 @@ void CQuestionBrick::Update(DWORD dt, vector<LPGAMEOBJECT>* coObjects)
 		jumptime = 0;
 		if (y < start_y)
 			vy = BRICK_QUESTION_JUMP_SPEED;
+		isjumping = false;
 		
 	}
 	if (y > start_y)

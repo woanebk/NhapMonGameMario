@@ -76,6 +76,9 @@ class CMario : public CGameObject
 
 	bool can_select_scence = false;
 	int scence_selected = 0;
+	//
+	bool switch_secrect_1 = false;
+	bool switch_secrect_4 = false;
 
 
 	float start_x;			// initial position of Mario at scene
@@ -95,6 +98,8 @@ public:
 	void LifeUp();
 	void LifeDown();
 	int getLevel() { return level; }
+	void setSecrect1(bool s) { switch_secrect_1 = s; }
+	void setSecrect4(bool s) { switch_secrect_4 = s; }
 
 	void StartUntouchable() { untouchable = 1; untouchable_start = GetTickCount(); }
 	int isUntouchable() { return untouchable; }

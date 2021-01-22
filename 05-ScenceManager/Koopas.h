@@ -8,6 +8,7 @@ class CKoopas : public CGameObject
 	int level;
 	int start_level;
 	int type = KOOPAS_TYPE_GREEN;
+	bool isonground;
 	virtual void GetBoundingBox(float &left, float &top, float &right, float &bottom);
 	virtual void Update(DWORD dt, vector<LPGAMEOBJECT> *coObjects);
 	virtual void Render();
@@ -34,5 +35,7 @@ public:
 	int getLevel() { return level; }
 	void LevelDown();
 	void Reset();
+	void KnockUp();
 	bool CalculateTurningAround(vector<LPGAMEOBJECT>* coObjects);
+	void KnockbyBrick(vector<LPGAMEOBJECT>* coObjects);
 };

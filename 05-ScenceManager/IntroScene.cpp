@@ -353,32 +353,11 @@ void CIntroScene::Update(DWORD dt)
 		objects[i]->Update(dt, &coObjects);
 	}
 
-	// skip the rest if scene was already unloaded (Mario::Update might trigger PlayScene::Unload)
-	//if (player == NULL) return;
+	if (curtain_y > -CURTAIN_HEIGHT)
+		curtain_y -= 1;
+	
 
-	// Update camera to follow mario
-	/*float cx, cy;
-	player->GetPosition(cx, cy);
-	CGame *game = CGame::GetInstance();
 
-	if (id == WORLDMAP_1_SCENCE_ID)
-	{
-		CGame::GetInstance()->SetCamPos(-(SCREEN_WIDTH - WORLDMAP_1_WIDTH) / 2 + 8, 0);
-	}
-	else
-	{
-		cx -= game->GetScreenWidth() / 2;
-		cy -= game->GetScreenHeight() / 2;
-		if (cx < 0)
-			cx = 0;
-		if (cx > mapbackground->GetMapWidth() - game->GetScreenWidth())
-			cx = mapbackground->GetMapWidth() - game->GetScreenWidth();
-		if (cy < 0)
-			cy = 0;
-		if (cy > mapbackground->GetMapHeight() - game->GetScreenHeight() + HUD_HEIGHT)
-			cy = mapbackground->GetMapHeight() - game->GetScreenHeight() + HUD_HEIGHT;
-		CGame::GetInstance()->SetCamPos((int)cx, (int)cy);
-	}*/
 	CGame::GetInstance()->SetCamPos(-23, 0);
 }
 
@@ -401,6 +380,7 @@ void CIntroScene::Render()
 	float y = cam_y;
 	CAnimations::GetInstance()->Get(ANI_NUMBER_3_ID)->Render(ANI_NUMBER_3_X, ANI_NUMBER_3_Y, 255);
 	CSprites::GetInstance()->Get(SELECTOR_SPRITE_ID)->Draw(selector_x, selector_y);
+	CAnimations::GetInstance()->Get(ANI_CURTAIN)->Render(curtain_x, curtain_y, 255);
 }
 
 void CIntroScene::Unload()

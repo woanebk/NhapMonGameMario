@@ -169,10 +169,26 @@ void CMario::Update(DWORD dt, vector<LPGAMEOBJECT> *coObjects)
 
 	ManageAccelerationAndSpeed();
 	TimingEvent();
+	//fix bug switch scene
+	if (switch_secrect_1)
+	{
+		if (x != WORLD_1_1_SECRECT_START_X && y > WORLD_1_1_SECRECT_START_Y + EXTRA_RESET_SPACE )
+		{
+			SetPosition(WORLD_1_1_SECRECT_START_X, WORLD_1_1_SECRECT_START_Y);
+		}
+	}
+	else if (switch_secrect_4)
+	{
+		if (x != WORLD_1_4_SECRECT_START_X && y > WORLD_1_4_SECRECT_START_Y + EXTRA_RESET_SPACE)
+		{
+			SetPosition(WORLD_1_4_SECRECT_START_X, WORLD_1_4_SECRECT_START_Y );
+		}
+	}
 	
 	// No collision occured, proceed normally
 	if (coEvents.size() == 0)
 	{
+		
 		CPlayScene *scene = (CPlayScene*)CGame::GetInstance()->GetCurrentScene();
 		int scene_id = scene->getScenceID();
 
@@ -235,7 +251,7 @@ void CMario::Update(DWORD dt, vector<LPGAMEOBJECT> *coObjects)
 						{
 							goomba->LevelDown();
 							GainScore(SCORE_400);
-							RenderPoint(EFFECT_TYPE_100_POINT);
+							RenderPoint(EFFECT_TYPE_400_POINT);
 							vy = -MARIO_JUMP_DEFLECT_SPEED;
 							goomba->setSpeedY(MARIO_JUMP_DEFLECT_SPEED);
 						}
@@ -508,17 +524,28 @@ void CMario::Update(DWORD dt, vector<LPGAMEOBJECT> *coObjects)
 			CMovingPlatform *movingplatform = dynamic_cast<CMovingPlatform*>(e->obj);
 			if (e->nx != 0)
 			{
-				vx = 0;
+				if (e->nx < 0)
+				{
+					x -= (min_tx * dy + nx * 0.6f);
+				}
+				else if(e->nx>0)
+					vx = 0;
 				if(!isonground)
 				y += dy;
 				break;
 			}
-			else if (e->ny != 0)
+			else if (e->ny < 0)
 				{
 					vy = 0;
 					x += dx;
 					movingplatform->setTouched(true);
 				}
+			else if (e->ny > 0)
+			{
+				vy = MARIO_GRAVITY;
+				isfalling = true;
+				jumpable = false;
+			}
 			} //if breakable brick
 			else if (dynamic_cast<CBreakableBrick*>(e->obj))
 			{
@@ -534,7 +561,12 @@ void CMario::Update(DWORD dt, vector<LPGAMEOBJECT> *coObjects)
 						vy = 0;
 						x += dx;
 						if (e->ny > 0)
+						{
 							breakablebrick->Break();
+							vy = MARIO_GRAVITY; //push mario down a bit
+							isfalling = true;
+							jumpable = false;
+						}
 					}
 			} //if breakable brick
 			else if (dynamic_cast<CQuestionBrick*>(e->obj))
@@ -726,9 +758,10 @@ void CMario::Update(DWORD dt, vector<LPGAMEOBJECT> *coObjects)
 			else if (dynamic_cast<CEnemyFireBall*>(e->obj))
 			{
 				CEnemyFireBall *fireball = dynamic_cast<CEnemyFireBall*>(e->obj);
-				if (!isonground || !istransformingtoBig || !istransformingtoLeaf)
+				x += dx;
+				if (!isonground)
 				{
-					x += dx; y += dy;
+					 y += dy;
 				}
 				if (untouchable == 0)
 				{
@@ -1048,7 +1081,7 @@ void CMario::Render()
 		if (firebullets[i]->isVisabled())
 			firebullets[i]->Render();
 	} //render shooting
-	RenderBoundingBox();
+	//RenderBoundingBox();
 }
 
 void CMario::SetState(int state)
@@ -1388,6 +1421,8 @@ void CMario::TimingEvent() {
 		untouchable_start = 0;
 		untouchable = 0;
 	}
+
+
 	//if leaf mario is spinning tail then stop
 	if (GetTickCount() - spin_start > 200) //4 sprites = 4*100ms
 	{
@@ -1431,11 +1466,13 @@ void CMario::TimingEvent() {
 				game->SwitchSceneEx(WORLD_1_1_SECRECT_SCENCE_ID, 180, 50);
 			else
 				game->SwitchBackScence(WORLD_1_1_SECRECT_SCENCE_ID, WORLD_1_1_SECRECT_START_X, WORLD_1_1_SECRECT_START_Y);
+			
 		}
 		else if (switch_to_scene == WORLD_1_4_SECRECT_SCENCE_ID)
 		{
 			//game->SwitchScene(WORLD_1_4_SECRECT_SCENCE_ID);
 			game->SwitchSceneEx(WORLD_1_4_SECRECT_SCENCE_ID, 136, 130);
+			return;
 		}
 		
 	}

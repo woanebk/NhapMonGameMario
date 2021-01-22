@@ -20,6 +20,9 @@ protected:
 	float selector_x = SELECT_1_PLAYER_X;
 	float selector_y = SELECT_1_PLAYER_Y;
 
+	float curtain_x = 0;
+	float curtain_y = 0;
+
 	void _ParseSection_TEXTURES(string line);
 	void _ParseSection_SPRITES(string line);
 	void _ParseSection_ANIMATIONS(string line);

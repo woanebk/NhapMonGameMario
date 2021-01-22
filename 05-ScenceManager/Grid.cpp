@@ -101,9 +101,9 @@ void Grid::Move(Unit * unit, float new_x, float new_y)
 	//Update unit:
 	unit->x = new_x;
 	unit->y = new_y;
-	
+
 	//if cell changed then delete unit and add again
-	if (new_column != old_column || new_row != old_row) 
+	if (new_column != old_column || new_row != old_row)
 	{
 		if (unit->prev != NULL)
 			unit->prev->next = unit->next;
@@ -112,7 +112,7 @@ void Grid::Move(Unit * unit, float new_x, float new_y)
 		if (cell[old_column][old_row] == unit)
 			cell[old_column][old_row] == unit->next;
 
-		this->Add(unit,new_column, new_row);
+		this->Add(unit, new_column, new_row);
 	}
 }
 
@@ -126,9 +126,9 @@ void Grid::getListUnits(float cam_x, float cam_y, vector<Unit*> &listUnits)
 	int end_row = (int)ceil((cam_y + SCREEN_HEIGHT) / CELL_WIDTH);
 
 	//int grid_last_column = (int)(map_width / CELL_WIDTH);
-	
-	
-	for(int i=0;i<grid_columns;i++)
+
+
+	for (int i = 0; i < grid_columns; i++)
 		for (int j = 0; j < grid_rows; j++)
 		{
 			Unit* unit = cell[i][j];
@@ -144,7 +144,7 @@ void Grid::getListUnits(float cam_x, float cam_y, vector<Unit*> &listUnits)
 					}
 				}
 			}
-			
+
 		}
 
 }
@@ -158,5 +158,3 @@ Unit::Unit(Grid * grid, float x, float y, LPGAMEOBJECT gameobj)
 	this->obj = gameobj;
 	this->grid = grid;
 }
-
-

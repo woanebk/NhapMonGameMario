@@ -555,13 +555,15 @@ void CPlayScene::Update(DWORD dt)
 	for (size_t i = 0; i < listUnits.size(); i++)
 	{
 		coObjects.push_back(listUnits[i]->GetObj());
+		if (dynamic_cast<CKoopas*>(listUnits[i]->GetObj()))
+			DebugOut(L"koopas\n");
 		
 	}
 	CGame *game = CGame::GetInstance();
 	for (size_t i = 0; i < listUnits.size(); i++)
 	{
-		if(!player->isTransForming())
-		listUnits[i]->GetObj()->Update(dt, &coObjects);
+		if (!player->isTransForming())
+			listUnits[i]->GetObj()->Update(dt, &coObjects);
 	}
 	if(player!=NULL)
 		player->Update(dt, &coObjects);
@@ -589,7 +591,7 @@ void CPlayScene::Update(DWORD dt)
 
 	if (id == WORLDMAP_1_SCENCE_ID)
 	{
-		CGame::GetInstance()->SetCamPos(-(SCREEN_WIDTH -WORLDMAP_1_WIDTH)/2 + 8,0);
+		CGame::GetInstance()->SetCamPos(-(SCREEN_WIDTH -WORLDMAP_1_WIDTH)/2 + 8, 0);
 	}
 	else if (id == WORLD_1_4_SCENCE_ID)
 	{
@@ -603,9 +605,9 @@ void CPlayScene::Update(DWORD dt)
 		if (cy > mapbackground->GetMapHeight() - game->GetScreenHeight() + HUD_HEIGHT)
 			cy = mapbackground->GetMapHeight() - game->GetScreenHeight() + HUD_HEIGHT;
 		if(cam_x < WORLD_1_4_WIDTH - SCREEN_WIDTH + BRICK_BBOX_WIDTH)
-			CGame::GetInstance()->SetCamPos(cam_x + 0.5f, cy);
+			CGame::GetInstance()->SetCamPos(cam_x + WORLD_1_4_CAM_SPEED_X, WORLD_1_4_CAM_Y);
 		else
-			CGame::GetInstance()->SetCamPos(cam_x, cy);
+			CGame::GetInstance()->SetCamPos(cam_x , WORLD_1_4_CAM_Y);
 	}
 	else
 	{
@@ -740,9 +742,13 @@ void CPlayScenceKeyHandler::OnKeyDown(int KeyCode)
 			mario->SetLevel(MARIO_LEVEL_LEAF);
 			mario->SetPosition(mario->x, mario->y - (MARIO_LEAF_BBOX_HEIGHT - MARIO_SMALL_BBOX_HEIGHT)); //push mario up a bit
 			break;
-		case DIK_3: //tranform to leaf mario
+		case DIK_3: //tranform to fire mario
 			mario->SetLevel(MARIO_LEVEL_FIRE);
 			mario->SetPosition(mario->x, mario->y - (MARIO_FIRE_BBOX_HEIGHT - MARIO_SMALL_BBOX_HEIGHT)); //push mario up a bit
+			break;
+		case DIK_4: //tranform to fire mario
+			mario->SetLevel(MARIO_LEVEL_BIG);
+			mario->SetPosition(mario->x, mario->y - (MARIO_BIG_BBOX_HEIGHT - MARIO_SMALL_BBOX_HEIGHT)); //push mario up a bit
 			break;
 		case DIK_1: //reset
 			mario->Reset();
@@ -784,15 +790,17 @@ void CPlayScenceKeyHandler::OnKeyDown(int KeyCode)
 		//	mario->SetState(MARIO_STATE_ICON);
 		//	mario->setIsIcon(true);
 		//	break;
-		case DIK_N: //
-			mario->SetState(MARIO_STATE_ICON);
-			mario->setIsIcon(true);
-			break;
-		case DIK_V: //
+		case DIK_V: //test gach kinh
 			mario->SetPosition(2263, 0);
 			break;
-		case DIK_B: //
-			mario->SetPosition(2000, 130);
+		case DIK_B: // chui cong
+			mario->SetPosition(1950, 70);
+			CGame::GetInstance()->SetCamPos(1900 - SCREEN_WIDTH / 2, 70);
+			break;
+		case DIK_N: // koopas
+			mario->SetPosition(980, 95);
+			CGame::GetInstance()->SetCamPos(980 - SCREEN_WIDTH / 2, 95);
+			
 			break;
 		case DIK_G: //
 			mario->SetPosition(180, 50);

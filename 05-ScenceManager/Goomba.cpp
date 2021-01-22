@@ -100,6 +100,7 @@ void CGoomba::Update(DWORD dt, vector<LPGAMEOBJECT> *coObjects)
 		float rdx = 0;
 		float rdy = 0;
 		HitByTail();
+		HeadHitbyMario();
 		// TODO: This is a very ugly designed function!!!!
 		FilterCollision(coEvents, coEventsResult, min_tx, min_ty, nx, ny, rdx, rdy);
 
@@ -300,7 +301,7 @@ void CGoomba::Render()
 
 	animation_set->at(ani)->Render(x, y);
 
-	RenderBoundingBox();
+	//RenderBoundingBox();
 }
 
 void CGoomba::SetState(int state)
@@ -343,7 +344,7 @@ void CGoomba::HitByTail()
 	CPlayScene* scence = (CPlayScene*)CGame::GetInstance()->GetCurrentScene();
 	CMario* mario = scence->GetPlayer();
 	mario->GetBoundingBox(mario_bb_left, mario_bb_top, mario_bb_right, mario_bb_bottom);
-	if (mario->isSpinning())
+	if (mario->isSpinning() &&state != GOOMBA_STATE_DIE)
 		if (bb_left <= mario_bb_right + MARIO_LEAF_BBOX_TAIL_WIDTH && bb_right >= mario_bb_left - MARIO_LEAF_BBOX_TAIL_WIDTH)
 			if (bb_top <= mario_bb_bottom && bb_bottom >= mario_bb_top + (mario_bb_bottom - mario_bb_top) / 2)
 			{
@@ -355,6 +356,27 @@ void CGoomba::HitByTail()
 				mario->RenderPoint(EFFECT_TYPE_100_POINT);
 			}	
 	
+}
+
+void CGoomba::HeadHitbyMario()
+{
+	float bb_left, bb_top, bb_right, bb_bottom;
+	float mario_bb_left, mario_bb_top, mario_bb_right, mario_bb_bottom;
+
+	GetBoundingBox(bb_left, bb_top, bb_right, bb_bottom);
+	CPlayScene* scence = (CPlayScene*)CGame::GetInstance()->GetCurrentScene();
+	CMario* mario = scence->GetPlayer();
+	mario->GetBoundingBox(mario_bb_left, mario_bb_top, mario_bb_right, mario_bb_bottom);
+	if (!mario->isSpinning() && level == GOOMBA_LEVEL_FLY && state!=GOOMBA_STATE_DIE)
+		if ((bb_left >= mario_bb_left  && bb_left <= mario_bb_right ) || ( bb_right <= mario_bb_right && bb_right>= mario_bb_left))
+			if (bb_top <= mario_bb_bottom && bb_top + 10 >= mario_bb_bottom)
+			{
+				LevelDown();
+				mario->GainScore(SCORE_400);
+				mario->RenderPoint(EFFECT_TYPE_400_POINT);
+				mario->SetSpeedY(-MARIO_JUMP_DEFLECT_SPEED);
+			}
+
 }
 
 void CGoomba::LevelDown()

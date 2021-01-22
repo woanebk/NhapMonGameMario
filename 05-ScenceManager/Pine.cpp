@@ -33,7 +33,7 @@ void CPine::Render()
 		animation_set->at(PINE_ANI_2ND_1_1)->Render(x, y);
 	else if (type == PINE_3RD_TYPE)
 		animation_set->at(PINE_ANI_3RD_1_1)->Render(x, y);
-
+	//RenderBoundingBox();
 }
 
 void CPine::GetBoundingBox(float & l, float & t, float & r, float & b)

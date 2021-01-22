@@ -43,7 +43,7 @@ void CKoopas::GetBoundingBox(float &left, float &top, float &right, float &botto
 
 void CKoopas::Update(DWORD dt, vector<LPGAMEOBJECT> *coObjects)
 {
-	if (!enable)
+	if (!enable || !isInCamera())
 		return;
 	CGameObject::Update(dt, coObjects);
 
@@ -80,21 +80,21 @@ void CKoopas::Update(DWORD dt, vector<LPGAMEOBJECT> *coObjects)
 		if (y < start_y)
 			vy = KOOPAS_FLOAT_SPEED_Y;
 	}
-
 	Reset();
 	//holded by mario///////////////////
 	getHoldedbyMario();
+	KnockbyBrick(coObjects);
 	// detect when get hit by tail///////////////////
 	if(!holded)
 	HitByTail();
 	// detect when get kick
 	getKicked();
-	if (CalculateTurningAround(coObjects))
-		vx = -vx;
+	
 	if (coEvents.size() == 0)
 	{
 		x += dx;
 		y += dy;
+		isonground = false;
 
 		if (vx > 0 && x > WORLD_1_1_WIDTH) {
 			vx = -vx;
@@ -127,6 +127,10 @@ void CKoopas::Update(DWORD dt, vector<LPGAMEOBJECT> *coObjects)
 		for (UINT i = 0; i < coEventsResult.size(); i++)
 		{
 			LPCOLLISIONEVENT e = coEventsResult[i];
+			if (e->ny < 0)
+				isonground = true;
+			else
+				isonground = false;
 			float obj_l, obj_t, obj_r, obj_b;
 			e->obj->GetBoundingBox(obj_l, obj_t, obj_r, obj_b);
 			if (dynamic_cast<CBlock*> (e->obj) && e->obj->isEnabled())
@@ -164,6 +168,14 @@ void CKoopas::Update(DWORD dt, vector<LPGAMEOBJECT> *coObjects)
 					break;
 				}
 				if (e->ny != 0) {
+					if (e->ny < 0)
+					{
+						vy = 0;
+						x += dx;
+						if ((koo_bb_left < obj_l - KOOPAS_BBOX_WIDTH / 2 && vx < 0) || (koo_bb_right > obj_r + KOOPAS_BBOX_WIDTH / 2 && vx > 0)) //red walking turn around
+							if (state == KOOPAS_STATE_WALKING)
+								vx = -vx;
+					}
 					vy = 0;
 					y += min_ty * rdy + ny * 0.4f;
 				}
@@ -190,6 +202,7 @@ void CKoopas::Update(DWORD dt, vector<LPGAMEOBJECT> *coObjects)
 				{
 					koopas->LevelDown();
 					koopas->SetState(KOOPAS_STATE_SHELL);
+					koopas->KnockUp();
 					koopas->is_shell_up = true;
 					Render_Tail_Hit();
 				}
@@ -258,7 +271,11 @@ void CKoopas::Update(DWORD dt, vector<LPGAMEOBJECT> *coObjects)
 					if (state == KOOPAS_STATE_SPIN_LEFT || state == KOOPAS_STATE_SPIN_RIGHT)
 					{
 						vx = -vx;
-						if (questionbrick->hasItem() && mario->getLevel() == MARIO_LEVEL_SMALL)
+						if (questionbrick->getType() == QUESTION_BRICK_TYPE_MONEY_BUTTON_CREATOR)
+							questionbrick->CreateItem(ITEM_MONEY_BUTTON);
+						else if (questionbrick->hasCoin())
+							questionbrick->CreateItem(ITEM_MONEY);
+						else if (questionbrick->hasItem() && mario->getLevel() == MARIO_LEVEL_SMALL)
 							questionbrick->CreateItem(ITEM_MUSHROOM_RED);
 						else if (questionbrick->hasItem() && mario->getLevel() <= MARIO_LEVEL_LEAF)
 							questionbrick->CreateItem(ITEM_LEAF);
@@ -287,6 +304,15 @@ void CKoopas::Update(DWORD dt, vector<LPGAMEOBJECT> *coObjects)
 						x += dx;
 						y += min_ty * dy + ny * 0.4f;
 						return;
+					}
+					if (e->ny < 0 && questionbrick->isJumping())
+					{
+						is_shell_up = true;
+						KnockUp();
+						SetState(KOOPAS_STATE_SHELL);
+						LevelDown();
+						mario->GainScore(SCORE_100);
+						mario->RenderPoint(EFFECT_TYPE_100_POINT);
 					}
 				}
 			}//if Question brick
@@ -362,6 +388,9 @@ void CKoopas::Update(DWORD dt, vector<LPGAMEOBJECT> *coObjects)
 
 
 	}
+	if (CalculateTurningAround(coObjects))
+		vx = -vx;
+
 	for (UINT i = 0; i < coEvents.size(); i++) delete coEvents[i];
 }
 
@@ -435,7 +464,7 @@ void CKoopas::Render()
 
 	animation_set->at(ani)->Render(x, y);
 
-	RenderBoundingBox();
+	//RenderBoundingBox();
 }
 
 void CKoopas::SetState(int state)
@@ -523,8 +552,7 @@ void CKoopas::HitByTail()
 			if (bb_top <= mario_bb_bottom && bb_bottom >= mario_bb_top + (mario_bb_bottom - mario_bb_top) / 2)
 			{
 				is_shell_up = true;
-				if (vy > 0)
-					vy = -MARIO_JUMP_DEFLECT_SPEED;
+				KnockUp();
 				SetState(KOOPAS_STATE_SHELL);
 				LevelDown();
 				mario->GainScore(SCORE_100);
@@ -617,7 +645,7 @@ bool CKoopas::CalculateTurningAround(vector<LPGAMEOBJECT>* coObjects)
 	bool onGround = false;
 	if (type != KOOPAS_TYPE_RED)
 		return false;
-	if (state!= KOOPAS_STATE_WALKING)
+	if (this->GetState() != KOOPAS_STATE_WALKING )
 		return false;
 	if (this->level != KOOPAS_LEVEL_NORMAL)
 		return false;
@@ -632,20 +660,21 @@ bool CKoopas::CalculateTurningAround(vector<LPGAMEOBJECT>* coObjects)
 		if (!dynamic_cast<CBrick*>(object) && !dynamic_cast<CQuestionBrick*>(object) && !dynamic_cast<CBreakableBrick*>(object))
 			continue;
 
+		//object is Break or RBox
 		float ol, ot, or , ob;
 		object->GetBoundingBox(ol, ot, or , ob);
 
-		if (kb == ot && ((kl >= ol && kl <= or) || (kr >= ol && kr <= or)))
+		if (kb > ot - 2 && kb < ot && ((kl >= ol && kl <= or) || (kr >= ol && kr <= or)))
 			onGround = true;
 
-		if (kb == ot )
+		if (kb > ot - 2 && kb < ot)
 		{
-			if (vx < 0)
+			if (state == KOOPAS_STATE_WALKING && vx<0)
 			{
 				if ((kl + 4 > ol && kl + 8 < or ) || (kl + 4 <= or && kl + 8 >= or))
 					return false;
 			}
-			else if (vx > 0)
+			else if (state == KOOPAS_STATE_WALKING && vx > 0)
 			{
 				if ((kr - 8 > ol && kr - 4 < or ) || (kr - 8 <= ol && kr - 4 >= ol))
 					return false;
@@ -655,4 +684,48 @@ bool CKoopas::CalculateTurningAround(vector<LPGAMEOBJECT>* coObjects)
 	}
 	if (!onGround) return false;
 	return true;
+}
+
+void CKoopas::KnockbyBrick(vector<LPGAMEOBJECT>* coObjects)
+{
+	CPlayScene* scene = (CPlayScene*)CGame::GetInstance()->GetCurrentScene();
+	CMario* mario = scene->GetPlayer();
+	if (this->level != KOOPAS_LEVEL_NORMAL)
+		return ;
+	float kl, kt, kr, kb;
+	GetBoundingBox(kl, kt, kr, kb);
+	for (UINT i = 0; i < coObjects->size(); i++)
+	{
+		LPGAMEOBJECT object = coObjects->at(i);
+		if (!object->isInCamera())
+			continue;
+
+		if (!dynamic_cast<CQuestionBrick*>(object))
+			continue;
+
+		//object is Break or RBox
+		float ol, ot, or , ob;
+		object->GetBoundingBox(ol, ot, or , ob);
+
+		if (SpecialCollision(ol, ot, or , ob))
+		{
+			is_shell_up = true;
+			KnockUp();
+			SetState(KOOPAS_STATE_SHELL);
+			LevelDown();
+			mario->GainScore(SCORE_100);
+			mario->RenderPoint(EFFECT_TYPE_100_POINT);
+		}
+
+		
+
+	}
+	
+}
+
+
+void CKoopas::KnockUp()
+{
+	if (vy > 0)
+		vy = -MARIO_JUMP_DEFLECT_SPEED;
 }

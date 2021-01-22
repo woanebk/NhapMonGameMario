@@ -487,6 +487,8 @@ idle right
 21003	333	363	375	404	999
 #selector
 21004	155	323	162	331	999
+#curtain
+21005	0	0	256	186	999
 
 # ani_id	sprite1_id	time1	sprite2_id	time2	...
 [ANIMATIONS]
@@ -814,6 +816,7 @@ idle right
 
 # =========INTRO ====== (1400++)
 1400	21000	100	21001	100	21002	100	21003	100
+1401	21005	100
 # id	ani1	ani2	ani3
 #
 [ANIMATION_SETS]

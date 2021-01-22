@@ -436,6 +436,7 @@ void CGame::SwitchScene(int scene_id)
 	CGame::GetInstance()->SetKeyHandler(s->GetKeyEventHandler());
 	s->Load();	
 	//
+	((CPlayScene*)s)->setVisitedBase(false);
 	if (scene_id == WORLDMAP_1_SCENCE_ID)
 	{
 		((CPlayScene*)s)->getHud()->setNoTiming(true);
@@ -478,7 +479,11 @@ void CGame::SwitchSceneEx(int scene_id, float mario_x, float mario_y) //save old
 	post_mario->setLostControl(false);
 	post_mario->setEnable(true);
 	post_mario->SetPosition(mario_x, mario_y);
-
+	if (scene_id == WORLD_1_1_SECRECT_SCENCE_ID)
+		post_mario->setSecrect1(true);
+	else if (scene_id == WORLD_1_4_SECRECT_SCENCE_ID)
+		post_mario->setSecrect4(true);
+	
 	s->Load();// add textures, sprties, anis, anisets, objs
 
 	//((CPlayScene*)s)->ReplaceMarioObjectWith(post_mario);
@@ -514,7 +519,10 @@ void CGame::SwitchBackScence(int scene_id, float mario_x, float mario_y)
 	}
 	else
 		post_mario->setIsIcon(true);
-
+	if (scene_id == WORLD_1_1_SCENCE_ID)
+		post_mario->setSecrect1(false);
+	else if (scene_id == WORLD_1_1_SECRECT_SCENCE_ID)
+		post_mario->setSecrect1(true);
 	((CPlayScene*)s)->SetPlayer(post_mario);
 	//((CPlayScene*)s)->ReplaceMarioObjectWith(post_mario);
 	((CPlayScene*)s)->setHud(post_hud);

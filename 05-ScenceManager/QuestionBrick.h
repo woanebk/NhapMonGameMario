@@ -9,6 +9,7 @@ class CQuestionBrick :public CGameObject
 	int Coin = 0;
 	int Item = 0;
 	DWORD jumptime = 0;
+	bool isjumping = false;
 public:
 	CQuestionBrick(int t, int b, int hasitem, int hascoin) {
 		x = y = 0;
@@ -42,6 +43,7 @@ public:
 	void getUsed();
 	void CreateItem(int item);
 	void Jump();
+	bool isJumping() { return isjumping; }
 	int getType() { return type; }
 	~CQuestionBrick();
 };

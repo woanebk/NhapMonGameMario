@@ -33,6 +33,8 @@ public:
 	virtual void SetState(int state);
 	void HitByTail();
 
+	void HeadHitbyMario();
+
 	void LevelDown();
 
 	void Reset();
